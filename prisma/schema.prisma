@@ -1,0 +1,283 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  accounts      Account[]
+  expenses      Expense[]
+  incomes       Income[]
+  categories    Category[]
+  budgets       Budget[]
+  groupMembers  GroupMember[]
+  groupExpenses GroupExpense[]
+  expenseSplits ExpenseSplit[]
+  payments          Payment[]
+  comments          Comment[]
+  recurringExpenses RecurringExpense[]
+
+  @@map("users")
+}
+
+model Account {
+  id      String      @id @default(cuid())
+  name    String
+  type    AccountType
+  balance Float       @default(0)
+  color   String?
+  userId  String
+
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expenses          Expense[]
+  incomes           Income[]
+  transfersFrom     Transfer[]         @relation("TransferFrom")
+  transfersTo       Transfer[]         @relation("TransferTo")
+  recurringExpenses RecurringExpense[]
+
+  @@map("accounts")
+}
+
+model Category {
+  id    String      @id @default(cuid())
+  name  String
+  type  CategoryType
+  color String?
+  icon  String?
+  userId String
+
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expenses          Expense[]
+  incomes           Income[]
+  budgets           Budget[]
+  recurringExpenses RecurringExpense[]
+
+  @@map("categories")
+}
+
+model Expense {
+  id                  String    @id @default(cuid())
+  amount              Float
+  description         String?
+  date                DateTime  @default(now())
+  receiptUrl          String?
+  isRecurring         Boolean   @default(false)
+  recurringExpenseId  String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  userId              String
+  accountId           String
+  categoryId          String
+
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account           Account           @relation(fields: [accountId], references: [id])
+  category          Category          @relation(fields: [categoryId], references: [id])
+  recurringExpense  RecurringExpense? @relation(fields: [recurringExpenseId], references: [id])
+
+  @@map("expenses")
+}
+
+model Income {
+  id          String   @id @default(cuid())
+  amount      Float
+  description String?
+  date        DateTime @default(now())
+  source      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      String
+  accountId   String
+  categoryId  String
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account  Account  @relation(fields: [accountId], references: [id])
+  category Category @relation(fields: [categoryId], references: [id])
+
+  @@map("incomes")
+}
+
+model Budget {
+  id         String   @id @default(cuid())
+  amount     Float
+  spent      Float    @default(0)
+  period     BudgetPeriod
+  startDate  DateTime
+  endDate    DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  userId     String
+  categoryId String
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id])
+
+  @@map("budgets")
+}
+
+model Group {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members   GroupMember[]
+  expenses  GroupExpense[]
+
+  @@map("groups")
+}
+
+model GroupMember {
+  id      String @id @default(cuid())
+  role    GroupRole @default(MEMBER)
+  userId  String
+  groupId String
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, groupId])
+  @@map("group_members")
+}
+
+model GroupExpense {
+  id          String   @id @default(cuid())
+  amount      Float
+  description String?
+  date        DateTime @default(now())
+  receiptUrl  String?
+  splitType   String   @default("EQUAL")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  paidById    String
+  groupId     String
+
+  paidBy   User         @relation(fields: [paidById], references: [id])
+  group    Group        @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  splits   ExpenseSplit[]
+  payments Payment[]
+  comments Comment[]
+
+  @@map("group_expenses")
+}
+
+model ExpenseSplit {
+  id        String    @id @default(cuid())
+  amount    Float
+  userId    String
+  expenseId String
+  settled   Boolean   @default(false)
+  settledAt DateTime?
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  groupExpense GroupExpense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, expenseId])
+  @@map("expense_splits")
+}
+
+model Payment {
+  id        String   @id @default(cuid())
+  amount    Float
+  date      DateTime @default(now())
+  fromId    String
+  toId      String
+  expenseId String?
+
+  from         User          @relation(fields: [fromId], references: [id])
+  groupExpense GroupExpense? @relation(fields: [expenseId], references: [id])
+
+  @@map("payments")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+  userId    String
+  expenseId String
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  groupExpense GroupExpense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+
+  @@map("comments")
+}
+
+model Transfer {
+  id          String   @id @default(cuid())
+  amount      Float
+  description String?
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+  fromId      String
+  toId        String
+
+  from Account @relation("TransferFrom", fields: [fromId], references: [id])
+  to   Account @relation("TransferTo", fields: [toId], references: [id])
+
+  @@map("transfers")
+}
+
+model RecurringExpense {
+  id              String         @id @default(cuid())
+  amount          Float
+  description     String?
+  frequency       RecurringFrequency
+  startDate       DateTime
+  endDate         DateTime?
+  nextDueDate     DateTime
+  isActive        Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  userId          String
+  accountId       String
+  categoryId      String
+
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account         Account        @relation(fields: [accountId], references: [id])
+  category        Category       @relation(fields: [categoryId], references: [id])
+  expenses        Expense[]
+
+  @@map("recurring_expenses")
+}
+
+enum AccountType {
+  CASH
+  BANK
+  CREDIT_CARD
+  INVESTMENT
+  OTHER
+}
+
+enum CategoryType {
+  EXPENSE
+  INCOME
+}
+
+enum BudgetPeriod {
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum GroupRole {
+  ADMIN
+  MEMBER
+}
+
+enum RecurringFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
