@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
-import { Filter, Search, ArrowUpCircle, ArrowDownCircle, Calendar, Download } from 'lucide-react'
+import { Filter, Search, ArrowUpCircle, ArrowDownCircle, Calendar, Download, Edit, Users } from 'lucide-react'
+import { CurrencyLoader } from '@/components/CurrencyLoader'
 
 interface Transaction {
   id: string
@@ -23,6 +24,14 @@ interface Transaction {
   source?: string
   receiptUrl?: string
   isRecurring?: boolean
+  groupExpense?: {
+    id: string
+    group: {
+      id: string
+      name: string
+    }
+  }
+  groupType?: 'LENDER' | 'BORROWER' | 'SETTLEMENT_RECEIVED' | 'SETTLEMENT_PAID'
 }
 
 export default function Transactions() {
@@ -41,6 +50,10 @@ export default function Transactions() {
   const [accounts, setAccounts] = useState([])
   const [sortBy, setSortBy] = useState('date')
   const [sortOrder, setSortOrder] = useState('desc')
+  
+  // Edit functionality state
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
+  const [showEditModal, setShowEditModal] = useState(false)
 
   useEffect(() => {
     if (session) {
@@ -169,12 +182,31 @@ export default function Transactions() {
     URL.revokeObjectURL(url)
   }
 
+  const handleSaveTransaction = async (updatedTransaction: any) => {
+    try {
+      const endpoint = updatedTransaction.type === 'income' ? '/api/income' : '/api/expenses'
+      const response = await fetch(endpoint, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedTransaction)
+      })
+
+      if (response.ok) {
+        setShowEditModal(false)
+        setEditingTransaction(null)
+        fetchTransactions() // Refresh the transactions list
+      } else {
+        const error = await response.json()
+        alert(error.error || 'Failed to update transaction')
+      }
+    } catch (error) {
+      console.error('Error updating transaction:', error)
+      alert('Failed to update transaction')
+    }
+  }
+
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading transactions...</div>
-      </div>
-    )
+    return <CurrencyLoader />
   }
 
   return (
@@ -367,6 +399,12 @@ export default function Transactions() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Amount
                 </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Source
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -389,11 +427,24 @@ export default function Transactions() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900 dark:text-white">{transaction.description}</div>
-                    {transaction.isRecurring && (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
-                        Recurring
-                      </span>
-                    )}
+                    <div className="flex items-center space-x-2 mt-1">
+                      {transaction.isRecurring && (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
+                          Recurring
+                        </span>
+                      )}
+                      {transaction.groupExpense && (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200">
+                          <Users className="h-3 w-3 mr-1" />
+                          Group
+                        </span>
+                      )}
+                      {transaction.groupType && (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                          {transaction.groupType.replace('_', ' ').toLowerCase()}
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
@@ -414,6 +465,37 @@ export default function Transactions() {
                       {transaction.type === 'income' ? '+' : '-'}${transaction.amount.toFixed(2)}
                     </span>
                   </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                    {transaction.groupExpense ? (
+                      <div>
+                        <div className="font-medium text-purple-600 dark:text-purple-400">
+                          {transaction.groupExpense.group.name}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          Group Transaction
+                        </div>
+                      </div>
+                    ) : transaction.source ? (
+                      transaction.source
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    {!transaction.groupExpense ? (
+                      <button
+                        onClick={() => {
+                          setEditingTransaction(transaction)
+                          setShowEditModal(true)
+                        }}
+                        className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </button>
+                    ) : (
+                      <span className="text-gray-400 text-xs">Group transaction</span>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -426,6 +508,168 @@ export default function Transactions() {
           <p className="text-gray-500 dark:text-gray-400">No transactions found. Try adjusting your filters.</p>
         </div>
       )}
+
+      {/* Edit Transaction Modal */}
+      {showEditModal && editingTransaction && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
+            <div className="mt-3">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                Edit {editingTransaction.type === 'income' ? 'Income' : 'Expense'}
+              </h3>
+              <EditTransactionForm 
+                transaction={editingTransaction}
+                categories={categories}
+                accounts={accounts}
+                onSave={handleSaveTransaction}
+                onCancel={() => setShowEditModal(false)}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+  )
+}
+
+// Edit Transaction Form Component
+function EditTransactionForm({ 
+  transaction, 
+  categories, 
+  accounts, 
+  onSave, 
+  onCancel 
+}: {
+  transaction: Transaction
+  categories: any[]
+  accounts: any[]
+  onSave: (updatedTransaction: any) => void
+  onCancel: () => void
+}) {
+  const [formData, setFormData] = useState({
+    amount: transaction.amount,
+    description: transaction.description || '',
+    categoryId: transaction.category.id,
+    accountId: transaction.account.id,
+    date: transaction.date.split('T')[0], // Convert to YYYY-MM-DD format
+    source: transaction.source || ''
+  })
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    onSave({
+      ...formData,
+      id: transaction.id,
+      type: transaction.type
+    })
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Amount *
+        </label>
+        <input
+          type="number"
+          step="0.01"
+          required
+          value={formData.amount}
+          onChange={(e) => setFormData({...formData, amount: parseFloat(e.target.value) || 0})}
+          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Description
+        </label>
+        <input
+          type="text"
+          value={formData.description}
+          onChange={(e) => setFormData({...formData, description: e.target.value})}
+          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Category *
+        </label>
+        <select
+          required
+          value={formData.categoryId}
+          onChange={(e) => setFormData({...formData, categoryId: e.target.value})}
+          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+        >
+          {categories.filter(cat => cat.type === transaction.type.toUpperCase()).map(category => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Account *
+        </label>
+        <select
+          required
+          value={formData.accountId}
+          onChange={(e) => setFormData({...formData, accountId: e.target.value})}
+          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+        >
+          {accounts.map(account => (
+            <option key={account.id} value={account.id}>
+              {account.name} ({account.type})
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Date *
+        </label>
+        <input
+          type="date"
+          required
+          value={formData.date}
+          onChange={(e) => setFormData({...formData, date: e.target.value})}
+          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+        />
+      </div>
+
+      {transaction.type === 'income' && (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Source
+          </label>
+          <input
+            type="text"
+            value={formData.source}
+            onChange={(e) => setFormData({...formData, source: e.target.value})}
+            className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+          />
+        </div>
+      )}
+
+      <div className="flex justify-end space-x-3 pt-4">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+        >
+          Save Changes
+        </button>
+      </div>
+    </form>
   )
 }

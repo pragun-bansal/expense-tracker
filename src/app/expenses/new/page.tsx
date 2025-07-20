@@ -66,6 +66,14 @@ export default function NewExpense() {
       if (response.ok) {
         const data = await response.json()
         setAccounts(data)
+        
+        // Set default account to "Others" if no accountId is set
+        if (!formData.accountId) {
+          const othersAccount = data.find((account: Account) => account.type === 'OTHERS_FIXED')
+          if (othersAccount) {
+            setFormData(prev => ({ ...prev, accountId: othersAccount.id }))
+          }
+        }
       }
     } catch (error) {
       console.error('Error fetching accounts:', error)
@@ -229,23 +237,32 @@ export default function NewExpense() {
 
                 <div>
                   <label htmlFor="accountId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Account *
+                    Account (Optional)
                   </label>
                   <div className="mt-1">
                     <select
                       name="accountId"
                       id="accountId"
-                      required
                       value={formData.accountId}
                       onChange={handleInputChange}
                       className="block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     >
-                      <option value="">Select an account</option>
-                      {accounts.map((account) => (
-                        <option key={account.id} value={account.id}>
-                          {account.name} (${account.balance.toFixed(2)})
-                        </option>
-                      ))}
+                      {accounts
+                        .filter(account => account.type === 'OTHERS_FIXED')
+                        .map((account) => (
+                          <option key={account.id} value={account.id}>
+                            {account.name} (Default)
+                          </option>
+                        ))}
+                      <optgroup label="Personal Accounts">
+                        {accounts
+                          .filter(account => !['OTHERS_FIXED', 'GROUP_LENDING'].includes(account.type))
+                          .map((account) => (
+                            <option key={account.id} value={account.id}>
+                              {account.name} (${account.balance.toFixed(2)})
+                            </option>
+                          ))}
+                      </optgroup>
                     </select>
                   </div>
                 </div>

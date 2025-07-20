@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { PlusCircle, CreditCard, Users, TrendingUp, Calendar } from 'lucide-react'
+import { CurrencyLoader } from '@/components/CurrencyLoader'
 
 export default function Dashboard() {
   const { data: session, status } = useSession()
@@ -40,11 +41,7 @@ export default function Dashboard() {
   }
 
   if (status === 'loading') {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
-      </div>
-    )
+    return <CurrencyLoader />
   }
 
   if (!session) {

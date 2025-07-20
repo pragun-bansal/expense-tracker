@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
+import { ensureSpecialAccountsExist } from '@/lib/specialAccounts'
 
 async function seedDefaultData(userId: string) {
   // Create expense categories
@@ -39,10 +40,10 @@ async function seedDefaultData(userId: string) {
 
   // Create accounts
   const accounts = [
-    { name: 'Checking Account', type: 'BANK', balance: 1000.00, color: '#4ECDC4', userId },
-    { name: 'Savings Account', type: 'BANK', balance: 5000.00, color: '#45B7D1', userId },
-    { name: 'Credit Card', type: 'CREDIT_CARD', balance: -200.00, color: '#FF6B6B', userId },
-    { name: 'Cash', type: 'CASH', balance: 100.00, color: '#96CEB4', userId }
+    { name: 'Checking Account', type: 'BANK', balance: 0.00, color: '#4ECDC4', userId },
+    { name: 'Savings Account', type: 'BANK', balance: 0.00, color: '#45B7D1', userId },
+    { name: 'Credit Card', type: 'CREDIT_CARD', balance: 0.00, color: '#FF6B6B', userId },
+    { name: 'Cash', type: 'CASH', balance: 0.00, color: '#96CEB4', userId }
   ];
 
   for (const account of accounts) {
@@ -50,6 +51,9 @@ async function seedDefaultData(userId: string) {
       data: account
     });
   }
+
+  // Create special accounts
+  await ensureSpecialAccountsExist(userId)
 }
 
 export async function POST(request: NextRequest) {

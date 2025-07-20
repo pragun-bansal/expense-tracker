@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { PlusCircle, CreditCard, Trash2 } from 'lucide-react'
+import { CurrencyLoader } from '@/components/CurrencyLoader'
 
 interface Account {
   id: string
@@ -43,6 +44,15 @@ export default function Accounts() {
       setLoading(false)
     }
   }
+
+  // Filter accounts to separate special accounts from regular accounts
+  const regularAccounts = accounts.filter(account => 
+    !['OTHERS_FIXED', 'GROUP_LENDING', 'OTHER'].includes(account.type)
+  )
+  
+  const specialAccounts = accounts.filter(account => 
+    ['OTHERS_FIXED', 'GROUP_LENDING'].includes(account.type)
+  )
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -93,11 +103,7 @@ export default function Accounts() {
   const totalBalance = accounts.reduce((sum, account) => sum + account.balance, 0)
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading accounts...</div>
-      </div>
-    )
+    return <CurrencyLoader />
   }
 
   return (
@@ -208,9 +214,62 @@ export default function Accounts() {
         </div>
       )}
 
-      {/* Accounts Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {accounts.map((account) => (
+      {/* Special Accounts Section */}
+      {specialAccounts.length > 0 && (
+        <div className="mb-8">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">System Accounts</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {specialAccounts.map((account) => (
+              <div key={account.id} className="bg-white dark:bg-gray-800 overflow-hidden shadow dark:shadow-gray-900/20 rounded-lg border border-blue-200 dark:border-blue-600">
+                <div className="px-4 py-5 sm:p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div
+                        className="h-10 w-10 rounded-full flex items-center justify-center"
+                        style={{ backgroundColor: account.color + '20' }}
+                      >
+                        <CreditCard
+                          className="h-6 w-6"
+                          style={{ color: account.color }}
+                        />
+                      </div>
+                      <div className="ml-4">
+                        <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                          {account.name}
+                        </h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {account.type === 'OTHERS_FIXED' ? 'Default Account' : 'Group Lending & Borrowing'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className={`text-lg font-semibold ${
+                        account.balance >= 0 
+                          ? 'text-green-600 dark:text-green-400' 
+                          : 'text-red-600 dark:text-red-400'
+                      }`}>
+                        ${account.balance.toFixed(2)}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {account.type === 'GROUP_LENDING' 
+                          ? (account.balance >= 0 ? 'Net Lending' : 'Net Borrowing')
+                          : 'Miscellaneous'
+                        }
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Regular Accounts Section */}
+      <div className="mb-8">
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Personal Accounts</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {regularAccounts.map((account) => (
           <div key={account.id} className="bg-white dark:bg-gray-800 overflow-hidden shadow dark:shadow-gray-900/20 rounded-lg">
             <div className="px-4 py-5 sm:p-6">
               <div className="flex items-center justify-between">
@@ -247,9 +306,10 @@ export default function Accounts() {
             </div>
           </div>
         ))}
+        </div>
       </div>
 
-      {accounts.length === 0 && !showAddForm && (
+      {regularAccounts.length === 0 && !showAddForm && (
         <div className="text-center py-12">
           <CreditCard className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No accounts</h3>

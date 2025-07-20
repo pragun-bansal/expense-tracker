@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { createPersonalTransactionsForGroupExpense } from '@/lib/groupTransactionSync'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -24,17 +25,35 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: 'Access denied' }, { status: 403 })
     }
 
-    // Fetch group expenses with splits
+    // Fetch group expenses with splits and lenders
     const expenses = await prisma.groupExpense.findMany({
       where: {
         groupId
       },
       include: {
-        paidBy: {
+        account: {
           select: {
             id: true,
             name: true,
-            email: true
+            type: true
+          }
+        },
+        lenders: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true
+              }
+            },
+            account: {
+              select: {
+                id: true,
+                name: true,
+                type: true
+              }
+            }
           }
         },
         splits: {
@@ -44,6 +63,13 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
                 id: true,
                 name: true,
                 email: true
+              }
+            },
+            settlementAccount: {
+              select: {
+                id: true,
+                name: true,
+                type: true
               }
             }
           }
@@ -91,12 +117,21 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       date, 
       splitType, 
       splits,
+      lenders,
+      accountId,
       receiptUrl 
     } = await request.json()
 
     if (!description || !amount || !splits || splits.length === 0) {
       return NextResponse.json(
         { error: 'Description, amount, and splits are required' },
+        { status: 400 }
+      )
+    }
+
+    if (!lenders || lenders.length === 0) {
+      return NextResponse.json(
+        { error: 'At least one lender is required' },
         { status: 400 }
       )
     }
@@ -110,18 +145,39 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       )
     }
 
+    // Validate lender amounts
+    const totalLenderAmount = lenders.reduce((sum: number, lender: any) => sum + lender.amount, 0)
+    if (Math.abs(totalLenderAmount - amount) > 0.01) {
+      return NextResponse.json(
+        { error: 'Lender amounts must equal the total expense amount' },
+        { status: 400 }
+      )
+    }
+
     // Create the group expense
     const groupExpense = await prisma.groupExpense.create({
       data: {
         groupId,
-        paidById: session.user.id,
         description,
         amount: parseFloat(amount),
         date: date ? new Date(date) : new Date(),
         splitType: splitType || 'EQUAL',
-        receiptUrl: receiptUrl || null
+        receiptUrl: receiptUrl || null,
+        accountId: accountId || null
       }
     })
+
+    // Create lenders
+    for (const lender of lenders) {
+      await prisma.groupLender.create({
+        data: {
+          expenseId: groupExpense.id,
+          userId: lender.userId,
+          amount: parseFloat(lender.amount),
+          accountId: lender.accountId || null
+        }
+      })
+    }
 
     // Create expense splits
     for (const split of splits) {
@@ -135,15 +191,74 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       })
     }
 
-    // Fetch the complete expense with splits
+    // Create personal transactions for account balances and transaction history
+    try {
+      await createPersonalTransactionsForGroupExpense(
+        groupExpense.id,
+        {
+          description,
+          amount: parseFloat(amount),
+          date: date ? new Date(date) : new Date(),
+          groupId
+        },
+        lenders,
+        splits
+      )
+    } catch (error) {
+      console.error('Error creating personal transactions:', error)
+      // Continue without failing the main operation
+    }
+
+    // Create notifications for group members (except the person adding the expense)
+    const groupMembers = await prisma.groupMember.findMany({
+      where: {
+        groupId,
+        userId: { not: session.user.id }
+      },
+      include: {
+        user: true
+      }
+    })
+
+    for (const member of groupMembers) {
+      await prisma.notification.create({
+        data: {
+          userId: member.userId,
+          title: 'New Group Expense Added',
+          message: `${session.user.name || session.user.email} added "${description}" for $${amount}`,
+          type: 'GROUP_EXPENSE_ADDED',
+          relatedId: groupExpense.id
+        }
+      })
+    }
+
+    // Fetch the complete expense with splits and lenders
     const completeExpense = await prisma.groupExpense.findUnique({
       where: { id: groupExpense.id },
       include: {
-        paidBy: {
+        account: {
           select: {
             id: true,
             name: true,
-            email: true
+            type: true
+          }
+        },
+        lenders: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true
+              }
+            },
+            account: {
+              select: {
+                id: true,
+                name: true,
+                type: true
+              }
+            }
           }
         },
         splits: {
@@ -153,6 +268,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
                 id: true,
                 name: true,
                 email: true
+              }
+            },
+            settlementAccount: {
+              select: {
+                id: true,
+                name: true,
+                type: true
               }
             }
           }

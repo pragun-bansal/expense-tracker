@@ -15,17 +15,19 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  accounts      Account[]
-  expenses      Expense[]
-  incomes       Income[]
-  categories    Category[]
-  budgets       Budget[]
-  groupMembers  GroupMember[]
-  groupExpenses GroupExpense[]
-  expenseSplits ExpenseSplit[]
+  accounts          Account[]
+  expenses          Expense[]
+  incomes           Income[]
+  categories        Category[]
+  budgets           Budget[]
+  groupMembers      GroupMember[]
+  groupExpenses     GroupExpense[]
+  expenseSplits     ExpenseSplit[]
+  groupLenders      GroupLender[]
   payments          Payment[]
   comments          Comment[]
   recurringExpenses RecurringExpense[]
+  notifications     Notification[]
 
   @@map("users")
 }
@@ -44,6 +46,9 @@ model Account {
   transfersFrom     Transfer[]         @relation("TransferFrom")
   transfersTo       Transfer[]         @relation("TransferTo")
   recurringExpenses RecurringExpense[]
+  groupExpenses     GroupExpense[]
+  groupLenders      GroupLender[]
+  settlementSplits  ExpenseSplit[]
 
   @@map("accounts")
 }
@@ -73,6 +78,8 @@ model Expense {
   receiptUrl          String?
   isRecurring         Boolean   @default(false)
   recurringExpenseId  String?
+  groupExpenseId      String?
+  groupType           GroupTransactionType?
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
   userId              String
@@ -83,25 +90,29 @@ model Expense {
   account           Account           @relation(fields: [accountId], references: [id])
   category          Category          @relation(fields: [categoryId], references: [id])
   recurringExpense  RecurringExpense? @relation(fields: [recurringExpenseId], references: [id])
+  groupExpense      GroupExpense?     @relation(fields: [groupExpenseId], references: [id])
 
   @@map("expenses")
 }
 
 model Income {
-  id          String   @id @default(cuid())
-  amount      Float
-  description String?
-  date        DateTime @default(now())
-  source      String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  userId      String
-  accountId   String
-  categoryId  String
+  id             String   @id @default(cuid())
+  amount         Float
+  description    String?
+  date           DateTime @default(now())
+  source         String?
+  groupExpenseId String?
+  groupType      GroupTransactionType?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  userId         String
+  accountId      String
+  categoryId     String
 
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  account  Account  @relation(fields: [accountId], references: [id])
-  category Category @relation(fields: [categoryId], references: [id])
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account      Account       @relation(fields: [accountId], references: [id])
+  category     Category      @relation(fields: [categoryId], references: [id])
+  groupExpense GroupExpense? @relation(fields: [groupExpenseId], references: [id])
 
   @@map("incomes")
 }
@@ -157,30 +168,52 @@ model GroupExpense {
   date        DateTime @default(now())
   receiptUrl  String?
   splitType   String   @default("EQUAL")
+  accountId   String?
+  paidById    String?
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  paidById    String
+  updatedAt   DateTime @default(now())
   groupId     String
 
-  paidBy   User         @relation(fields: [paidById], references: [id])
-  group    Group        @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  splits   ExpenseSplit[]
-  payments Payment[]
-  comments Comment[]
+  account         Account?       @relation(fields: [accountId], references: [id])
+  paidBy          User?          @relation(fields: [paidById], references: [id])
+  group           Group          @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  splits          ExpenseSplit[]
+  lenders         GroupLender[]
+  payments        Payment[]
+  comments        Comment[]
+  personalExpenses Expense[]
+  personalIncomes  Income[]
 
   @@map("group_expenses")
 }
 
-model ExpenseSplit {
-  id        String    @id @default(cuid())
+model GroupLender {
+  id        String @id @default(cuid())
   amount    Float
   userId    String
   expenseId String
-  settled   Boolean   @default(false)
-  settledAt DateTime?
+  accountId String?
 
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account      Account?     @relation(fields: [accountId], references: [id])
   groupExpense GroupExpense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, expenseId])
+  @@map("group_lenders")
+}
+
+model ExpenseSplit {
+  id               String    @id @default(cuid())
+  amount           Float
+  userId           String
+  expenseId        String
+  settled          Boolean   @default(false)
+  settledAt        DateTime?
+  settlementAccountId String?
+
+  user               User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  groupExpense       GroupExpense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  settlementAccount  Account?     @relation(fields: [settlementAccountId], references: [id])
 
   @@unique([userId, expenseId])
   @@map("expense_splits")
@@ -251,12 +284,29 @@ model RecurringExpense {
   @@map("recurring_expenses")
 }
 
+model Notification {
+  id        String   @id @default(cuid())
+  title     String
+  message   String
+  type      NotificationType
+  read      Boolean  @default(false)
+  userId    String
+  relatedId String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
 enum AccountType {
   CASH
   BANK
   CREDIT_CARD
   INVESTMENT
   OTHER
+  OTHERS_FIXED      // Fixed "Others" account (cannot be deleted/edited)
+  GROUP_LENDING     // For tracking group lending/borrowing
 }
 
 enum CategoryType {
@@ -280,4 +330,18 @@ enum RecurringFrequency {
   WEEKLY
   MONTHLY
   YEARLY
+}
+
+enum NotificationType {
+  GROUP_EXPENSE_ADDED
+  GROUP_EXPENSE_SETTLED
+  GROUP_PAYMENT_RECEIVED
+  BUDGET_ALERT
+}
+
+enum GroupTransactionType {
+  LENDER
+  BORROWER
+  SETTLEMENT_RECEIVED
+  SETTLEMENT_PAID
 }

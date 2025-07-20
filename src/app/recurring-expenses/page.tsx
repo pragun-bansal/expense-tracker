@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { PlusCircle, Calendar, Play, Pause, Edit, Trash2, RefreshCw } from 'lucide-react'
+import { CurrencyLoader } from '@/components/CurrencyLoader'
 
 interface RecurringExpense {
   id: string
@@ -212,11 +213,7 @@ export default function RecurringExpenses() {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading recurring expenses...</div>
-      </div>
-    )
+    return <CurrencyLoader />
   }
 
   return (

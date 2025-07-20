@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -13,9 +13,11 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { id } = await params
+
     const expense = await prisma.expense.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id
       },
       include: {
@@ -40,7 +42,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -48,6 +50,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { id } = await params
     const { amount, description, categoryId, accountId, date, receiptUrl, isRecurring } = await request.json()
 
     if (!amount || !categoryId || !accountId) {
@@ -60,7 +63,7 @@ export async function PUT(
     // Get the original expense to calculate balance adjustment
     const originalExpense = await prisma.expense.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id
       }
     })
@@ -74,7 +77,7 @@ export async function PUT(
 
     // Update the expense
     const updatedExpense = await prisma.expense.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         amount: newAmount,
         description,
@@ -137,7 +140,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -145,10 +148,12 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { id } = await params
+
     // Get the expense to adjust account balance
     const expense = await prisma.expense.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id
       }
     })
@@ -159,7 +164,7 @@ export async function DELETE(
 
     // Delete the expense
     await prisma.expense.delete({
-      where: { id: params.id }
+      where: { id }
     })
 
     // Restore account balance

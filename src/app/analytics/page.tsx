@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
+import { CurrencyLoader } from '@/components/CurrencyLoader'
 import { 
   PieChart, 
   Pie, 
@@ -102,11 +103,7 @@ export default function Analytics() {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading analytics...</div>
-      </div>
-    )
+    return <CurrencyLoader />
   }
 
   if (!data) {

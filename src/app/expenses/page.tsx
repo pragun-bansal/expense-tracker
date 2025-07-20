@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { PlusCircle, Filter, Search, Edit, Trash2, Image } from 'lucide-react'
+import { CurrencyLoader } from '@/components/CurrencyLoader'
 
 interface Expense {
   id: string
@@ -109,11 +110,7 @@ export default function Expenses() {
   const totalAmount = filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0)
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading expenses...</div>
-      </div>
-    )
+    return <CurrencyLoader />
   }
 
   return (

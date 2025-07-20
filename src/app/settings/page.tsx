@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { Bell, Mail, Shield, User, Save, RefreshCw } from 'lucide-react'
+import { CurrencyLoader } from '@/components/CurrencyLoader'
 
 interface BudgetAlert {
   budgetId: string
@@ -97,11 +98,7 @@ export default function Settings() {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading settings...</div>
-      </div>
-    )
+    return <CurrencyLoader />
   }
 
   return (

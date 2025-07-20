@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { Download, FileText, Calendar, Filter, TrendingUp, DollarSign, PieChart } from 'lucide-react'
+import { CurrencyLoader } from '@/components/CurrencyLoader'
 
 export default function Reports() {
   const { data: session } = useSession()
@@ -100,11 +101,7 @@ export default function Reports() {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading reports...</div>
-      </div>
-    )
+    return <CurrencyLoader />
   }
 
   return (

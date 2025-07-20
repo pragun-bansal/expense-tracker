@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { Plus, Users, DollarSign, UserPlus, Settings } from 'lucide-react'
+import { CurrencyLoader } from '@/components/CurrencyLoader'
 
 interface Group {
   id: string
@@ -197,11 +198,7 @@ export default function Groups() {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading groups...</div>
-      </div>
-    )
+    return <CurrencyLoader />
   }
 
   return (

@@ -24,17 +24,21 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: 'Access denied' }, { status: 403 })
     }
 
-    // Get all group expenses with splits
+    // Get all group expenses with lenders and splits
     const expenses = await prisma.groupExpense.findMany({
       where: {
         groupId
       },
       include: {
-        paidBy: {
-          select: {
-            id: true,
-            name: true,
-            email: true
+        lenders: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true
+              }
+            }
           }
         },
         splits: {
@@ -56,19 +60,20 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const userInfo: { [userId: string]: { name: string; email: string } } = {}
 
     for (const expense of expenses) {
-      const paidById = expense.paidById
-      
-      // User who paid gets positive balance
-      if (!userBalances[paidById]) {
-        userBalances[paidById] = 0
-        userInfo[paidById] = {
-          name: expense.paidBy.name || '',
-          email: expense.paidBy.email || ''
+      // Lenders get positive balance (money they lent out)
+      for (const lender of expense.lenders) {
+        const lenderId = lender.userId
+        if (!userBalances[lenderId]) {
+          userBalances[lenderId] = 0
+          userInfo[lenderId] = {
+            name: lender.user.name || '',
+            email: lender.user.email || ''
+          }
         }
+        userBalances[lenderId] += lender.amount
       }
-      userBalances[paidById] += expense.amount
 
-      // Users who owe get negative balance
+      // Users who owe get negative balance (debts)
       for (const split of expense.splits) {
         if (!split.settled) {
           const userId = split.userId

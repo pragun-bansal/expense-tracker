@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { PlusCircle, Filter, Search, Edit, Trash2 } from 'lucide-react'
+import { CurrencyLoader } from '@/components/CurrencyLoader'
 
 interface Income {
   id: string
@@ -109,11 +110,7 @@ export default function Income() {
   const totalAmount = filteredIncomes.reduce((sum, income) => sum + income.amount, 0)
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading income...</div>
-      </div>
-    )
+    return <CurrencyLoader />
   }
 
   return (

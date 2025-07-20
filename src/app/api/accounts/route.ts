@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { ensureSpecialAccountsExist } from '@/lib/specialAccounts'
+import { migrateOldOthersAccounts } from '@/lib/migrateAccounts'
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,9 +12,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Run migration for old accounts first
+    await migrateOldOthersAccounts()
+    
+    // Ensure special accounts exist
+    await ensureSpecialAccountsExist(session.user.id)
+
     const accounts = await prisma.account.findMany({
       where: { userId: session.user.id },
-      orderBy: { name: 'asc' }
+      orderBy: [
+        { type: 'asc' }, // Special accounts first
+        { name: 'asc' }
+      ]
     })
 
     return NextResponse.json(accounts)
@@ -30,6 +41,16 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Check if user exists in database
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id }
+    })
+
+    if (!user) {
+      console.error('User not found in database:', session.user.id)
+      return NextResponse.json({ error: 'User not found. Please log out and log in again.' }, { status: 401 })
     }
 
     const { name, type, balance, color } = await request.json()

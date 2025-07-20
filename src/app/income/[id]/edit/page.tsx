@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
+import { CurrencyLoader } from '@/components/CurrencyLoader'
 
 interface Category {
   id: string
@@ -139,11 +140,7 @@ export default function EditIncome({ params }: { params: { id: string } }) {
   }
 
   if (isLoadingData) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading income...</div>
-      </div>
-    )
+    return <CurrencyLoader />
   }
 
   if (error && isLoadingData) {

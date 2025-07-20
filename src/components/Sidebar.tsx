@@ -20,12 +20,14 @@ import {
   FileText,
   Repeat,
   Calculator,
-  Shield
+  Shield,
+  Bell
 } from 'lucide-react'
 import { ThemeToggle } from './ThemeToggle'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Notifications', href: '/notifications', icon: Bell },
   { name: 'Expenses', href: '/expenses', icon: Receipt },
   { name: 'Income', href: '/income', icon: DollarSign },
   { name: 'Recurring', href: '/recurring-expenses', icon: Repeat },

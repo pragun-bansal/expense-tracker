@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import Link from 'next/link'
+import { CurrencyLoader } from '@/components/CurrencyLoader'
 
 export default function Home() {
   const { data: session, status } = useSession()
@@ -17,11 +18,7 @@ export default function Home() {
   }, [session, status, router])
 
   if (status === 'loading') {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
-      </div>
-    )
+    return <CurrencyLoader />
   }
 
   if (session) {
