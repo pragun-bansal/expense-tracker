@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { createNotification } from '@/lib/notifications'
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -166,14 +167,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     // Create notification for the other user
     const otherUserId = session.user.id === fromUserId ? toUserId : fromUserId
-    await prisma.notification.create({
-      data: {
-        userId: otherUserId,
-        title: 'Settlement Recorded',
-        message: `${session.user.name || session.user.email} recorded a settlement of $${totalOwed.toFixed(2)}`,
-        type: 'SETTLEMENT',
-        relatedId: groupId
-      }
+    await createNotification({
+      userId: otherUserId,
+      title: 'Settlement Recorded',
+      message: `${session.user.name || session.user.email} recorded a settlement of $${totalOwed.toFixed(2)}`,
+      type: 'GROUP_PAYMENT_RECEIVED',
+      relatedId: groupId
     })
 
     return NextResponse.json({ 

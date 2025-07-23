@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { PlusCircle, Calendar, Play, Pause, Edit, Trash2, RefreshCw } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
+import { useBudgetAlerts } from '@/hooks/useBudgetAlerts'
 
 interface RecurringExpense {
   id: string
@@ -46,12 +47,14 @@ interface Account {
 
 export default function RecurringExpenses() {
   const { data: session } = useSession()
+  const { handleBudgetAlert } = useBudgetAlerts()
   const [recurringExpenses, setRecurringExpenses] = useState<RecurringExpense[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [accounts, setAccounts] = useState<Account[]>([])
   const [loading, setLoading] = useState(true)
   const [showAddForm, setShowAddForm] = useState(false)
   const [processing, setProcessing] = useState(false)
+  const [processingIndividual, setProcessingIndividual] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     amount: '',
     description: '',
@@ -194,6 +197,35 @@ export default function RecurringExpenses() {
     }
   }
 
+  const handleProcessIndividual = async (id: string) => {
+    setProcessingIndividual(id)
+    try {
+      const response = await fetch(`/api/recurring-expenses/${id}/process`, {
+        method: 'POST'
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        
+        // Handle budget alerts if present
+        if (result.budgetAlert) {
+          handleBudgetAlert(result.budgetAlert)
+        }
+        
+        alert(result.message)
+        fetchRecurringExpenses()
+      } else {
+        const error = await response.json()
+        alert(error.error || 'Failed to process recurring expense')
+      }
+    } catch (error) {
+      console.error('Error processing recurring expense:', error)
+      alert('Failed to process recurring expense')
+    } finally {
+      setProcessingIndividual(null)
+    }
+  }
+
   const formatFrequency = (frequency: string) => {
     switch (frequency) {
       case 'DAILY': return 'Daily'
@@ -221,8 +253,8 @@ export default function RecurringExpenses() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
         <div className="mb-4 sm:mb-0">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Recurring Expenses</h1>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          <h1 className="text-2xl sm:text-3xl font-bold text-heading">Recurring Expenses</h1>
+          <p className="mt-2 text-sm text-body">
             Automate your regular expenses
           </p>
         </div>
@@ -230,7 +262,7 @@ export default function RecurringExpenses() {
           <button
             onClick={handleProcessRecurring}
             disabled={processing}
-            className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
+            className="inline-flex items-center justify-center px-4 py-2 border border-input text-sm font-medium rounded-md text-input-label bg-card hover:bg-button-secondary-hover disabled:opacity-50"
           >
             <RefreshCw className={`h-4 w-4 mr-2 ${processing ? 'animate-spin' : ''}`} />
             {processing ? 'Processing...' : 'Process Due'}
@@ -247,15 +279,15 @@ export default function RecurringExpenses() {
 
       {/* Add Form */}
       {showAddForm && (
-        <div className="bg-white dark:bg-gray-800 shadow dark:shadow-gray-900/20 rounded-lg mb-8">
+        <div className="bg-card shadow-card rounded-lg mb-8">
           <div className="px-4 py-5 sm:p-6">
-            <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
+            <h3 className="text-lg font-medium leading-6 text-heading mb-4">
               Add Recurring Expense
             </h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="amount" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label htmlFor="amount" className="block text-sm font-medium text-input-label">
                     Amount *
                   </label>
                   <input
@@ -265,19 +297,19 @@ export default function RecurringExpenses() {
                     required
                     value={formData.amount}
                     onChange={(e) => setFormData({...formData, amount: e.target.value})}
-                    className="mt-1 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="mt-1 block w-full border-input rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-input text-heading"
                     placeholder="0.00"
                   />
                 </div>
                 <div>
-                  <label htmlFor="frequency" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label htmlFor="frequency" className="block text-sm font-medium text-input-label">
                     Frequency *
                   </label>
                   <select
                     id="frequency"
                     value={formData.frequency}
                     onChange={(e) => setFormData({...formData, frequency: e.target.value})}
-                    className="mt-1 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="mt-1 block w-full border-input rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-input text-heading"
                   >
                     <option value="DAILY">Daily</option>
                     <option value="WEEKLY">Weekly</option>
@@ -286,7 +318,7 @@ export default function RecurringExpenses() {
                   </select>
                 </div>
                 <div>
-                  <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label htmlFor="categoryId" className="block text-sm font-medium text-input-label">
                     Category *
                   </label>
                   <select
@@ -294,7 +326,7 @@ export default function RecurringExpenses() {
                     required
                     value={formData.categoryId}
                     onChange={(e) => setFormData({...formData, categoryId: e.target.value})}
-                    className="mt-1 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="mt-1 block w-full border-input rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-input text-heading"
                   >
                     <option value="">Select a category</option>
                     {categories.map((category) => (
@@ -305,7 +337,7 @@ export default function RecurringExpenses() {
                   </select>
                 </div>
                 <div>
-                  <label htmlFor="accountId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label htmlFor="accountId" className="block text-sm font-medium text-input-label">
                     Account *
                   </label>
                   <select
@@ -313,7 +345,7 @@ export default function RecurringExpenses() {
                     required
                     value={formData.accountId}
                     onChange={(e) => setFormData({...formData, accountId: e.target.value})}
-                    className="mt-1 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="mt-1 block w-full border-input rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-input text-heading"
                   >
                     <option value="">Select an account</option>
                     {accounts.map((account) => (
@@ -325,7 +357,7 @@ export default function RecurringExpenses() {
                 </div>
               </div>
               <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label htmlFor="description" className="block text-sm font-medium text-input-label">
                   Description
                 </label>
                 <input
@@ -333,13 +365,13 @@ export default function RecurringExpenses() {
                   id="description"
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  className="mt-1 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="mt-1 block w-full border-input rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-input text-heading"
                   placeholder="Description of the recurring expense"
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label htmlFor="startDate" className="block text-sm font-medium text-input-label">
                     Start Date *
                   </label>
                   <input
@@ -348,11 +380,11 @@ export default function RecurringExpenses() {
                     required
                     value={formData.startDate}
                     onChange={(e) => setFormData({...formData, startDate: e.target.value})}
-                    className="mt-1 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="mt-1 block w-full border-input rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-input text-heading"
                   />
                 </div>
                 <div>
-                  <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label htmlFor="endDate" className="block text-sm font-medium text-input-label">
                     End Date (Optional)
                   </label>
                   <input
@@ -360,7 +392,7 @@ export default function RecurringExpenses() {
                     id="endDate"
                     value={formData.endDate}
                     onChange={(e) => setFormData({...formData, endDate: e.target.value})}
-                    className="mt-1 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="mt-1 block w-full border-input rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-input text-heading"
                   />
                 </div>
               </div>
@@ -368,7 +400,7 @@ export default function RecurringExpenses() {
                 <button
                   type="button"
                   onClick={() => setShowAddForm(false)}
-                  className="bg-white dark:bg-gray-700 py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
+                  className="bg-input py-2 px-4 border border-input rounded-md shadow-sm text-sm font-medium text-input-label hover:bg-button-secondary-hover"
                 >
                   Cancel
                 </button>
@@ -387,7 +419,7 @@ export default function RecurringExpenses() {
       {/* Recurring Expenses List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {recurringExpenses.map((expense) => (
-          <div key={expense.id} className="bg-white dark:bg-gray-800 overflow-hidden shadow dark:shadow-gray-900/20 rounded-lg">
+          <div key={expense.id} className="bg-card overflow-hidden shadow-card rounded-lg">
             <div className="px-4 py-5 sm:p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
@@ -401,24 +433,32 @@ export default function RecurringExpenses() {
                     />
                   </div>
                   <div className="ml-3">
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                    <h3 className="text-lg font-medium text-heading">
                       ${expense.amount.toFixed(2)}
                     </h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-sm text-muted">
                       {formatFrequency(expense.frequency)}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
                   <button
-                    onClick={() => handleToggleActive(expense.id, expense.isActive)}
-                    className={`p-2 rounded-full ${expense.isActive ? 'text-green-600 hover:bg-green-50 dark:hover:bg-green-900' : 'text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+                    onClick={() => handleProcessIndividual(expense.id)}
+                    disabled={processingIndividual === expense.id}
+                    className="p-2 text-blue-600 hover:bg-blue-100 rounded-full disabled:opacity-50"
+                    title="Process this recurring expense now"
                   >
-                    {expense.isActive ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
+                    <RefreshCw className={`h-4 w-4 ${processingIndividual === expense.id ? 'animate-spin' : ''}`} />
+                  </button>
+                  <button
+                    onClick={() => handleToggleActive(expense.id, expense.isActive)}
+                    className={`p-2 rounded-full ${expense.isActive ? 'text-green-600 hover:bg-status-success' : 'text-gray-400 hover:bg-button-secondary-hover'}`}
+                  >
+                    {!expense.isActive ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
                   </button>
                   <button
                     onClick={() => handleDelete(expense.id)}
-                    className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900 rounded-full"
+                    className="p-2 text-red-600 hover:bg-status-error rounded-full"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -426,29 +466,29 @@ export default function RecurringExpenses() {
               </div>
               
               <div className="mt-4">
-                <div className="text-sm text-gray-900 dark:text-white">
+                <div className="text-sm text-heading">
                   {expense.description || 'No description'}
                 </div>
                 <div className="mt-2 flex items-center justify-between text-sm">
-                  <span className="text-gray-500 dark:text-gray-400">
+                  <span className="text-muted">
                     Category: {expense.category.name}
                   </span>
-                  <span className="text-gray-500 dark:text-gray-400">
+                  <span className="text-muted">
                     Account: {expense.account.name}
                   </span>
                 </div>
                 <div className="mt-2 flex items-center justify-between text-sm">
-                  <span className="text-gray-500 dark:text-gray-400">
+                  <span className="text-muted">
                     Next Due: {formatDate(expense.nextDueDate)}
                   </span>
                   {isDue(expense.nextDueDate) && expense.isActive && (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-status-error text-status-error">
                       Due
                     </span>
                   )}
                 </div>
                 {expense.expenses.length > 0 && (
-                  <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                  <div className="mt-2 text-sm text-muted">
                     Last processed: {formatDate(expense.expenses[0].date)}
                   </div>
                 )}
@@ -461,8 +501,8 @@ export default function RecurringExpenses() {
       {recurringExpenses.length === 0 && !showAddForm && (
         <div className="text-center py-12">
           <Calendar className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No recurring expenses</h3>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <h3 className="mt-2 text-sm font-medium text-heading">No recurring expenses</h3>
+          <p className="mt-1 text-sm text-muted">
             Get started by creating your first recurring expense.
           </p>
           <div className="mt-6">

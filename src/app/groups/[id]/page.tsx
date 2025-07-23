@@ -470,7 +470,7 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
       <div className="mb-8">
         <Link
           href="/groups"
-          className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+          className="inline-flex items-center text-sm font-medium text-muted hover:text-body"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Groups
@@ -480,16 +480,16 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
       {/* Header */}
       <div className="sm:flex sm:items-center sm:justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{group.name}</h1>
+          <h1 className="text-3xl font-bold text-heading">{group.name}</h1>
           {group.description && (
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            <p className="mt-2 text-sm text-muted">
               {group.description}
             </p>
           )}
           <div className="mt-4 flex items-center space-x-4">
             <div className="flex items-center">
               <Users className="h-4 w-4 text-gray-400 mr-1" />
-              <span className="text-sm text-gray-600 dark:text-gray-400">
+              <span className="text-sm text-muted">
                 {group.members.length} members
               </span>
             </div>
@@ -497,7 +497,7 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
               {group.members.map((member) => (
                 <div
                   key={member.id}
-                  className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-medium border-2 border-white dark:border-gray-900"
+                  className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-medium border-2 border-card"
                   title={member.user.name}
                 >
                   {member.user.name?.[0]?.toUpperCase() || 'U'}
@@ -521,14 +521,14 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200 dark:border-gray-700 mb-8">
+      <div className="border-b border-card-border mb-8">
         <nav className="flex space-x-8">
           <button
             onClick={() => setActiveTab('expenses')}
             className={`py-2 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'expenses'
-                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                ? 'border-blue-500 text-status-info'
+                : 'border-transparent text-muted hover:text-body'
             }`}
           >
             Expenses
@@ -537,8 +537,8 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
             onClick={() => setActiveTab('balances')}
             className={`py-2 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'balances'
-                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                ? 'border-blue-500 text-status-info'
+                : 'border-transparent text-muted hover:text-body'
             }`}
           >
             Balances
@@ -547,8 +547,8 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
             onClick={() => setActiveTab('stats')}
             className={`py-2 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'stats'
-                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                ? 'border-blue-500 text-status-info'
+                : 'border-transparent text-muted hover:text-body'
             }`}
           >
             Statistics
@@ -565,16 +565,16 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
             const lenderNames = expense.lenders.map(lender => lender.user.name).join(', ')
 
             return (
-              <div key={expense.id} className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-900/20 p-6">
+              <div key={expense.id} className="bg-card rounded-lg shadow-card p-6">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center">
                       <Receipt className="h-5 w-5 text-gray-400 mr-2" />
-                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                      <h3 className="text-lg font-medium text-heading">
                         {expense.description}
                       </h3>
                     </div>
-                    <div className="mt-2 flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
+                    <div className="mt-2 flex items-center space-x-4 text-sm text-muted">
                       <span>Paid by {lenderNames}</span>
                       <span>•</span>
                       <span>{new Date(expense.date).toLocaleDateString()}</span>
@@ -589,11 +589,11 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <div className="text-2xl font-bold text-heading">
                       ${expense.amount.toFixed(2)}
                     </div>
                     {myShare && (
-                      <div className={`text-sm ${myShare.settled ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                      <div className={`text-sm ${myShare.settled ? 'text-status-success' : 'text-status-error'}`}>
                         Your share: ${myShare.amount.toFixed(2)}
                         {myShare.settled ? ' (settled)' : ' (unsettled)'}
                       </div>
@@ -602,8 +602,8 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
                 </div>
 
                 {/* Split details */}
-                <div className="mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
-                  <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Split Details</h4>
+                <div className="mt-4 border-t border-card-border pt-4">
+                  <h4 className="text-sm font-medium text-heading mb-2">Split Details</h4>
                   <div className="space-y-2">
                     {expense.splits.map((split) => (
                       <div key={split.id} className="flex items-center justify-between">
@@ -611,18 +611,18 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
                           <div className="h-6 w-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-medium mr-3">
                             {split.user.name?.[0]?.toUpperCase() || 'U'}
                           </div>
-                          <span className="text-sm text-gray-900 dark:text-white">
+                          <span className="text-sm text-heading">
                             {split.user.name}
                           </span>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <span className="text-sm text-gray-900 dark:text-white">
+                          <span className="text-sm text-heading">
                             ${split.amount.toFixed(2)}
                           </span>
                           {split.settled ? (
-                            <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
+                            <Check className="h-4 w-4 text-status-success" />
                           ) : (
-                            <X className="h-4 w-4 text-red-600 dark:text-red-400" />
+                            <X className="h-4 w-4 text-status-error" />
                           )}
                         </div>
                       </div>
@@ -631,7 +631,7 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
                 </div>
 
                 {/* Action buttons */}
-                <div className="mt-4 border-t border-gray-200 dark:border-gray-700 pt-4 flex items-center justify-end">
+                <div className="mt-4 border-t border-card-border pt-4 flex items-center justify-end">
                   {/* Edit and Delete buttons - only for admins or lenders */}
                   {(group?.members.find(m => m.user.id === session?.user?.id)?.role === 'ADMIN' || isLentByMe) && (
                     <div className="flex space-x-2">
@@ -659,8 +659,8 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
           {expenses.length === 0 && (
             <div className="text-center py-12">
               <Receipt className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No expenses yet</h3>
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              <h3 className="mt-2 text-sm font-medium text-heading">No expenses yet</h3>
+              <p className="mt-1 text-sm text-muted">
                 Add your first shared expense to get started.
               </p>
             </div>
@@ -673,9 +673,9 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
         <div className="space-y-8">
           {/* Current Balances */}
           <div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Current Balances</h3>
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-900/20 overflow-hidden">
-              <div className="divide-y divide-gray-200 dark:divide-gray-700">
+            <h3 className="text-lg font-medium text-heading mb-4">Current Balances</h3>
+            <div className="bg-card rounded-lg shadow-card overflow-hidden">
+              <div className="divide-y divide-table-border">
                 {balances.map((balance) => (
                   <div key={balance.userId} className="p-4 flex items-center justify-between">
                     <div className="flex items-center">
@@ -683,20 +683,20 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
                         {balance.user.name?.[0]?.toUpperCase() || 'U'}
                       </div>
                       <div>
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">
+                        <div className="text-sm font-medium text-heading">
                           {balance.user.name}
                         </div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                        <div className="text-sm text-muted">
                           {balance.user.email}
                         </div>
                       </div>
                     </div>
                     <div className={`text-lg font-semibold ${
                       balance.balance > 0 
-                        ? 'text-green-600 dark:text-green-400' 
+                        ? 'text-status-success' 
                         : balance.balance < 0 
-                        ? 'text-red-600 dark:text-red-400' 
-                        : 'text-gray-900 dark:text-white'
+                        ? 'text-status-error' 
+                        : 'text-heading'
                     }`}>
                       {balance.balance > 0 ? '+' : ''}${balance.balance.toFixed(2)}
                     </div>
@@ -709,28 +709,28 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
           {/* Suggested Settlements */}
           {settlements.length > 0 && (
             <div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Suggested Settlements</h3>
+              <h3 className="text-lg font-medium text-heading mb-4">Suggested Settlements</h3>
               <div className="space-y-3">
                 {settlements.map((settlement, index) => (
-                  <div key={index} className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                  <div key={index} className="bg-status-info border border-blue-200 rounded-lg p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
                         <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-medium mr-3">
                           {settlement.from.name?.[0]?.toUpperCase() || 'U'}
                         </div>
-                        <span className="text-sm text-blue-900 dark:text-blue-200">
+                        <span className="text-sm text-status-info">
                           {settlement.from.name}
                         </span>
-                        <span className="mx-2 text-blue-600 dark:text-blue-400">owes</span>
+                        <span className="mx-2 text-status-info">owes</span>
                         <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center text-white text-xs font-medium mr-3">
                           {settlement.to.name?.[0]?.toUpperCase() || 'U'}
                         </div>
-                        <span className="text-sm text-blue-900 dark:text-blue-200">
+                        <span className="text-sm text-status-info">
                           {settlement.to.name}
                         </span>
                       </div>
                       <div className="flex items-center space-x-3">
-                        <div className="text-lg font-semibold text-blue-900 dark:text-blue-200">
+                        <div className="text-lg font-semibold text-status-info">
                           ${settlement.amount.toFixed(2)}
                         </div>
                         {(settlement.from.id === session?.user?.id || settlement.to.id === session?.user?.id) && (
@@ -757,35 +757,35 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
         <div className="space-y-8">
           {/* Overview Stats */}
           <div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Group Overview</h3>
+            <h3 className="text-lg font-medium text-heading mb-4">Group Overview</h3>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow dark:shadow-gray-900/20">
-                <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Expenses</div>
-                <div className="text-2xl font-semibold text-gray-900 dark:text-white">${stats.totalAmount.toFixed(2)}</div>
+              <div className="bg-card p-6 rounded-lg shadow-card">
+                <div className="text-sm font-medium text-muted">Total Expenses</div>
+                <div className="text-2xl font-semibold text-heading">${stats.totalAmount.toFixed(2)}</div>
               </div>
               
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow dark:shadow-gray-900/20">
-                <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Number of Expenses</div>
-                <div className="text-2xl font-semibold text-gray-900 dark:text-white">{stats.totalExpenses}</div>
+              <div className="bg-card p-6 rounded-lg shadow-card">
+                <div className="text-sm font-medium text-muted">Number of Expenses</div>
+                <div className="text-2xl font-semibold text-heading">{stats.totalExpenses}</div>
               </div>
               
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow dark:shadow-gray-900/20">
-                <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Average Expense</div>
-                <div className="text-2xl font-semibold text-gray-900 dark:text-white">${stats.averageExpense.toFixed(2)}</div>
+              <div className="bg-card p-6 rounded-lg shadow-card">
+                <div className="text-sm font-medium text-muted">Average Expense</div>
+                <div className="text-2xl font-semibold text-heading">${stats.averageExpense.toFixed(2)}</div>
               </div>
               
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow dark:shadow-gray-900/20">
-                <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Members</div>
-                <div className="text-2xl font-semibold text-gray-900 dark:text-white">{stats.totalMembers}</div>
+              <div className="bg-card p-6 rounded-lg shadow-card">
+                <div className="text-sm font-medium text-muted">Total Members</div>
+                <div className="text-2xl font-semibold text-heading">{stats.totalMembers}</div>
               </div>
             </div>
           </div>
 
           {/* Member Statistics */}
           <div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Member Statistics</h3>
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-gray-900/20 overflow-hidden">
-              <div className="divide-y divide-gray-200 dark:divide-gray-700">
+            <h3 className="text-lg font-medium text-heading mb-4">Member Statistics</h3>
+            <div className="bg-card rounded-lg shadow-card overflow-hidden">
+              <div className="divide-y divide-table-border">
                 {stats.memberStats.map((member) => (
                   <div key={member.user.id} className="p-6">
                     <div className="flex items-center justify-between mb-4">
@@ -794,20 +794,20 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
                           {member.user.name?.[0]?.toUpperCase() || 'U'}
                         </div>
                         <div>
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">
+                          <div className="text-sm font-medium text-heading">
                             {member.user.name}
                           </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">
+                          <div className="text-sm text-muted">
                             {member.user.email}
                           </div>
                         </div>
                       </div>
                       <div className={`text-lg font-semibold ${
                         member.netBalance > 0 
-                          ? 'text-green-600 dark:text-green-400' 
+                          ? 'text-status-success' 
                           : member.netBalance < 0 
-                          ? 'text-red-600 dark:text-red-400' 
-                          : 'text-gray-900 dark:text-white'
+                          ? 'text-status-error' 
+                          : 'text-heading'
                       }`}>
                         {member.netBalance > 0 ? '+' : ''}${member.netBalance.toFixed(2)}
                       </div>
@@ -815,25 +815,25 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
                     
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                       <div>
-                        <div className="text-gray-600 dark:text-gray-400">Total Lent</div>
-                        <div className="font-medium text-green-600 dark:text-green-400">${member.totalLent.toFixed(2)}</div>
+                        <div className="text-muted">Total Lent</div>
+                        <div className="font-medium text-status-success">${member.totalLent.toFixed(2)}</div>
                       </div>
                       <div>
-                        <div className="text-gray-600 dark:text-gray-400">Total Borrowed</div>
-                        <div className="font-medium text-red-600 dark:text-red-400">${member.totalBorrowed.toFixed(2)}</div>
+                        <div className="text-muted">Total Borrowed</div>
+                        <div className="font-medium text-status-error">${member.totalBorrowed.toFixed(2)}</div>
                       </div>
                       <div>
-                        <div className="text-gray-600 dark:text-gray-400">Expenses Created</div>
-                        <div className="font-medium text-gray-900 dark:text-white">{member.totalExpenses}</div>
+                        <div className="text-muted">Expenses Created</div>
+                        <div className="font-medium text-heading">{member.totalExpenses}</div>
                       </div>
                       <div>
-                        <div className="text-gray-600 dark:text-gray-400">Net Balance</div>
+                        <div className="text-muted">Net Balance</div>
                         <div className={`font-medium ${
                           member.netBalance > 0 
-                            ? 'text-green-600 dark:text-green-400' 
+                            ? 'text-status-success' 
                             : member.netBalance < 0 
-                            ? 'text-red-600 dark:text-red-400' 
-                            : 'text-gray-900 dark:text-white'
+                            ? 'text-status-error' 
+                            : 'text-heading'
                         }`}>
                           {member.netBalance > 0 ? 'Owed ' : member.netBalance < 0 ? 'Owes ' : 'Even'}
                           {member.netBalance !== 0 && `$${Math.abs(member.netBalance).toFixed(2)}`}
@@ -849,20 +849,20 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
           {/* Top Contributors */}
           {(stats.topLender || stats.topBorrower) && (
             <div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Top Contributors</h3>
+              <h3 className="text-lg font-medium text-heading mb-4">Top Contributors</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {stats.topLender && (
-                  <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-6">
+                  <div className="bg-status-success border border-green-200 rounded-lg p-6">
                     <div className="flex items-center">
                       <div className="h-12 w-12 rounded-full bg-green-500 flex items-center justify-center text-white text-lg font-medium mr-4">
                         {stats.topLender.user.name?.[0]?.toUpperCase() || 'U'}
                       </div>
                       <div>
-                        <div className="text-sm font-medium text-green-800 dark:text-green-200">Top Lender</div>
-                        <div className="text-lg font-semibold text-green-900 dark:text-green-100">
+                        <div className="text-sm font-medium text-status-success">Top Lender</div>
+                        <div className="text-lg font-semibold text-status-success">
                           {stats.topLender.user.name}
                         </div>
-                        <div className="text-sm text-green-700 dark:text-green-300">
+                        <div className="text-sm text-status-success">
                           Lent ${stats.topLender.totalLent.toFixed(2)}
                         </div>
                       </div>
@@ -871,17 +871,17 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
                 )}
                 
                 {stats.topBorrower && (
-                  <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
+                  <div className="bg-status-info border border-blue-200 rounded-lg p-6">
                     <div className="flex items-center">
                       <div className="h-12 w-12 rounded-full bg-blue-500 flex items-center justify-center text-white text-lg font-medium mr-4">
                         {stats.topBorrower.user.name?.[0]?.toUpperCase() || 'U'}
                       </div>
                       <div>
-                        <div className="text-sm font-medium text-blue-800 dark:text-blue-200">Most Active</div>
-                        <div className="text-lg font-semibold text-blue-900 dark:text-blue-100">
+                        <div className="text-sm font-medium text-status-info">Most Active</div>
+                        <div className="text-lg font-semibold text-status-info">
                           {stats.topBorrower.user.name}
                         </div>
-                        <div className="text-sm text-blue-700 dark:text-blue-300">
+                        <div className="text-sm text-status-info">
                           {stats.topBorrower.totalExpenses} expenses created
                         </div>
                       </div>
@@ -896,15 +896,15 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
 
       {/* Add Expense Modal */}
       {showAddExpense && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
+        <div className="fixed inset-0 bg-modal-overlay overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-card">
             <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+              <h3 className="text-lg font-medium text-heading mb-4">
                 Add New Expense
               </h3>
               <form onSubmit={handleAddExpense} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-input-label mb-1">
                     Description *
                   </label>
                   <input
@@ -912,13 +912,13 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
                     required
                     value={newExpense.description}
                     onChange={(e) => setNewExpense(prev => ({ ...prev, description: e.target.value }))}
-                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full border border-input rounded-md px-3 py-2 bg-input text-heading"
                     placeholder="e.g., Dinner at restaurant"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-input-label mb-1">
                     Amount *
                   </label>
                   <input
@@ -927,19 +927,19 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
                     required
                     value={newExpense.amount}
                     onChange={(e) => setNewExpense(prev => ({ ...prev, amount: e.target.value }))}
-                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full border border-input rounded-md px-3 py-2 bg-input text-heading"
                     placeholder="0.00"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-input-label mb-1">
                     Account (Optional)
                   </label>
                   <select
                     value={newExpense.accountId}
                     onChange={(e) => setNewExpense(prev => ({ ...prev, accountId: e.target.value }))}
-                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full border border-input rounded-md px-3 py-2 bg-input text-heading"
                   >
                     <option value="">Select Account</option>
                     <optgroup label="Accounts">
@@ -956,7 +956,7 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-input-label mb-1">
                     Split Type
                   </label>
                   <select
@@ -965,7 +965,7 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
                       setNewExpense(prev => ({ ...prev, splitType: e.target.value }))
                       setTimeout(initializeSplits, 100) // Initialize splits after state update
                     }}
-                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full border border-input rounded-md px-3 py-2 bg-input text-heading"
                   >
                     <option value="EQUAL">Equal Split</option>
                     <option value="CUSTOM">Custom Amounts</option>
@@ -975,10 +975,10 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
                 {/* Lender Selection */}
                 {newExpense.lenders.length > 0 && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-input-label mb-2">
                       Select Who Paid (Lenders) *
                     </label>
-                    <div className="space-y-2 max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded p-2">
+                    <div className="space-y-2 max-h-48 overflow-y-auto border border-input rounded p-2">
                       {newExpense.lenders.map((lender) => {
                         const member = group?.members.find(m => m.user.id === lender.userId)
                         if (!member) return null
@@ -987,7 +987,7 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
                         const showAmountInput = selectedLenders.length > 1
                         
                         return (
-                          <div key={lender.userId} className="flex items-center space-x-3 p-2 border border-gray-100 dark:border-gray-700 rounded">
+                          <div key={lender.userId} className="flex items-center space-x-3 p-2 border border-card-border rounded">
                             <input
                               type="checkbox"
                               checked={lender.selected}
@@ -999,10 +999,10 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
                                 {member.user.name?.[0]?.toUpperCase() || 'U'}
                               </div>
                               <div className="flex-1">
-                                <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                <div className="text-sm font-medium text-heading">
                                   {member.user.name}
                                 </div>
-                                <div className="text-xs text-gray-500 dark:text-gray-400">
+                                <div className="text-xs text-muted">
                                   {member.user.email}
                                 </div>
                               </div>
@@ -1016,7 +1016,7 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
                                       step="0.01"
                                       value={lender.amount || ''}
                                       onChange={(e) => updateLenderAmount(lender.userId, parseFloat(e.target.value) || 0)}
-                                      className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                      className="w-full border border-input rounded px-2 py-1 text-sm bg-input text-heading"
                                       placeholder="0.00"
                                     />
                                   </div>
@@ -1025,7 +1025,7 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
                                   <select
                                     value={lender.accountId}
                                     onChange={(e) => updateLenderAccount(lender.userId, e.target.value)}
-                                    className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    className="w-full border border-input rounded px-2 py-1 text-sm bg-input text-heading"
                                   >
                                     <option value="">Others</option>
                                     {accounts.map((account) => (
@@ -1042,7 +1042,7 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
                       })}
                     </div>
                     {newExpense.lenders.filter(l => l.selected).length > 1 && (
-                      <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                      <div className="mt-2 text-sm text-muted">
                         Total: ${newExpense.lenders.reduce((sum, lender) => sum + (lender.selected ? lender.amount : 0), 0).toFixed(2)} 
                         / ${newExpense.amount || '0.00'}
                       </div>
@@ -1053,7 +1053,7 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
                 {/* Member Selection and Split Configuration */}
                 {newExpense.splits.length > 0 && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-input-label mb-2">
                       Select Members and {newExpense.splitType === 'CUSTOM' ? 'Amounts' : 'Split'}
                     </label>
                     <div className="space-y-2 max-h-48 overflow-y-auto">
@@ -1062,7 +1062,7 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
                         if (!member) return null
                         
                         return (
-                          <div key={split.userId} className="flex items-center space-x-3 p-2 border border-gray-200 dark:border-gray-600 rounded">
+                          <div key={split.userId} className="flex items-center space-x-3 p-2 border border-input rounded">
                             <input
                               type="checkbox"
                               checked={split.selected}
@@ -1074,10 +1074,10 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
                                 {member.user.name?.[0]?.toUpperCase() || 'U'}
                               </div>
                               <div className="flex-1">
-                                <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                <div className="text-sm font-medium text-heading">
                                   {member.user.name}
                                 </div>
-                                <div className="text-xs text-gray-500 dark:text-gray-400">
+                                <div className="text-xs text-muted">
                                   {member.user.email}
                                 </div>
                               </div>
@@ -1089,13 +1089,13 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
                                   step="0.01"
                                   value={split.amount || ''}
                                   onChange={(e) => updateSplitAmount(split.userId, parseFloat(e.target.value) || 0)}
-                                  className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                  className="w-full border border-input rounded px-2 py-1 text-sm bg-input text-heading"
                                   placeholder="0.00"
                                 />
                               </div>
                             )}
                             {newExpense.splitType === 'EQUAL' && split.selected && (
-                              <div className="text-sm text-gray-600 dark:text-gray-400">
+                              <div className="text-sm text-muted">
                                 ${newExpense.amount ? (parseFloat(newExpense.amount) / newExpense.splits.filter(s => s.selected).length).toFixed(2) : '0.00'}
                               </div>
                             )}
@@ -1105,7 +1105,7 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
                     </div>
                     
                     {newExpense.splitType === 'CUSTOM' && (
-                      <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                      <div className="mt-2 text-sm text-muted">
                         Total: ${newExpense.splits.reduce((sum, split) => sum + (split.selected ? split.amount : 0), 0).toFixed(2)} 
                         / ${newExpense.amount || '0.00'}
                       </div>
@@ -1117,7 +1117,7 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
                   <button
                     type="button"
                     onClick={() => setShowAddExpense(false)}
-                    className="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+                    className="px-4 py-2 text-input-label border border-input rounded-md hover:bg-button-secondary-hover"
                   >
                     Cancel
                   </button>
@@ -1136,10 +1136,10 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
 
       {/* Edit Expense Modal */}
       {showEditExpense && editingExpense && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-10 mx-auto p-5 border max-w-2xl shadow-lg rounded-md bg-white dark:bg-gray-800">
+        <div className="fixed inset-0 bg-modal-overlay overflow-y-auto h-full w-full z-50">
+          <div className="relative top-10 mx-auto p-5 border max-w-2xl shadow-lg rounded-md bg-card">
             <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+              <h3 className="text-lg font-medium text-heading mb-4">
                 Edit Group Expense
               </h3>
               <EditExpenseForm 
@@ -1165,21 +1165,21 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
 
       {/* Settlement Modal */}
       {showSettleModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
+        <div className="fixed inset-0 bg-modal-overlay overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-card">
             <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+              <h3 className="text-lg font-medium text-heading mb-4">
                 {settleData.isLender ? 'Record Settlement Receipt' : 'Record Settlement Payment'}
               </h3>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-input-label mb-1">
                     {settleData.isLender ? 'Account that received the payment' : 'Account used for payment'} (Optional)
                   </label>
                   <select
                     value={settlementAccountId}
                     onChange={(e) => setSettlementAccountId(e.target.value)}
-                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full border border-input rounded-md px-3 py-2 bg-input text-heading"
                   >
                     <option value="">Others (Miscellaneous)</option>
                     <optgroup label="Accounts">
@@ -1192,7 +1192,7 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
                   </select>
                 </div>
                 
-                <div className="text-sm text-gray-600 dark:text-gray-400">
+                <div className="text-sm text-muted">
                   {settleData.isLender 
                     ? 'Mark these debts as settled and optionally record which account received the payments.'
                     : 'Mark your debt as settled and optionally record which account you used for payment.'
@@ -1204,7 +1204,7 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
                 <button
                   type="button"
                   onClick={() => setShowSettleModal(false)}
-                  className="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className="px-4 py-2 text-input-label border border-input rounded-md hover:bg-button-secondary-hover"
                 >
                   Cancel
                 </button>
@@ -1309,7 +1309,7 @@ function EditExpenseForm({
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-input-label mb-1">
             Description *
           </label>
           <input
@@ -1317,12 +1317,12 @@ function EditExpenseForm({
             required
             value={formData.description}
             onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            className="w-full border border-input rounded-md px-3 py-2 bg-input text-heading"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-input-label mb-1">
             Amount *
           </label>
           <input
@@ -1331,29 +1331,29 @@ function EditExpenseForm({
             required
             value={formData.amount}
             onChange={(e) => setFormData(prev => ({ ...prev, amount: e.target.value }))}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            className="w-full border border-input rounded-md px-3 py-2 bg-input text-heading"
           />
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label className="block text-sm font-medium text-input-label mb-1">
           Date
         </label>
         <input
           type="date"
           value={formData.date}
           onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
-          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+          className="w-full border border-input rounded-md px-3 py-2 bg-input text-heading"
         />
       </div>
 
       {/* Lenders Section */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label className="block text-sm font-medium text-input-label mb-2">
           Lenders
         </label>
-        <div className="space-y-2 max-h-32 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded p-2">
+        <div className="space-y-2 max-h-32 overflow-y-auto border border-input rounded p-2">
           {formData.lenders.map((lender) => {
             const member = group?.members.find(m => m.user.id === lender.userId)
             if (!member) return null
@@ -1366,12 +1366,12 @@ function EditExpenseForm({
                   step="0.01"
                   value={lender.amount}
                   onChange={(e) => updateLenderAmount(lender.userId, parseFloat(e.target.value) || 0)}
-                  className="w-24 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-24 border border-input rounded px-2 py-1 text-xs bg-input text-heading"
                 />
                 <select
                   value={lender.accountId}
                   onChange={(e) => updateLenderAccount(lender.userId, e.target.value)}
-                  className="flex-1 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="flex-1 border border-input rounded px-2 py-1 text-xs bg-input text-heading"
                 >
                   <option value="">Others (Miscellaneous)</option>
                   {accounts
@@ -1390,10 +1390,10 @@ function EditExpenseForm({
 
       {/* Splits Section */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label className="block text-sm font-medium text-input-label mb-2">
           Split Among
         </label>
-        <div className="space-y-2 max-h-32 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded p-2">
+        <div className="space-y-2 max-h-32 overflow-y-auto border border-input rounded p-2">
           {formData.splits.map((split) => {
             const member = group?.members.find(m => m.user.id === split.userId)
             if (!member) return null
@@ -1406,7 +1406,7 @@ function EditExpenseForm({
                   step="0.01"
                   value={split.amount}
                   onChange={(e) => updateSplitAmount(split.userId, parseFloat(e.target.value) || 0)}
-                  className="w-24 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-24 border border-input rounded px-2 py-1 text-xs bg-input text-heading"
                 />
               </div>
             )
@@ -1418,7 +1418,7 @@ function EditExpenseForm({
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+          className="px-4 py-2 text-input-label border border-input rounded-md hover:bg-button-secondary-hover"
         >
           Cancel
         </button>

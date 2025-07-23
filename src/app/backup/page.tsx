@@ -92,22 +92,22 @@ export default function BackupRestore() {
     <div>
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Backup & Restore</h1>
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+        <h1 className="text-2xl sm:text-3xl font-bold text-heading">Backup & Restore</h1>
+        <p className="mt-2 text-sm text-muted">
           Export your data or restore from a previous backup
         </p>
       </div>
 
       <div className="space-y-8">
         {/* Warning Notice */}
-        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4">
+        <div className="bg-status-warning border border-status-warning rounded-lg p-4">
           <div className="flex">
-            <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mr-2 flex-shrink-0 mt-0.5" />
+            <AlertTriangle className="h-5 w-5 text-status-warning mr-2 flex-shrink-0 mt-0.5" />
             <div>
-              <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+              <h3 className="text-sm font-medium text-status-warning">
                 Important Notice
               </h3>
-              <p className="mt-1 text-sm text-yellow-700 dark:text-yellow-300">
+              <p className="mt-1 text-sm text-status-warning">
                 Always create a backup before restoring data. Restoring will overwrite existing data with the same IDs.
                 Make sure to keep your backup files secure as they contain sensitive financial information.
               </p>
@@ -116,27 +116,27 @@ export default function BackupRestore() {
         </div>
 
         {/* Export Backup */}
-        <div className="bg-white dark:bg-gray-800 shadow dark:shadow-gray-900/20 rounded-lg">
+        <div className="bg-card shadow-card rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <div className="flex items-center mb-4">
-              <Download className="h-5 w-5 text-gray-500 dark:text-gray-400 mr-2" />
-              <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white">
+              <Download className="h-5 w-5 text-muted mr-2" />
+              <h3 className="text-lg font-medium leading-6 text-heading">
                 Export Backup
               </h3>
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+            <p className="text-sm text-muted mb-6">
               Create a backup of all your expense tracking data including accounts, categories, expenses, income, budgets, and groups.
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+              <div className="border border-card-border rounded-lg p-4">
                 <div className="flex items-center mb-2">
-                  <Database className="h-5 w-5 text-blue-600 dark:text-blue-400 mr-2" />
-                  <h4 className="font-medium text-gray-900 dark:text-white">
+                  <Database className="h-5 w-5 text-status-info mr-2" />
+                  <h4 className="font-medium text-heading">
                     Complete Backup (JSON)
                   </h4>
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                <p className="text-sm text-muted mb-4">
                   Full backup with all data and relationships. Use this for complete restoration.
                 </p>
                 <button
@@ -149,14 +149,14 @@ export default function BackupRestore() {
                 </button>
               </div>
 
-              <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+              <div className="border border-card-border rounded-lg p-4">
                 <div className="flex items-center mb-2">
-                  <FileText className="h-5 w-5 text-green-600 dark:text-green-400 mr-2" />
-                  <h4 className="font-medium text-gray-900 dark:text-white">
+                  <FileText className="h-5 w-5 text-status-success mr-2" />
+                  <h4 className="font-medium text-heading">
                     Simple Export (CSV)
                   </h4>
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                <p className="text-sm text-muted mb-4">
                   Basic expense and income data in CSV format. Good for spreadsheet analysis.
                 </p>
                 <button
@@ -173,39 +173,39 @@ export default function BackupRestore() {
         </div>
 
         {/* Restore Backup */}
-        <div className="bg-white dark:bg-gray-800 shadow dark:shadow-gray-900/20 rounded-lg">
+        <div className="bg-card shadow-card rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <div className="flex items-center mb-4">
-              <Upload className="h-5 w-5 text-gray-500 dark:text-gray-400 mr-2" />
-              <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white">
+              <Upload className="h-5 w-5 text-muted mr-2" />
+              <h3 className="text-lg font-medium leading-6 text-heading">
                 Restore Backup
               </h3>
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+            <p className="text-sm text-muted mb-6">
               Restore your data from a previous backup file. Only JSON backup files are supported for restoration.
             </p>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-input-label mb-2">
                   Select Backup File
                 </label>
                 <input
                   type="file"
                   accept=".json"
                   onChange={handleFileSelect}
-                  className="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900 dark:file:text-blue-300 dark:hover:file:bg-blue-800"
+                  className="block w-full text-sm text-muted file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900 dark:file:text-blue-300 dark:hover:file:bg-blue-800"
                 />
               </div>
 
               {selectedFile && (
-                <div className="flex items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <FileText className="h-5 w-5 text-gray-500 dark:text-gray-400 mr-2" />
+                <div className="flex items-center p-3 bg-muted rounded-lg">
+                  <FileText className="h-5 w-5 text-muted mr-2" />
                   <div className="flex-1">
-                    <div className="text-sm font-medium text-gray-900 dark:text-white">
+                    <div className="text-sm font-medium text-heading">
                       {selectedFile.name}
                     </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                    <div className="text-xs text-muted">
                       {(selectedFile.size / 1024).toFixed(1)} KB
                     </div>
                   </div>
@@ -225,81 +225,81 @@ export default function BackupRestore() {
 
         {/* Restore Results */}
         {restoreResult && (
-          <div className="bg-white dark:bg-gray-800 shadow dark:shadow-gray-900/20 rounded-lg">
+          <div className="bg-card shadow-card rounded-lg">
             <div className="px-4 py-5 sm:p-6">
               <div className="flex items-center mb-4">
-                <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mr-2" />
-                <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white">
+                <CheckCircle className="h-5 w-5 text-status-success mr-2" />
+                <h3 className="text-lg font-medium leading-6 text-heading">
                   Restore Results
                 </h3>
               </div>
 
-              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-4 mb-6">
-                <div className="text-sm text-green-800 dark:text-green-200">
+              <div className="bg-status-success border border-green-200 rounded-lg p-4 mb-6">
+                <div className="text-sm text-status-success">
                   <strong>{restoreResult.message}</strong>
                 </div>
-                <div className="text-sm text-green-700 dark:text-green-300 mt-1">
+                <div className="text-sm text-status-success mt-1">
                   Total items restored: {restoreResult.totalRestored}
                 </div>
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-                <div className="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <div className="text-lg font-bold text-gray-900 dark:text-white">
+                <div className="text-center p-3 bg-muted rounded-lg">
+                  <div className="text-lg font-bold text-heading">
                     {restoreResult.results.accounts}
                   </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                  <div className="text-sm text-muted">
                     Accounts
                   </div>
                 </div>
-                <div className="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <div className="text-lg font-bold text-gray-900 dark:text-white">
+                <div className="text-center p-3 bg-muted rounded-lg">
+                  <div className="text-lg font-bold text-heading">
                     {restoreResult.results.categories}
                   </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                  <div className="text-sm text-muted">
                     Categories
                   </div>
                 </div>
-                <div className="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <div className="text-lg font-bold text-gray-900 dark:text-white">
+                <div className="text-center p-3 bg-muted rounded-lg">
+                  <div className="text-lg font-bold text-heading">
                     {restoreResult.results.expenses}
                   </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                  <div className="text-sm text-muted">
                     Expenses
                   </div>
                 </div>
-                <div className="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <div className="text-lg font-bold text-gray-900 dark:text-white">
+                <div className="text-center p-3 bg-muted rounded-lg">
+                  <div className="text-lg font-bold text-heading">
                     {restoreResult.results.incomes}
                   </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                  <div className="text-sm text-muted">
                     Incomes
                   </div>
                 </div>
-                <div className="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <div className="text-lg font-bold text-gray-900 dark:text-white">
+                <div className="text-center p-3 bg-muted rounded-lg">
+                  <div className="text-lg font-bold text-heading">
                     {restoreResult.results.budgets}
                   </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                  <div className="text-sm text-muted">
                     Budgets
                   </div>
                 </div>
-                <div className="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <div className="text-lg font-bold text-gray-900 dark:text-white">
+                <div className="text-center p-3 bg-muted rounded-lg">
+                  <div className="text-lg font-bold text-heading">
                     {restoreResult.results.recurringExpenses}
                   </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                  <div className="text-sm text-muted">
                     Recurring
                   </div>
                 </div>
               </div>
 
               {restoreResult.results.errors.length > 0 && (
-                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg p-4">
-                  <h4 className="text-sm font-medium text-red-800 dark:text-red-200 mb-2">
+                <div className="bg-status-error border border-status-error rounded-lg p-4">
+                  <h4 className="text-sm font-medium text-status-error mb-2">
                     Errors ({restoreResult.results.errors.length})
                   </h4>
-                  <ul className="text-sm text-red-700 dark:text-red-300 space-y-1">
+                  <ul className="text-sm text-status-error space-y-1">
                     {restoreResult.results.errors.map((error, index) => (
                       <li key={index} className="list-disc list-inside">
                         {error}
@@ -313,29 +313,29 @@ export default function BackupRestore() {
         )}
 
         {/* Security Information */}
-        <div className="bg-white dark:bg-gray-800 shadow dark:shadow-gray-900/20 rounded-lg">
+        <div className="bg-card shadow-card rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <div className="flex items-center mb-4">
-              <Shield className="h-5 w-5 text-gray-500 dark:text-gray-400 mr-2" />
-              <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white">
+              <Shield className="h-5 w-5 text-muted mr-2" />
+              <h3 className="text-lg font-medium leading-6 text-heading">
                 Security & Privacy
               </h3>
             </div>
-            <div className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
+            <div className="space-y-3 text-sm text-muted">
               <div className="flex items-start">
-                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400 mr-2 mt-0.5 flex-shrink-0" />
+                <CheckCircle className="h-4 w-4 text-status-success mr-2 mt-0.5 flex-shrink-0" />
                 <span>Backup files are generated locally and not stored on our servers</span>
               </div>
               <div className="flex items-start">
-                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400 mr-2 mt-0.5 flex-shrink-0" />
+                <CheckCircle className="h-4 w-4 text-status-success mr-2 mt-0.5 flex-shrink-0" />
                 <span>All sensitive data remains encrypted and secure</span>
               </div>
               <div className="flex items-start">
-                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400 mr-2 mt-0.5 flex-shrink-0" />
+                <CheckCircle className="h-4 w-4 text-status-success mr-2 mt-0.5 flex-shrink-0" />
                 <span>You have full control over your backup files</span>
               </div>
               <div className="flex items-start">
-                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400 mr-2 mt-0.5 flex-shrink-0" />
+                <CheckCircle className="h-4 w-4 text-status-success mr-2 mt-0.5 flex-shrink-0" />
                 <span>Restore only works with backups from the same user account</span>
               </div>
             </div>

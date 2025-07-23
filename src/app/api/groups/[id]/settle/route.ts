@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { createPersonalTransactionsForSettlement } from '@/lib/groupTransactionSync'
+import { createNotification } from '@/lib/notifications'
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -115,14 +116,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         : split.userId // Notify borrower if lender settled
 
       if (notificationUserId && notificationUserId !== session.user.id) {
-        await prisma.notification.create({
-          data: {
-            userId: notificationUserId,
-            title: 'Expense Settled',
-            message: `${session.user.name || session.user.email} marked an expense split as settled`,
-            type: 'GROUP_EXPENSE_SETTLED',
-            relatedId: split.groupExpense.id
-          }
+        await createNotification({
+          userId: notificationUserId,
+          title: 'Expense Settled',
+          message: `${session.user.name || session.user.email} marked an expense split as settled`,
+          type: 'GROUP_EXPENSE_SETTLED',
+          relatedId: split.groupExpense.id
         })
       }
     }

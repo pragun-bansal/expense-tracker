@@ -3,12 +3,12 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-  id        String   @id @default(cuid())
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   email     String   @unique
   name      String?
   password  String
@@ -28,17 +28,18 @@ model User {
   comments          Comment[]
   recurringExpenses RecurringExpense[]
   notifications     Notification[]
+  budgetNotifications BudgetNotification[]
 
   @@map("users")
 }
 
 model Account {
-  id      String      @id @default(cuid())
+  id      String      @id @default(auto()) @map("_id") @db.ObjectId
   name    String
   type    AccountType
   balance Float       @default(0)
   color   String?
-  userId  String
+  userId  String      @db.ObjectId
 
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   expenses          Expense[]
@@ -54,12 +55,12 @@ model Account {
 }
 
 model Category {
-  id    String      @id @default(cuid())
+  id    String      @id @default(auto()) @map("_id") @db.ObjectId
   name  String
   type  CategoryType
   color String?
   icon  String?
-  userId String
+  userId String      @db.ObjectId
 
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   expenses          Expense[]
@@ -71,20 +72,20 @@ model Category {
 }
 
 model Expense {
-  id                  String    @id @default(cuid())
+  id                  String    @id @default(auto()) @map("_id") @db.ObjectId
   amount              Float
   description         String?
   date                DateTime  @default(now())
   receiptUrl          String?
   isRecurring         Boolean   @default(false)
-  recurringExpenseId  String?
-  groupExpenseId      String?
+  recurringExpenseId  String?   @db.ObjectId
+  groupExpenseId      String?   @db.ObjectId
   groupType           GroupTransactionType?
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
-  userId              String
-  accountId           String
-  categoryId          String
+  userId              String    @db.ObjectId
+  accountId           String    @db.ObjectId
+  categoryId          String    @db.ObjectId
 
   user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   account           Account           @relation(fields: [accountId], references: [id])
@@ -96,18 +97,18 @@ model Expense {
 }
 
 model Income {
-  id             String   @id @default(cuid())
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
   amount         Float
   description    String?
   date           DateTime @default(now())
   source         String?
-  groupExpenseId String?
+  groupExpenseId String?  @db.ObjectId
   groupType      GroupTransactionType?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
-  userId         String
-  accountId      String
-  categoryId     String
+  userId         String   @db.ObjectId
+  accountId      String   @db.ObjectId
+  categoryId     String   @db.ObjectId
 
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   account      Account       @relation(fields: [accountId], references: [id])
@@ -118,7 +119,7 @@ model Income {
 }
 
 model Budget {
-  id         String   @id @default(cuid())
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
   amount     Float
   spent      Float    @default(0)
   period     BudgetPeriod
@@ -126,17 +127,18 @@ model Budget {
   endDate    DateTime
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  userId     String
-  categoryId String
+  userId     String   @db.ObjectId
+  categoryId String   @db.ObjectId
 
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   category Category @relation(fields: [categoryId], references: [id])
+  budgetNotifications BudgetNotification[]
 
   @@map("budgets")
 }
 
 model Group {
-  id          String   @id @default(cuid())
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   description String?
   createdAt   DateTime @default(now())
@@ -149,10 +151,10 @@ model Group {
 }
 
 model GroupMember {
-  id      String @id @default(cuid())
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
   role    GroupRole @default(MEMBER)
-  userId  String
-  groupId String
+  userId  String    @db.ObjectId
+  groupId String    @db.ObjectId
 
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
@@ -162,17 +164,17 @@ model GroupMember {
 }
 
 model GroupExpense {
-  id          String   @id @default(cuid())
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
   amount      Float
   description String?
   date        DateTime @default(now())
   receiptUrl  String?
   splitType   String   @default("EQUAL")
-  accountId   String?
-  paidById    String?
+  accountId   String?  @db.ObjectId
+  paidById    String?  @db.ObjectId
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now())
-  groupId     String
+  groupId     String   @db.ObjectId
 
   account         Account?       @relation(fields: [accountId], references: [id])
   paidBy          User?          @relation(fields: [paidById], references: [id])
@@ -188,11 +190,11 @@ model GroupExpense {
 }
 
 model GroupLender {
-  id        String @id @default(cuid())
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
   amount    Float
-  userId    String
-  expenseId String
-  accountId String?
+  userId    String @db.ObjectId
+  expenseId String @db.ObjectId
+  accountId String? @db.ObjectId
 
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   account      Account?     @relation(fields: [accountId], references: [id])
@@ -203,13 +205,13 @@ model GroupLender {
 }
 
 model ExpenseSplit {
-  id               String    @id @default(cuid())
+  id               String    @id @default(auto()) @map("_id") @db.ObjectId
   amount           Float
-  userId           String
-  expenseId        String
+  userId           String    @db.ObjectId
+  expenseId        String    @db.ObjectId
   settled          Boolean   @default(false)
   settledAt        DateTime?
-  settlementAccountId String?
+  settlementAccountId String? @db.ObjectId
 
   user               User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   groupExpense       GroupExpense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
@@ -220,12 +222,12 @@ model ExpenseSplit {
 }
 
 model Payment {
-  id        String   @id @default(cuid())
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   amount    Float
   date      DateTime @default(now())
-  fromId    String
-  toId      String
-  expenseId String?
+  fromId    String   @db.ObjectId
+  toId      String   @db.ObjectId
+  expenseId String?  @db.ObjectId
 
   from         User          @relation(fields: [fromId], references: [id])
   groupExpense GroupExpense? @relation(fields: [expenseId], references: [id])
@@ -234,11 +236,11 @@ model Payment {
 }
 
 model Comment {
-  id        String   @id @default(cuid())
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   content   String
   createdAt DateTime @default(now())
-  userId    String
-  expenseId String
+  userId    String   @db.ObjectId
+  expenseId String   @db.ObjectId
 
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   groupExpense GroupExpense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
@@ -247,13 +249,13 @@ model Comment {
 }
 
 model Transfer {
-  id          String   @id @default(cuid())
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
   amount      Float
   description String?
   date        DateTime @default(now())
   createdAt   DateTime @default(now())
-  fromId      String
-  toId        String
+  fromId      String   @db.ObjectId
+  toId        String   @db.ObjectId
 
   from Account @relation("TransferFrom", fields: [fromId], references: [id])
   to   Account @relation("TransferTo", fields: [toId], references: [id])
@@ -262,7 +264,7 @@ model Transfer {
 }
 
 model RecurringExpense {
-  id              String         @id @default(cuid())
+  id              String         @id @default(auto()) @map("_id") @db.ObjectId
   amount          Float
   description     String?
   frequency       RecurringFrequency
@@ -272,9 +274,9 @@ model RecurringExpense {
   isActive        Boolean        @default(true)
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
-  userId          String
-  accountId       String
-  categoryId      String
+  userId          String         @db.ObjectId
+  accountId       String         @db.ObjectId
+  categoryId      String         @db.ObjectId
 
   user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   account         Account        @relation(fields: [accountId], references: [id])
@@ -285,18 +287,32 @@ model RecurringExpense {
 }
 
 model Notification {
-  id        String   @id @default(cuid())
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   title     String
   message   String
   type      NotificationType
   read      Boolean  @default(false)
-  userId    String
-  relatedId String?
+  userId    String   @db.ObjectId
+  relatedId String?  @db.ObjectId
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notifications")
+}
+
+model BudgetNotification {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  budgetId  String   @db.ObjectId
+  userId    String   @db.ObjectId
+  sentAt    DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  budget Budget @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+
+  @@unique([budgetId, userId])
+  @@map("budget_notifications")
 }
 
 enum AccountType {
@@ -337,6 +353,12 @@ enum NotificationType {
   GROUP_EXPENSE_SETTLED
   GROUP_PAYMENT_RECEIVED
   BUDGET_ALERT
+  BUDGET_WARNING
+  GROUP_MEMBER_ADDED
+  GROUP_MEMBER_REMOVED
+  EXPENSE_REMINDER
+  PAYMENT_REMINDER
+  ACCOUNT_LOW_BALANCE
 }
 
 enum GroupTransactionType {

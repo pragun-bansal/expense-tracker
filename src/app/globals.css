@@ -1,26 +1,2259 @@
+/*!*@import "tailwindcss";*!*/
+
+/*!*:root {*!*/
+/*!*  !* === PAGE & LAYOUT === *!*!*/
+/*!*  --page-background: 249 250 251; !* bg-gray-50 *!*!*/
+/*!*  --page-foreground: 17 24 39; !* text-gray-900 *!*!*/
+
+/*!*  !* === SIDEBAR === *!*!*/
+/*!*  --sidebar-background: 255 255 255; !* bg-white *!*!*/
+/*!*  --sidebar-border: 229 231 235; !* border-gray-200 *!*!*/
+/*!*  --sidebar-brand-icon: 37 99 235; !* text-blue-600 *!*!*/
+/*!*  --sidebar-brand-text: 17 24 39; !* text-gray-900 *!*!*/
+/*!*  --sidebar-nav-text: 55 65 81; !* text-gray-700 *!*!*/
+/*!*  --sidebar-nav-text-hover: 17 24 39; !* hover:text-gray-900 *!*!*/
+/*!*  --sidebar-nav-active-bg: 219 234 254; !* bg-blue-100 *!*!*/
+/*!*  --sidebar-nav-active-text: 29 78 216; !* text-blue-700 *!*!*/
+/*!*  --sidebar-nav-hover-bg: 249 250 251; !* hover:bg-gray-50 *!*!*/
+/*!*  --sidebar-user-name: 55 65 81; !* text-gray-700 *!*!*/
+/*!*  --sidebar-user-email: 107 114 128; !* text-gray-500 *!*!*/
+/*!*  --sidebar-mobile-overlay: 75 85 99 / 0.75; !* bg-gray-600/75 *!*!*/
+
+/*!*  !* === CARDS === *!*!*/
+/*!*  --card-background: 255 255 255; !* bg-white *!*!*/
+/*!*  --card-border: 229 231 235; !* border-gray-200 *!*!*/
+/*!*  --card-header-text: 17 24 39; !* text-gray-900 *!*!*/
+/*!*  --card-body-text: 75 85 99; !* text-gray-600 *!*!*/
+/*!*  --card-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);*!*/
+
+/*!*  !* === BUTTONS === *!*!*/
+/*!*  --button-primary-bg: 37 99 235; !* bg-blue-600 *!*!*/
+/*!*  --button-primary-bg-hover: 29 78 216; !* hover:bg-blue-700 *!*!*/
+/*!*  --button-primary-text: 255 255 255; !* text-white *!*!*/
+/*!*  --button-secondary-bg: 229 231 235; !* bg-gray-200 *!*!*/
+/*!*  --button-secondary-bg-hover: 209 213 219; !* hover:bg-gray-300 *!*!*/
+/*!*  --button-secondary-text: 55 65 81; !* text-gray-700 *!*!*/
+/*!*  --button-success-bg: 22 163 74; !* bg-green-600 *!*!*/
+/*!*  --button-success-bg-hover: 21 128 61; !* hover:bg-green-700 *!*!*/
+/*!*  --button-success-text: 255 255 255; !* text-white *!*!*/
+/*!*  --button-danger-bg: 220 38 38; !* bg-red-600 *!*!*/
+/*!*  --button-danger-bg-hover: 185 28 28; !* hover:bg-red-700 *!*!*/
+/*!*  --button-danger-text: 255 255 255; !* text-white *!*!*/
+
+/*!*  !* === FORMS === *!*!*/
+/*!*  --input-background: 255 255 255; !* bg-white *!*!*/
+/*!*  --input-border: 209 213 219; !* border-gray-300 *!*!*/
+/*!*  --input-border-focus: 59 130 246; !* focus:border-blue-500 *!*!*/
+/*!*  --input-text: 17 24 39; !* text-gray-900 *!*!*/
+/*!*  --input-placeholder: 107 114 128; !* placeholder-gray-500 *!*!*/
+/*!*  --input-label: 55 65 81; !* text-gray-700 *!*!*/
+/*!*  --input-help-text: 107 114 128; !* text-gray-500 *!*!*/
+
+/*!*  !* === TEXT HIERARCHY === *!*!*/
+/*!*  --text-heading: 17 24 39; !* text-gray-900 *!*!*/
+/*!*  --text-body: 55 65 81; !* text-gray-700 *!*!*/
+/*!*  --text-muted: 107 114 128; !* text-gray-500 *!*!*/
+/*!*  --text-link: 37 99 235; !* text-blue-600 *!*!*/
+/*!*  --text-link-hover: 59 130 246; !* hover:text-blue-500 *!*!*/
+
+/*!*  !* === STATUS COLORS === *!*!*/
+/*!*  --status-success-bg: 220 252 231; !* bg-green-100 *!*!*/
+/*!*  --status-success-text: 22 163 74; !* text-green-600 *!*!*/
+/*!*  --status-warning-bg: 254 243 199; !* bg-yellow-100 *!*!*/
+/*!*  --status-warning-text: 217 119 6; !* text-yellow-600 *!*!*/
+/*!*  --status-error-bg: 254 226 226; !* bg-red-100 *!*!*/
+/*!*  --status-error-text: 220 38 38; !* text-red-600 *!*!*/
+/*!*  --status-info-bg: 219 234 254; !* bg-blue-100 *!*!*/
+/*!*  --status-info-text: 37 99 235; !* text-blue-600 *!*!*/
+
+/*!*  !* === ICONS === *!*!*/
+/*!*  --icon-neutral: 156 163 175; !* text-gray-400 *!*!*/
+/*!*  --icon-success: 22 163 74; !* text-green-600 *!*!*/
+/*!*  --icon-error: 220 38 38; !* text-red-600 *!*!*/
+/*!*  --icon-warning: 217 119 6; !* text-yellow-600 *!*!*/
+/*!*  --icon-info: 37 99 235; !* text-blue-600 *!*!*/
+
+/*!*  !* === TABLES === *!*!*/
+/*!*  --table-header-bg: 249 250 251; !* bg-gray-50 *!*!*/
+/*!*  --table-header-text: 107 114 128; !* text-gray-500 *!*!*/
+/*!*  --table-row-bg: 255 255 255; !* bg-white *!*!*/
+/*!*  --table-row-text: 17 24 39; !* text-gray-900 *!*!*/
+/*!*  --table-border: 229 231 235; !* divide-gray-200 *!*!*/
+
+/*!*  !* === MODALS === *!*!*/
+/*!*  --modal-overlay: 75 85 99 / 0.5; !* bg-gray-600/50 *!*!*/
+/*!*  --modal-background: 255 255 255; !* bg-white *!*!*/
+/*!*  --modal-border: 229 231 235; !* border-gray-200 *!*!*/
+
+/*!*  !* === FOCUS & INTERACTION === *!*!*/
+/*!*  --focus-ring: 59 130 246; !* ring-blue-500 *!*!*/
+/*!*  --focus-ring-offset: 255 255 255; !* ring-offset-white *!*!*/
+/*!*}*!*/
+
+/*!*.dark {*!*/
+/*!*  !* === PAGE & LAYOUT === *!*!*/
+/*!*  --page-background: 17 24 39; !* dark:bg-gray-900 *!*!*/
+/*!*  --page-foreground: 243 244 246; !* dark:text-gray-100 *!*!*/
+
+/*!*  !* === SIDEBAR === *!*!*/
+/*!*  --sidebar-background: 17 24 39; !* dark:bg-gray-900 *!*!*/
+/*!*  --sidebar-border: 55 65 81; !* dark:border-gray-700 *!*!*/
+/*!*  --sidebar-brand-icon: 96 165 250; !* dark:text-blue-400 *!*!*/
+/*!*  --sidebar-brand-text: 255 255 255; !* dark:text-white *!*!*/
+/*!*  --sidebar-nav-text: 209 213 219; !* dark:text-gray-300 *!*!*/
+/*!*  --sidebar-nav-text-hover: 255 255 255; !* dark:hover:text-white *!*!*/
+/*!*  --sidebar-nav-active-bg: 30 58 138; !* dark:bg-blue-900 *!*!*/
+/*!*  --sidebar-nav-active-text: 191 219 254; !* dark:text-blue-200 *!*!*/
+/*!*  --sidebar-nav-hover-bg: 31 41 55; !* dark:hover:bg-gray-800 *!*!*/
+/*!*  --sidebar-user-name: 209 213 219; !* dark:text-gray-300 *!*!*/
+/*!*  --sidebar-user-email: 156 163 175; !* dark:text-gray-400 *!*!*/
+/*!*  --sidebar-mobile-overlay: 75 85 99 / 0.75; !* dark:bg-gray-600/75 *!*!*/
+
+/*!*  !* === CARDS === *!*!*/
+/*!*  --card-background: 31 41 55; !* dark:bg-gray-800 *!*!*/
+/*!*  --card-border: 55 65 81; !* dark:border-gray-700 *!*!*/
+/*!*  --card-header-text: 255 255 255; !* dark:text-white *!*!*/
+/*!*  --card-body-text: 156 163 175; !* dark:text-gray-400 *!*!*/
+/*!*  --card-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3);*!*/
+
+/*!*  !* === BUTTONS === *!*!*/
+/*!*  --button-primary-bg: 37 99 235; !* dark:bg-blue-600 *!*!*/
+/*!*  --button-primary-bg-hover: 29 78 216; !* dark:hover:bg-blue-700 *!*!*/
+/*!*  --button-primary-text: 255 255 255; !* dark:text-white *!*!*/
+/*!*  --button-secondary-bg: 55 65 81; !* dark:bg-gray-700 *!*!*/
+/*!*  --button-secondary-bg-hover: 75 85 99; !* dark:hover:bg-gray-600 *!*!*/
+/*!*  --button-secondary-text: 209 213 219; !* dark:text-gray-300 *!*!*/
+/*!*  --button-success-bg: 22 163 74; !* dark:bg-green-600 *!*!*/
+/*!*  --button-success-bg-hover: 21 128 61; !* dark:hover:bg-green-700 *!*!*/
+/*!*  --button-success-text: 255 255 255; !* dark:text-white *!*!*/
+/*!*  --button-danger-bg: 220 38 38; !* dark:bg-red-600 *!*!*/
+/*!*  --button-danger-bg-hover: 185 28 28; !* dark:hover:bg-red-700 *!*!*/
+/*!*  --button-danger-text: 255 255 255; !* dark:text-white *!*!*/
+
+/*!*  !* === FORMS === *!*!*/
+/*!*  --input-background: 55 65 81; !* dark:bg-gray-700 *!*!*/
+/*!*  --input-border: 75 85 99; !* dark:border-gray-600 *!*!*/
+/*!*  --input-border-focus: 59 130 246; !* dark:focus:border-blue-500 *!*!*/
+/*!*  --input-text: 255 255 255; !* dark:text-white *!*!*/
+/*!*  --input-placeholder: 156 163 175; !* dark:placeholder-gray-400 *!*!*/
+/*!*  --input-label: 209 213 219; !* dark:text-gray-300 *!*!*/
+/*!*  --input-help-text: 156 163 175; !* dark:text-gray-400 *!*!*/
+
+/*!*  !* === TEXT HIERARCHY === *!*!*/
+/*!*  --text-heading: 255 255 255; !* dark:text-white *!*!*/
+/*!*  --text-body: 209 213 219; !* dark:text-gray-300 *!*!*/
+/*!*  --text-muted: 156 163 175; !* dark:text-gray-400 *!*!*/
+/*!*  --text-link: 96 165 250; !* dark:text-blue-400 *!*!*/
+/*!*  --text-link-hover: 147 197 253; !* dark:hover:text-blue-300 *!*!*/
+
+/*!*  !* === STATUS COLORS === *!*!*/
+/*!*  --status-success-bg: 6 78 59; !* dark:bg-green-900 *!*!*/
+/*!*  --status-success-text: 74 222 128; !* dark:text-green-400 *!*!*/
+/*!*  --status-warning-bg: 120 113 4; !* dark:bg-yellow-900 *!*!*/
+/*!*  --status-warning-text: 251 191 36; !* dark:text-yellow-400 *!*!*/
+/*!*  --status-error-bg: 127 29 29; !* dark:bg-red-900 *!*!*/
+/*!*  --status-error-text: 248 113 113; !* dark:text-red-400 *!*!*/
+/*!*  --status-info-bg: 30 58 138; !* dark:bg-blue-900 *!*!*/
+/*!*  --status-info-text: 96 165 250; !* dark:text-blue-400 *!*!*/
+
+/*!*  !* === ICONS === *!*!*/
+/*!*  --icon-neutral: 156 163 175; !* dark:text-gray-400 *!*!*/
+/*!*  --icon-success: 74 222 128; !* dark:text-green-400 *!*!*/
+/*!*  --icon-error: 248 113 113; !* dark:text-red-400 *!*!*/
+/*!*  --icon-warning: 251 191 36; !* dark:text-yellow-400 *!*!*/
+/*!*  --icon-info: 96 165 250; !* dark:text-blue-400 *!*!*/
+
+/*!*  !* === TABLES === *!*!*/
+/*!*  --table-header-bg: 55 65 81; !* dark:bg-gray-700 *!*!*/
+/*!*  --table-header-text: 209 213 219; !* dark:text-gray-300 *!*!*/
+/*!*  --table-row-bg: 31 41 55; !* dark:bg-gray-800 *!*!*/
+/*!*  --table-row-text: 255 255 255; !* dark:text-white *!*!*/
+/*!*  --table-border: 55 65 81; !* dark:divide-gray-700 *!*!*/
+
+/*!*  !* === MODALS === *!*!*/
+/*!*  --modal-overlay: 75 85 99 / 0.5; !* dark:bg-gray-600/50 *!*!*/
+/*!*  --modal-background: 31 41 55; !* dark:bg-gray-800 *!*!*/
+/*!*  --modal-border: 55 65 81; !* dark:border-gray-700 *!*!*/
+
+/*!*  !* === FOCUS & INTERACTION === *!*!*/
+/*!*  --focus-ring: 59 130 246; !* dark:ring-blue-500 *!*!*/
+/*!*  --focus-ring-offset: 31 41 55; !* dark:ring-offset-gray-800 *!*!*/
+/*!*}*!*/
+
+/*!*.soft {*!*/
+/*!*  !* === PAGE & LAYOUT === *!*!*/
+/*!*  --page-background: 238 239 224; !* soft cream #EEEFE0 *!*!*/
+/*!*  --page-foreground: 55 65 61; !* darker teal for text *!*!*/
+
+/*!*  !* === SIDEBAR === *!*!*/
+/*!*  --sidebar-background: 209 216 190; !* soft sage #D1D8BE *!*!*/
+/*!*  --sidebar-border: 167 193 168; !* light sage #A7C1A8 *!*!*/
+/*!*  --sidebar-brand-icon: 75 110 99; !* deep sage *!*!*/
+/*!*  --sidebar-brand-text: 55 65 61; !* darker teal *!*!*/
+/*!*  --sidebar-nav-text: 85 95 91; !* medium teal *!*!*/
+/*!*  --sidebar-nav-text-hover: 55 65 61; !* darker on hover *!*!*/
+/*!*  --sidebar-nav-active-bg: 167 193 168; !* light sage #A7C1A8 *!*!*/
+/*!*  --sidebar-nav-active-text: 55 65 61; !* darker teal *!*!*/
+/*!*  --sidebar-nav-hover-bg: 225 230 215; !* lighter cream *!*!*/
+/*!*  --sidebar-user-name: 85 95 91; !* medium teal *!*!*/
+/*!*  --sidebar-user-email: 115 125 121; !* muted teal *!*!*/
+/*!*  --sidebar-mobile-overlay: 55 65 61 / 0.75; !* dark teal overlay *!*!*/
+
+/*!*  !* === CARDS === *!*!*/
+/*!*  --card-background: 255 255 255; !* pure white for contrast *!*!*/
+/*!*  --card-border: 167 193 168; !* light sage #A7C1A8 *!*!*/
+/*!*  --card-header-text: 55 65 61; !* darker teal *!*!*/
+/*!*  --card-body-text: 85 95 91; !* medium teal *!*!*/
+/*!*  --card-shadow: 0 2px 4px 0 rgb(129 154 145 / 0.15); !* soft sage shadow *!*!*/
+
+/*!*  !* === BUTTONS === *!*!*/
+/*!*  --button-primary-bg: 129 154 145; !* sage #819A91 *!*!*/
+/*!*  --button-primary-bg-hover: 115 140 131; !* darker sage on hover *!*!*/
+/*!*  --button-primary-text: 255 255 255; !* white text *!*!*/
+/*!*  --button-secondary-bg: 209 216 190; !* soft sage #D1D8BE *!*!*/
+/*!*  --button-secondary-bg-hover: 195 205 175; !* darker on hover *!*!*/
+/*!*  --button-secondary-text: 55 65 61; !* darker teal *!*!*/
+/*!*  --button-success-bg: 34 139 34; !* forest green *!*!*/
+/*!*  --button-success-bg-hover: 24 119 24; !* darker green *!*!*/
+/*!*  --button-success-text: 255 255 255; !* white *!*!*/
+/*!*  --button-danger-bg: 165 42 42; !* muted red *!*!*/
+/*!*  --button-danger-bg-hover: 145 32 32; !* darker red *!*!*/
+/*!*  --button-danger-text: 255 255 255; !* white *!*!*/
+
+/*!*  !* === FORMS === *!*!*/
+/*!*  --input-background: 255 255 255; !* white for clarity *!*!*/
+/*!*  --input-border: 167 193 168; !* light sage #A7C1A8 *!*!*/
+/*!*  --input-border-focus: 129 154 145; !* sage focus *!*!*/
+/*!*  --input-text: 55 65 61; !* darker teal *!*!*/
+/*!*  --input-placeholder: 115 125 121; !* muted teal *!*!*/
+/*!*  --input-label: 85 95 91; !* medium teal *!*!*/
+/*!*  --input-help-text: 115 125 121; !* muted teal *!*!*/
+
+/*!*  !* === TEXT HIERARCHY === *!*!*/
+/*!*  --text-heading: 55 65 61; !* darker teal *!*!*/
+/*!*  --text-body: 85 95 91; !* medium teal *!*!*/
+/*!*  --text-muted: 115 125 121; !* muted teal *!*!*/
+/*!*  --text-link: 129 154 145; !* sage links *!*!*/
+/*!*  --text-link-hover: 105 130 121; !* darker sage on hover *!*!*/
+
+/*!*  !* === STATUS COLORS === *!*!*/
+/*!*  --status-success-bg: 220 245 220; !* very light green *!*!*/
+/*!*  --status-success-text: 34 139 34; !* forest green *!*!*/
+/*!*  --status-warning-bg: 255 248 220; !* cream yellow *!*!*/
+/*!*  --status-warning-text: 184 134 11; !* golden brown *!*!*/
+/*!*  --status-error-bg: 255 235 235; !* very light red *!*!*/
+/*!*  --status-error-text: 165 42 42; !* muted red *!*!*/
+/*!*  --status-info-bg: 225 240 235; !* very light sage *!*!*/
+/*!*  --status-info-text: 129 154 145; !* sage *!*!*/
+
+/*!*  !* === ICONS === *!*!*/
+/*!*  --icon-neutral: 115 125 121; !* muted teal *!*!*/
+/*!*  --icon-success: 34 139 34; !* forest green *!*!*/
+/*!*  --icon-error: 165 42 42; !* muted red *!*!*/
+/*!*  --icon-warning: 184 134 11; !* golden brown *!*!*/
+/*!*  --icon-info: 129 154 145; !* sage *!*!*/
+
+/*!*  !* === TABLES === *!*!*/
+/*!*  --table-header-bg: 209 216 190; !* soft sage #D1D8BE *!*!*/
+/*!*  --table-header-text: 85 95 91; !* medium teal *!*!*/
+/*!*  --table-row-bg: 255 255 255; !* white rows *!*!*/
+/*!*  --table-row-text: 55 65 61; !* darker teal *!*!*/
+/*!*  --table-border: 167 193 168; !* light sage borders *!*!*/
+
+/*!*  !* === MODALS === *!*!*/
+/*!*  --modal-overlay: 55 65 61 / 0.5; !* dark teal overlay *!*!*/
+/*!*  --modal-background: 255 255 255; !* white modal *!*!*/
+/*!*  --modal-border: 167 193 168; !* light sage border *!*!*/
+
+/*!*  !* === FOCUS & INTERACTION === *!*!*/
+/*!*  --focus-ring: 129 154 145; !* sage focus ring *!*!*/
+/*!*  --focus-ring-offset: 255 255 255; !* white offset *!*!*/
+/*!*}*!*/
+
+/*!*!* === BASE STYLES === *!*!*/
+/*!** {*!*/
+/*!*  box-sizing: border-box;*!*/
+/*!*}*!*/
+
+/*!*body {*!*/
+/*!*  background-color: rgb(var(--page-background));*!*/
+/*!*  color: rgb(var(--page-foreground));*!*/
+/*!*  font-feature-settings: "rlig" 1, "calt" 1;*!*/
+/*!*  margin: 0;*!*/
+/*!*  padding: 0;*!*/
+/*!*}*!*/
+
+/*!*!* === COMPONENT UTILITY CLASSES === *!*!*/
+
+/*!*!* Page & Layout *!*!*/
+/*!*.bg-page { background-color: rgb(var(--page-background)); }*!*/
+/*!*.text-page { color: rgb(var(--page-foreground)); }*!*/
+
+/*!*!* Sidebar *!*!*/
+/*!*.bg-sidebar { background-color: rgb(var(--sidebar-background)); }*!*/
+/*!*.border-sidebar { border-color: rgb(var(--sidebar-border)); }*!*/
+/*!*.text-sidebar-brand-icon { color: rgb(var(--sidebar-brand-icon)); }*!*/
+/*!*.text-sidebar-brand-text { color: rgb(var(--sidebar-brand-text)); }*!*/
+/*!*.text-sidebar-nav { color: rgb(var(--sidebar-nav-text)); }*!*/
+/*!*.text-sidebar-nav-hover:hover { color: rgb(var(--sidebar-nav-text-hover)); }*!*/
+/*!*.bg-sidebar-nav-active { background-color: rgb(var(--sidebar-nav-active-bg)); }*!*/
+/*!*.text-sidebar-nav-active { color: rgb(var(--sidebar-nav-active-text)); }*!*/
+/*!*.bg-sidebar-nav-hover:hover { background-color: rgb(var(--sidebar-nav-hover-bg)); }*!*/
+/*!*.text-sidebar-user-name { color: rgb(var(--sidebar-user-name)); }*!*/
+/*!*.text-sidebar-user-email { color: rgb(var(--sidebar-user-email)); }*!*/
+/*!*.bg-sidebar-mobile-overlay { background-color: rgb(var(--sidebar-mobile-overlay)); }*!*/
+
+/*!*!* Cards *!*!*/
+/*!*.bg-card { background-color: rgb(var(--card-background)); }*!*/
+/*!*.border-card { border-color: rgb(var(--card-border)); }*!*/
+/*!*.text-card-header { color: rgb(var(--card-header-text)); }*!*/
+/*!*.text-card-body { color: rgb(var(--card-body-text)); }*!*/
+/*!*.shadow-card { box-shadow: var(--card-shadow); }*!*/
+
+/*!*!* Buttons *!*!*/
+/*!*.bg-button-primary { background-color: rgb(var(--button-primary-bg)); }*!*/
+/*!*.bg-button-primary:hover { background-color: rgb(var(--button-primary-bg-hover)); }*!*/
+/*!*.text-button-primary { color: rgb(var(--button-primary-text)); }*!*/
+/*!*.bg-button-secondary { background-color: rgb(var(--button-secondary-bg)); }*!*/
+/*!*.bg-button-secondary:hover { background-color: rgb(var(--button-secondary-bg-hover)); }*!*/
+/*!*.text-button-secondary { color: rgb(var(--button-secondary-text)); }*!*/
+/*!*.bg-button-success { background-color: rgb(var(--button-success-bg)); }*!*/
+/*!*.bg-button-success:hover { background-color: rgb(var(--button-success-bg-hover)); }*!*/
+/*!*.text-button-success { color: rgb(var(--button-success-text)); }*!*/
+/*!*.bg-button-danger { background-color: rgb(var(--button-danger-bg)); }*!*/
+/*!*.bg-button-danger:hover { background-color: rgb(var(--button-danger-bg-hover)); }*!*/
+/*!*.text-button-danger { color: rgb(var(--button-danger-text)); }*!*/
+
+/*!*!* Forms *!*!*/
+/*!*.bg-input { background-color: rgb(var(--input-background)); }*!*/
+/*!*.border-input { border-color: rgb(var(--input-border)); }*!*/
+/*!*.border-input-focus:focus { border-color: rgb(var(--input-border-focus)); }*!*/
+/*!*.text-input { color: rgb(var(--input-text)); }*!*/
+/*!*.text-input-label { color: rgb(var(--input-label)); }*!*/
+/*!*.text-input-help { color: rgb(var(--input-help-text)); }*!*/
+
+/*!*!* Text Hierarchy *!*!*/
+/*!*.text-heading { color: rgb(var(--text-heading)); }*!*/
+/*!*.text-body { color: rgb(var(--text-body)); }*!*/
+/*!*.text-muted { color: rgb(var(--text-muted)); }*!*/
+/*!*.text-link { color: rgb(var(--text-link)); }*!*/
+/*!*.text-link:hover { color: rgb(var(--text-link-hover)); }*!*/
+
+/*!*!* Status Colors *!*!*/
+/*!*.bg-status-success { background-color: rgb(var(--status-success-bg)); }*!*/
+/*!*.text-status-success { color: rgb(var(--status-success-text)); }*!*/
+/*!*.bg-status-warning { background-color: rgb(var(--status-warning-bg)); }*!*/
+/*!*.text-status-warning { color: rgb(var(--status-warning-text)); }*!*/
+/*!*.bg-status-error { background-color: rgb(var(--status-error-bg)); }*!*/
+/*!*.text-status-error { color: rgb(var(--status-error-text)); }*!*/
+/*!*.bg-status-info { background-color: rgb(var(--status-info-bg)); }*!*/
+/*!*.text-status-info { color: rgb(var(--status-info-text)); }*!*/
+
+/*!*!* Icons *!*!*/
+/*!*.text-icon-neutral { color: rgb(var(--icon-neutral)); }*!*/
+/*!*.text-icon-success { color: rgb(var(--icon-success)); }*!*/
+/*!*.text-icon-error { color: rgb(var(--icon-error)); }*!*/
+/*!*.text-icon-warning { color: rgb(var(--icon-warning)); }*!*/
+/*!*.text-icon-info { color: rgb(var(--icon-info)); }*!*/
+
+/*!*!* Tables *!*!*/
+/*!*.bg-table-header { background-color: rgb(var(--table-header-bg)); }*!*/
+/*!*.text-table-header { color: rgb(var(--table-header-text)); }*!*/
+/*!*.bg-table-row { background-color: rgb(var(--table-row-bg)); }*!*/
+/*!*.text-table-row { color: rgb(var(--table-row-text)); }*!*/
+/*!*.border-table { border-color: rgb(var(--table-border)); }*!*/
+
+/*!*!* Modals *!*!*/
+/*!*.bg-modal-overlay { background-color: rgb(var(--modal-overlay)); }*!*/
+/*!*.bg-modal { background-color: rgb(var(--modal-background)); }*!*/
+/*!*.border-modal { border-color: rgb(var(--modal-border)); }*!*/
+
+/*!*!* Focus & Interaction *!*!*/
+/*!*.ring-focus { ring-color: rgb(var(--focus-ring)); }*!*/
+/*!*.ring-offset-focus { ring-offset-color: rgb(var(--focus-ring-offset)); }*!*/
+
+/*!*!* Additional Status and Semantic Colors *!*!*/
+/*!*.border-card-border { border-color: rgb(var(--card-border)); }*!*/
+/*!*.divide-table-border { border-color: rgb(var(--table-border)); }*!*/
+/*!*.bg-button-secondary-hover:hover { background-color: rgb(var(--button-secondary-bg-hover)); }*!*/
+/*!*.bg-muted { background-color: rgb(var(--table-header-bg)); }*!*/
+/*!*!* === ENHANCED STYLES === *!*!*/
+
+/*!*!* Custom scrollbar *!*!*/
+/*!*::-webkit-scrollbar {*!*/
+/*!*  width: 8px;*!*/
+/*!*}*!*/
+
+/*!*::-webkit-scrollbar-track {*!*/
+/*!*  background: rgb(var(--card-background));*!*/
+/*!*}*!*/
+
+/*!*::-webkit-scrollbar-thumb {*!*/
+/*!*  background: rgb(var(--text-muted));*!*/
+/*!*  border-radius: 4px;*!*/
+/*!*}*!*/
+
+/*!*::-webkit-scrollbar-thumb:hover {*!*/
+/*!*  background: rgb(var(--text-body));*!*/
+/*!*}*!*/
+
+/*!*!* Form input focus states *!*!*/
+/*!*input:focus,*!*/
+/*!*select:focus,*!*/
+/*!*textarea:focus {*!*/
+/*!*  outline: 2px solid rgb(var(--focus-ring));*!*/
+/*!*  outline-offset: 2px;*!*/
+/*!*}*!*/
+
+/*!*!* Smooth transitions *!*!*/
+/*!** {*!*/
+/*!*  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;*!*/
+/*!*  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);*!*/
+/*!*  transition-duration: 150ms;*!*/
+/*!*}*!*/
+
+/*@import "tailwindcss";*/
+
+/*:root {*/
+/*  !* === PAGE & LAYOUT === *!*/
+/*  --page-background: 249 250 251; !* bg-gray-50 *!*/
+/*  --page-foreground: 17 24 39; !* text-gray-900 *!*/
+
+/*  !* === SIDEBAR === *!*/
+/*  --sidebar-background: 255 255 255; !* bg-white *!*/
+/*  --sidebar-border: 229 231 235; !* border-gray-200 *!*/
+/*  --sidebar-brand-icon: 37 99 235; !* text-blue-600 *!*/
+/*  --sidebar-brand-text: 17 24 39; !* text-gray-900 *!*/
+/*  --sidebar-nav-text: 55 65 81; !* text-gray-700 *!*/
+/*  --sidebar-nav-text-hover: 17 24 39; !* hover:text-gray-900 *!*/
+/*  --sidebar-nav-active-bg: 219 234 254; !* bg-blue-100 *!*/
+/*  --sidebar-nav-active-text: 29 78 216; !* text-blue-700 *!*/
+/*  --sidebar-nav-hover-bg: 249 250 251; !* hover:bg-gray-50 *!*/
+/*  --sidebar-user-name: 55 65 81; !* text-gray-700 *!*/
+/*  --sidebar-user-email: 107 114 128; !* text-gray-500 *!*/
+/*  --sidebar-mobile-overlay: 75 85 99 / 0.75; !* bg-gray-600/75 *!*/
+
+/*  !* === CARDS === *!*/
+/*  --card-background: 255 255 255; !* bg-white *!*/
+/*  --card-border: 229 231 235; !* border-gray-200 *!*/
+/*  --card-header-text: 17 24 39; !* text-gray-900 *!*/
+/*  --card-body-text: 75 85 99; !* text-gray-600 *!*/
+/*  --card-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);*/
+
+/*  !* === BUTTONS === *!*/
+/*  --button-primary-bg: 37 99 235; !* bg-blue-600 *!*/
+/*  --button-primary-bg-hover: 29 78 216; !* hover:bg-blue-700 *!*/
+/*  --button-primary-text: 255 255 255; !* text-white *!*/
+/*  --button-secondary-bg: 229 231 235; !* bg-gray-200 *!*/
+/*  --button-secondary-bg-hover: 209 213 219; !* hover:bg-gray-300 *!*/
+/*  --button-secondary-text: 55 65 81; !* text-gray-700 *!*/
+/*  --button-success-bg: 22 163 74; !* bg-green-600 *!*/
+/*  --button-success-bg-hover: 21 128 61; !* hover:bg-green-700 *!*/
+/*  --button-success-text: 255 255 255; !* text-white *!*/
+/*  --button-danger-bg: 220 38 38; !* bg-red-600 *!*/
+/*  --button-danger-bg-hover: 185 28 28; !* hover:bg-red-700 *!*/
+/*  --button-danger-text: 255 255 255; !* text-white *!*/
+
+/*  !* === FORMS === *!*/
+/*  --input-background: 255 255 255; !* bg-white *!*/
+/*  --input-border: 209 213 219; !* border-gray-300 *!*/
+/*  --input-border-focus: 59 130 246; !* focus:border-blue-500 *!*/
+/*  --input-text: 17 24 39; !* text-gray-900 *!*/
+/*  --input-placeholder: 107 114 128; !* placeholder-gray-500 *!*/
+/*  --input-label: 55 65 81; !* text-gray-700 *!*/
+/*  --input-help-text: 107 114 128; !* text-gray-500 *!*/
+
+/*  !* === TEXT HIERARCHY === *!*/
+/*  --text-heading: 17 24 39; !* text-gray-900 *!*/
+/*  --text-body: 55 65 81; !* text-gray-700 *!*/
+/*  --text-muted: 107 114 128; !* text-gray-500 *!*/
+/*  --text-link: 37 99 235; !* text-blue-600 *!*/
+/*  --text-link-hover: 59 130 246; !* hover:text-blue-500 *!*/
+
+/*  !* === STATUS COLORS === *!*/
+/*  --status-success-bg: 220 252 231; !* bg-green-100 *!*/
+/*  --status-success-text: 22 163 74; !* text-green-600 *!*/
+/*  --status-warning-bg: 254 243 199; !* bg-yellow-100 *!*/
+/*  --status-warning-text: 217 119 6; !* text-yellow-600 *!*/
+/*  --status-error-bg: 254 226 226; !* bg-red-100 *!*/
+/*  --status-error-text: 220 38 38; !* text-red-600 *!*/
+/*  --status-info-bg: 219 234 254; !* bg-blue-100 *!*/
+/*  --status-info-text: 37 99 235; !* text-blue-600 *!*/
+
+/*  !* === ICONS === *!*/
+/*  --icon-neutral: 156 163 175; !* text-gray-400 *!*/
+/*  --icon-success: 22 163 74; !* text-green-600 *!*/
+/*  --icon-error: 220 38 38; !* text-red-600 *!*/
+/*  --icon-warning: 217 119 6; !* text-yellow-600 *!*/
+/*  --icon-info: 37 99 235; !* text-blue-600 *!*/
+
+/*  !* === TABLES === *!*/
+/*  --table-header-bg: 249 250 251; !* bg-gray-50 *!*/
+/*  --table-header-text: 107 114 128; !* text-gray-500 *!*/
+/*  --table-row-bg: 255 255 255; !* bg-white *!*/
+/*  --table-row-text: 17 24 39; !* text-gray-900 *!*/
+/*  --table-border: 229 231 235; !* divide-gray-200 *!*/
+
+/*  !* === MODALS === *!*/
+/*  --modal-overlay: 75 85 99 / 0.75; !* bg-gray-600/75 *!*/
+/*  --modal-background: 255 255 255; !* bg-white *!*/
+/*  --modal-border: 229 231 235; !* border-gray-200 *!*/
+
+/*  !* === FOCUS & INTERACTION === *!*/
+/*  --focus-ring: 59 130 246; !* ring-blue-500 *!*/
+/*  --focus-ring-offset: 255 255 255; !* ring-offset-white *!*/
+/*}*/
+
+/*.dark {*/
+/*  !* === PAGE & LAYOUT === *!*/
+/*  --page-background: 17 24 39; !* dark:bg-gray-900 *!*/
+/*  --page-foreground: 243 244 246; !* dark:text-gray-100 *!*/
+
+/*  !* === SIDEBAR === *!*/
+/*  --sidebar-background: 17 24 39; !* dark:bg-gray-900 *!*/
+/*  --sidebar-border: 55 65 81; !* dark:border-gray-700 *!*/
+/*  --sidebar-brand-icon: 96 165 250; !* dark:text-blue-400 *!*/
+/*  --sidebar-brand-text: 255 255 255; !* dark:text-white *!*/
+/*  --sidebar-nav-text: 209 213 219; !* dark:text-gray-300 *!*/
+/*  --sidebar-nav-text-hover: 255 255 255; !* dark:hover:text-white *!*/
+/*  --sidebar-nav-active-bg: 30 58 138; !* dark:bg-blue-900 *!*/
+/*  --sidebar-nav-active-text: 191 219 254; !* dark:text-blue-200 *!*/
+/*  --sidebar-nav-hover-bg: 31 41 55; !* dark:hover:bg-gray-800 *!*/
+/*  --sidebar-user-name: 209 213 219; !* dark:text-gray-300 *!*/
+/*  --sidebar-user-email: 156 163 175; !* dark:text-gray-400 *!*/
+/*  --sidebar-mobile-overlay: 75 85 99 / 0.75; !* dark:bg-gray-600/75 *!*/
+
+/*  !* === CARDS === *!*/
+/*  --card-background: 31 41 55; !* dark:bg-gray-800 *!*/
+/*  --card-border: 55 65 81; !* dark:border-gray-700 *!*/
+/*  --card-header-text: 255 255 255; !* dark:text-white *!*/
+/*  --card-body-text: 156 163 175; !* dark:text-gray-400 *!*/
+/*  --card-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3);*/
+
+/*  !* === BUTTONS === *!*/
+/*  --button-primary-bg: 37 99 235; !* dark:bg-blue-600 *!*/
+/*  --button-primary-bg-hover: 29 78 216; !* dark:hover:bg-blue-700 *!*/
+/*  --button-primary-text: 255 255 255; !* dark:text-white *!*/
+/*  --button-secondary-bg: 55 65 81; !* dark:bg-gray-700 *!*/
+/*  --button-secondary-bg-hover: 75 85 99; !* dark:hover:bg-gray-600 *!*/
+/*  --button-secondary-text: 209 213 219; !* dark:text-gray-300 *!*/
+/*  --button-success-bg: 22 163 74; !* dark:bg-green-600 *!*/
+/*  --button-success-bg-hover: 21 128 61; !* dark:hover:bg-green-700 *!*/
+/*  --button-success-text: 255 255 255; !* dark:text-white *!*/
+/*  --button-danger-bg: 220 38 38; !* dark:bg-red-600 *!*/
+/*  --button-danger-bg-hover: 185 28 28; !* dark:hover:bg-red-700 *!*/
+/*  --button-danger-text: 255 255 255; !* dark:text-white *!*/
+
+/*  !* === FORMS === *!*/
+/*  --input-background: 55 65 81; !* dark:bg-gray-700 *!*/
+/*  --input-border: 75 85 99; !* dark:border-gray-600 *!*/
+/*  --input-border-focus: 59 130 246; !* dark:focus:border-blue-500 *!*/
+/*  --input-text: 255 255 255; !* dark:text-white *!*/
+/*  --input-placeholder: 156 163 175; !* dark:placeholder-gray-400 *!*/
+/*  --input-label: 209 213 219; !* dark:text-gray-300 *!*/
+/*  --input-help-text: 156 163 175; !* dark:text-gray-400 *!*/
+
+/*  !* === TEXT HIERARCHY === *!*/
+/*  --text-heading: 255 255 255; !* dark:text-white *!*/
+/*  --text-body: 209 213 219; !* dark:text-gray-300 *!*/
+/*  --text-muted: 156 163 175; !* dark:text-gray-400 *!*/
+/*  --text-link: 96 165 250; !* dark:text-blue-400 *!*/
+/*  --text-link-hover: 147 197 253; !* dark:hover:text-blue-300 *!*/
+
+/*  !* === STATUS COLORS === *!*/
+/*  --status-success-bg: 6 78 59; !* dark:bg-green-900 *!*/
+/*  --status-success-text: 74 222 128; !* dark:text-green-400 *!*/
+/*  --status-warning-bg: 120 113 4; !* dark:bg-yellow-900 *!*/
+/*  --status-warning-text: 251 191 36; !* dark:text-yellow-400 *!*/
+/*  --status-error-bg: 127 29 29; !* dark:bg-red-900 *!*/
+/*  --status-error-text: 248 113 113; !* dark:text-red-400 *!*/
+/*  --status-info-bg: 30 58 138; !* dark:bg-blue-900 *!*/
+/*  --status-info-text: 96 165 250; !* dark:text-blue-400 *!*/
+
+/*  !* === ICONS === *!*/
+/*  --icon-neutral: 156 163 175; !* dark:text-gray-400 *!*/
+/*  --icon-success: 74 222 128; !* dark:text-green-400 *!*/
+/*  --icon-error: 248 113 113; !* dark:text-red-400 *!*/
+/*  --icon-warning: 251 191 36; !* dark:text-yellow-400 *!*/
+/*  --icon-info: 96 165 250; !* dark:text-blue-400 *!*/
+
+/*  !* === TABLES === *!*/
+/*  --table-header-bg: 55 65 81; !* dark:bg-gray-700 *!*/
+/*  --table-header-text: 209 213 219; !* dark:text-gray-300 *!*/
+/*  --table-row-bg: 31 41 55; !* dark:bg-gray-800 *!*/
+/*  --table-row-text: 255 255 255; !* dark:text-white *!*/
+/*  --table-border: 55 65 81; !* dark:divide-gray-700 *!*/
+
+/*  !* === MODALS === *!*/
+/*  --modal-overlay: 75 85 99 / 0.5; !* dark:bg-gray-600/50 *!*/
+/*  --modal-background: 31 41 55; !* dark:bg-gray-800 *!*/
+/*  --modal-border: 55 65 81; !* dark:border-gray-700 *!*/
+
+/*  !* === FOCUS & INTERACTION === *!*/
+/*  --focus-ring: 59 130 246; !* dark:ring-blue-500 *!*/
+/*  --focus-ring-offset: 31 41 55; !* dark:ring-offset-gray-800 *!*/
+/*}*/
+
+/*.dark-2 {*/
+/*  !* === PAGE & LAYOUT === *!*/
+/*  --page-background: 26 26 26; !* Deep charcoal black, close to #1A1A1A *!*/
+/*  --page-foreground: 255 255 255; !* Pure white for readability *!*/
+
+/*  !* === SIDEBAR === *!*/
+/*  --sidebar-background: 26 26 26; !* Same as page background *!*/
+/*  --sidebar-border: 51 51 51; !* Darker gray for subtle borders *!*/
+/*  --sidebar-brand-icon: 76 208 225; !* Cyan for brand icon *!*/
+/*  --sidebar-brand-text: 255 255 255; !* White for brand text *!*/
+/*  --sidebar-nav-text: 224 224 224; !* Light gray for nav text *!*/
+/*  --sidebar-nav-text-hover: 255 255 255; !* White on hover *!*/
+/*  --sidebar-nav-active-bg: 77 77 77; !* Medium gray for active background *!*/
+/*  --sidebar-nav-active-text: 76 208 225; !* Cyan for active text *!*/
+/*  --sidebar-nav-hover-bg: 38 38 38; !* Slightly lighter dark gray on hover *!*/
+/*  --sidebar-user-name: 224 224 224; !* Light gray *!*/
+/*  --sidebar-user-email: 179 179 179; !* Muted gray *!*/
+/*  --sidebar-mobile-overlay: 75 85 99 / 0.75; !* Standard overlay *!*/
+
+/*  !* === CARDS === *!*/
+/*  --card-background: 38 38 38; !* Slightly lighter than page background for distinction *!*/
+/*  --card-border: 51 51 51; !* Darker gray for card borders *!*/
+/*  --card-header-text: 255 255 255; !* White for header text *!*/
+/*  --card-body-text: 179 179 179; !* Muted gray for body text *!*/
+/*  --card-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.4); !* Slightly stronger shadow for dark cards *!*/
+
+/*  !* === BUTTONS === *!*/
+/*  --button-primary-bg: 76 208 225; !* Cyan for primary buttons *!*/
+/*  --button-primary-bg-hover: 60 180 195; !* Darker cyan on hover *!*/
+/*  --button-primary-text: 26 26 26; !* Dark text for primary buttons *!*/
+/*  --button-secondary-bg: 51 51 51; !* Dark gray for secondary buttons *!*/
+/*  --button-secondary-bg-hover: 77 77 77; !* Lighter gray on hover *!*/
+/*  --button-secondary-text: 224 224 224; !* Light gray for secondary text *!*/
+/*  --button-success-bg: 76 179 79; !* Vibrant green for success *!*/
+/*  --button-success-bg-hover: 60 145 64; !* Darker green on hover *!*/
+/*  --button-success-text: 255 255 255; !* White for success text *!*/
+/*  --button-danger-bg: 229 64 64; !* Vibrant red for danger *!*/
+/*  --button-danger-bg-hover: 195 50 50; !* Darker red on hover *!*/
+/*  --button-danger-text: 255 255 255; !* White for danger text *!*/
+
+/*  !* === FORMS === *!*/
+/*  --input-background: 51 51 51; !* Dark gray for input backgrounds *!*/
+/*  --input-border: 77 77 77; !* Slightly lighter gray for input borders *!*/
+/*  --input-border-focus: 76 208 225; !* Cyan for focus border *!*/
+/*  --input-text: 255 255 255; !* White for input text *!*/
+/*  --input-placeholder: 179 179 179; !* Muted gray for placeholder *!*/
+/*  --input-label: 224 224 224; !* Light gray for input labels *!*/
+/*  --input-help-text: 179 179 179; !* Muted gray for help text *!*/
+
+/*  !* === TEXT HIERARCHY === *!*/
+/*  --text-heading: 255 255 255; !* White for headings *!*/
+/*  --text-body: 224 224 224; !* Light gray for body text *!*/
+/*  --text-muted: 179 179 179; !* Muted gray for muted text *!*/
+/*  --text-link: 76 208 225; !* Cyan for links *!*/
+/*  --text-link-hover: 60 180 195; !* Darker cyan on hover *!*/
+
+/*  !* === STATUS COLORS === *!*/
+/*  --status-success-bg: 51 102 54; !* Darker green for success background *!*/
+/*  --status-success-text: 76 179 79; !* Vibrant green for success text *!*/
+/*  --status-warning-bg: 153 102 0; !* Darker yellow/orange for warning background *!*/
+/*  --status-warning-text: 255 193 7; !* Vibrant yellow for warning text *!*/
+/*  --status-error-bg: 153 51 51; !* Darker red for error background *!*/
+/*  --status-error-text: 229 64 64; !* Vibrant red for error text *!*/
+/*  --status-info-bg: 51 102 153; !* Darker blue for info background *!*/
+/*  --status-info-text: 76 208 225; !* Cyan for info text *!*/
+
+/*  !* === ICONS === *!*/
+/*  --icon-neutral: 179 179 179; !* Muted gray for neutral icons *!*/
+/*  --icon-success: 76 179 79; !* Vibrant green for success icons *!*/
+/*  --icon-error: 229 64 64; !* Vibrant red for error icons *!*/
+/*  --icon-warning: 255 193 7; !* Vibrant yellow for warning icons *!*/
+/*  --icon-info: 76 208 225; !* Cyan for info icons *!*/
+
+/*  !* === TABLES === *!*/
+/*  --table-header-bg: 38 38 38; !* Card background for table headers *!*/
+/*  --table-header-text: 179 179 179; !* Muted gray for table header text *!*/
+/*  --table-row-bg: 26 26 26; !* Page background for table rows *!*/
+/*  --table-row-text: 255 255 255; !* White for table row text *!*/
+/*  --table-border: 51 51 51; !* Darker gray for table borders *!*/
+
+/*  !* === MODALS === *!*/
+/*  --modal-overlay: 75 85 99 / 0.5; !* Standard overlay *!*/
+/*  --modal-background: 38 38 38; !* Card background for modals *!*/
+/*  --modal-border: 51 51 51; !* Darker gray for modal borders *!*/
+
+/*  !* === FOCUS & INTERACTION === *!*/
+/*  --focus-ring: 76 208 225; !* Cyan for focus ring *!*/
+/*  --focus-ring-offset: 26 26 26; !* Page background for focus ring offset *!*/
+/*}*/
+
+/*.soft {*/
+/*  !* === PAGE & LAYOUT === *!*/
+/*  --page-background: 238 239 224; !* soft cream #EEEFE0 *!*/
+/*  --page-foreground: 55 65 61; !* darker teal for text *!*/
+
+/*  !* === SIDEBAR === *!*/
+/*  --sidebar-background: 209 216 190; !* soft sage #D1D8BE *!*/
+/*  --sidebar-border: 167 193 168; !* light sage #A7C1A8 *!*/
+/*  --sidebar-brand-icon: 75 110 99; !* deep sage *!*/
+/*  --sidebar-brand-text: 55 65 61; !* darker teal *!*/
+/*  --sidebar-nav-text: 85 95 91; !* medium teal *!*/
+/*  --sidebar-nav-text-hover: 55 65 61; !* darker on hover *!*/
+/*  --sidebar-nav-active-bg: 167 193 168; !* light sage #A7C1A8 *!*/
+/*  --sidebar-nav-active-text: 55 65 61; !* darker teal *!*/
+/*  --sidebar-nav-hover-bg: 225 230 215; !* lighter cream *!*/
+/*  --sidebar-user-name: 85 95 91; !* medium teal *!*/
+/*  --sidebar-user-email: 115 125 121; !* muted teal *!*/
+/*  --sidebar-mobile-overlay: 55 65 61 / 0.75; !* dark teal overlay *!*/
+
+/*  !* === CARDS === *!*/
+/*  --card-background: 255 255 255; !* pure white for contrast *!*/
+/*  --card-border: 167 193 168; !* light sage #A7C1A8 *!*/
+/*  --card-header-text: 55 65 61; !* darker teal *!*/
+/*  --card-body-text: 85 95 91; !* medium teal *!*/
+/*  --card-shadow: 0 2px 4px 0 rgb(129 154 145 / 0.15); !* soft sage shadow *!*/
+
+/*  !* === BUTTONS === *!*/
+/*  --button-primary-bg: 129 154 145; !* sage #819A91 *!*/
+/*  --button-primary-bg-hover: 115 140 131; !* darker sage on hover *!*/
+/*  --button-primary-text: 255 255 255; !* white text *!*/
+/*  --button-secondary-bg: 209 216 190; !* soft sage #D1D8BE *!*/
+/*  --button-secondary-bg-hover: 195 205 175; !* darker on hover *!*/
+/*  --button-secondary-text: 55 65 61; !* darker teal *!*/
+/*  --button-success-bg: 34 139 34; !* forest green *!*/
+/*  --button-success-bg-hover: 24 119 24; !* darker green *!*/
+/*  --button-success-text: 255 255 255; !* white *!*/
+/*  --button-danger-bg: 165 42 42; !* muted red *!*/
+/*  --button-danger-bg-hover: 145 32 32; !* darker red *!*/
+/*  --button-danger-text: 255 255 255; !* white *!*/
+
+/*  !* === FORMS === *!*/
+/*  --input-background: 255 255 255; !* white for clarity *!*/
+/*  --input-border: 167 193 168; !* light sage #A7C1A8 *!*/
+/*  --input-border-focus: 129 154 145; !* sage focus *!*/
+/*  --input-text: 55 65 61; !* darker teal *!*/
+/*  --input-placeholder: 115 125 121; !* muted teal *!*/
+/*  --input-label: 85 95 91; !* medium teal *!*/
+/*  --input-help-text: 115 125 121; !* muted teal *!*/
+
+/*  !* === TEXT HIERARCHY === *!*/
+/*  --text-heading: 55 65 61; !* darker teal *!*/
+/*  --text-body: 85 95 91; !* medium teal *!*/
+/*  --text-muted: 115 125 121; !* muted teal *!*/
+/*  --text-link: 129 154 145; !* sage links *!*/
+/*  --text-link-hover: 105 130 121; !* darker sage on hover *!*/
+
+/*  !* === STATUS COLORS === *!*/
+/*  --status-success-bg: 220 245 220; !* very light green *!*/
+/*  --status-success-text: 34 139 34; !* forest green *!*/
+/*  --status-warning-bg: 255 248 220; !* cream yellow *!*/
+/*  --status-warning-text: 184 134 11; !* golden brown *!*/
+/*  --status-error-bg: 255 235 235; !* very light red *!*/
+/*  --status-error-text: 165 42 42; !* muted red *!*/
+/*  --status-info-bg: 225 240 235; !* very light sage *!*/
+/*  --status-info-text: 129 154 145; !* sage *!*/
+
+/*  !* === ICONS === *!*/
+/*  --icon-neutral: 115 125 121; !* muted teal *!*/
+/*  --icon-success: 34 139 34; !* forest green *!*/
+/*  --icon-error: 165 42 42; !* muted red *!*/
+/*  --icon-warning: 184 134 11; !* golden brown *!*/
+/*  --icon-info: 129 154 145; !* sage *!*/
+
+/*  !* === TABLES === *!*/
+/*  --table-header-bg: 209 216 190; !* soft sage #D1D8BE *!*/
+/*  --table-header-text: 85 95 91; !* medium teal *!*/
+/*  --table-row-bg: 255 255 255; !* white rows *!*/
+/*  --table-row-text: 55 65 61; !* darker teal *!*/
+/*  --table-border: 167 193 168; !* light sage borders *!*/
+
+/*  !* === MODALS === *!*/
+/*  --modal-overlay: 55 65 61 / 0.5; !* dark teal overlay *!*/
+/*  --modal-background: 255 255 255; !* white modal *!*/
+/*  --modal-border: 167 193 168; !* light sage border *!*/
+
+/*  !* === FOCUS & INTERACTION === *!*/
+/*  --focus-ring: 129 154 145; !* sage focus ring *!*/
+/*  --focus-ring-offset: 255 255 255; !* white offset *!*/
+/*}*/
+
+/*!* === BASE STYLES === *!*/
+/** {*/
+/*  box-sizing: border-box;*/
+/*}*/
+
+/*body {*/
+/*  background-color: rgb(var(--page-background));*/
+/*  color: rgb(var(--page-foreground));*/
+/*  font-feature-settings: "rlig" 1, "calt" 1;*/
+/*  margin: 0;*/
+/*  padding: 0;*/
+/*}*/
+
+/*!* === COMPONENT UTILITY CLASSES === *!*/
+
+/*!* Page & Layout *!*/
+/*.bg-page { background-color: rgb(var(--page-background)); }*/
+/*.text-page { color: rgb(var(--page-foreground)); }*/
+
+/*!* Sidebar *!*/
+/*.bg-sidebar { background-color: rgb(var(--sidebar-background)); }*/
+/*.border-sidebar { border-color: rgb(var(--sidebar-border)); }*/
+/*.text-sidebar-brand-icon { color: rgb(var(--sidebar-brand-icon)); }*/
+/*.text-sidebar-brand-text { color: rgb(var(--sidebar-brand-text)); }*/
+/*.text-sidebar-nav { color: rgb(var(--sidebar-nav-text)); }*/
+/*.text-sidebar-nav-hover:hover { color: rgb(var(--sidebar-nav-text-hover)); }*/
+/*.bg-sidebar-nav-active { background-color: rgb(var(--sidebar-nav-active-bg)); }*/
+/*.text-sidebar-nav-active { color: rgb(var(--sidebar-nav-active-text)); }*/
+/*.bg-sidebar-nav-hover:hover { background-color: rgb(var(--sidebar-nav-hover-bg)); }*/
+/*.text-sidebar-user-name { color: rgb(var(--sidebar-user-name)); }*/
+/*.text-sidebar-user-email { color: rgb(var(--sidebar-user-email)); }*/
+/*.bg-sidebar-mobile-overlay { background-color: rgb(var(--sidebar-mobile-overlay)); }*/
+
+/*!* Cards *!*/
+/*.bg-card { background-color: rgb(var(--card-background)); }*/
+/*.border-card { border-color: rgb(var(--card-border)); }*/
+/*.text-card-header { color: rgb(var(--card-header-text)); }*/
+/*.text-card-body { color: rgb(var(--card-body-text)); }*/
+/*.shadow-card { box-shadow: var(--card-shadow); }*/
+
+/*!* Buttons *!*/
+/*.bg-button-primary { background-color: rgb(var(--button-primary-bg)); }*/
+/*.bg-button-primary:hover { background-color: rgb(var(--button-primary-bg-hover)); }*/
+/*.text-button-primary { color: rgb(var(--button-primary-text)); }*/
+/*.bg-button-secondary { background-color: rgb(var(--button-secondary-bg)); }*/
+/*.bg-button-secondary:hover { background-color: rgb(var(--button-secondary-bg-hover)); }*/
+/*.text-button-secondary { color: rgb(var(--button-secondary-text)); }*/
+/*.bg-button-success { background-color: rgb(var(--button-success-bg)); }*/
+/*.bg-button-success:hover { background-color: rgb(var(--button-success-bg-hover)); }*/
+/*.text-button-success { color: rgb(var(--button-success-text)); }*/
+/*.bg-button-danger { background-color: rgb(var(--button-danger-bg)); }*/
+/*.bg-button-danger:hover { background-color: rgb(var(--button-danger-bg-hover)); }*/
+/*.text-button-danger { color: rgb(var(--button-danger-text)); }*/
+
+/*!* Forms *!*/
+/*.bg-input { background-color: rgb(var(--input-background)); }*/
+/*.border-input { border-color: rgb(var(--input-border)); }*/
+/*.border-input-focus:focus { border-color: rgb(var(--input-border-focus)); }*/
+/*.text-input { color: rgb(var(--input-text)); }*/
+/*.text-input-label { color: rgb(var(--input-label)); }*/
+/*.text-input-help { color: rgb(var(--input-help-text)); }*/
+
+/*!* Text Hierarchy *!*/
+/*.text-heading { color: rgb(var(--text-heading)); }*/
+/*.text-body { color: rgb(var(--text-body)); }*/
+/*.text-muted { color: rgb(var(--text-muted)); }*/
+/*.text-link { color: rgb(var(--text-link)); }*/
+/*.text-link:hover { color: rgb(var(--text-link-hover)); }*/
+
+/*!* Status Colors *!*/
+/*.bg-status-success { background-color: rgb(var(--status-success-bg)); }*/
+/*.text-status-success { color: rgb(var(--status-success-text)); }*/
+/*.bg-status-warning { background-color: rgb(var(--status-warning-bg)); }*/
+/*.text-status-warning { color: rgb(var(--status-warning-text)); }*/
+/*.bg-status-error { background-color: rgb(var(--status-error-bg)); }*/
+/*.text-status-error { color: rgb(var(--status-error-text)); }*/
+/*.bg-status-info { background-color: rgb(var(--status-info-bg)); }*/
+/*.text-status-info { color: rgb(var(--status-info-text)); }*/
+
+/*!* Icons *!*/
+/*.text-icon-neutral { color: rgb(var(--icon-neutral)); }*/
+/*.text-icon-success { color: rgb(var(--icon-success)); }*/
+/*.text-icon-error { color: rgb(var(--icon-error)); }*/
+/*.text-icon-warning { color: rgb(var(--icon-warning)); }*/
+/*.text-icon-info { color: rgb(var(--icon-info)); }*/
+
+/*!* Tables *!*/
+/*.bg-table-header { background-color: rgb(var(--table-header-bg)); }*/
+/*.text-table-header { color: rgb(var(--table-header-text)); }*/
+/*.bg-table-row { background-color: rgb(var(--table-row-bg)); }*/
+/*.text-table-row { color: rgb(var(--table-row-text)); }*/
+/*.border-table { border-color: rgb(var(--table-border)); }*/
+
+/*!* Modals *!*/
+/*.bg-modal-overlay { background-color: rgb(var(--modal-overlay)); }*/
+/*.bg-modal { background-color: rgb(var(--modal-background)); }*/
+/*.border-modal { border-color: rgb(var(--modal-border)); }*/
+
+/*!* Focus & Interaction *!*/
+/*.ring-focus { ring-color: rgb(var(--focus-ring)); }*/
+/*.ring-offset-focus { ring-offset-color: rgb(var(--focus-ring-offset)); }*/
+
+/*!* Additional Status and Semantic Colors *!*/
+/*.border-card-border { border-color: rgb(var(--card-border)); }*/
+/*.divide-table-border { border-color: rgb(var(--table-border)); }*/
+/*.bg-button-secondary-hover:hover { background-color: rgb(var(--button-secondary-bg-hover)); }*/
+/*.bg-muted { background-color: rgb(var(--table-header-bg)); }*/
+/*!* === ENHANCED STYLES === *!*/
+
+/*!* Custom scrollbar *!*/
+/*::-webkit-scrollbar {*/
+/*  width: 8px;*/
+/*}*/
+
+/*::-webkit-scrollbar-track {*/
+/*  background: rgb(var(--card-background));*/
+/*}*/
+
+/*::-webkit-scrollbar-thumb {*/
+/*  background: rgb(var(--text-muted));*/
+/*  border-radius: 4px;*/
+/*}*/
+
+/*::-webkit-scrollbar-thumb:hover {*/
+/*  background: rgb(var(--text-body));*/
+/*}*/
+
+/*!* Form input focus states *!*/
+/*input:focus,*/
+/*select:focus,*/
+/*textarea:focus {*/
+/*  outline: 2px solid rgb(var(--focus-ring));*/
+/*  outline-offset: 2px;*/
+/*}*/
+
+/*!* Smooth transitions *!*/
+/** {*/
+/*  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;*/
+/*  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);*/
+/*  transition-duration: 150ms;*/
+/*}
+*/
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* === PAGE & LAYOUT === */
+  --page-background: 249 250 251; /* bg-gray-50 */
+  --page-foreground: 17 24 39; /* text-gray-900 */
+
+  /* === SIDEBAR === */
+  --sidebar-background: 255 255 255; /* bg-white */
+  --sidebar-border: 229 231 235; /* border-gray-200 */
+  --sidebar-brand-icon: 37 99 235; /* text-blue-600 */
+  --sidebar-brand-text: 17 24 39; /* text-gray-900 */
+  --sidebar-nav-text: 55 65 81; /* text-gray-700 */
+  --sidebar-nav-text-hover: 17 24 39; /* hover:text-gray-900 */
+  --sidebar-nav-active-bg: 219 234 254; /* bg-blue-100 */
+  --sidebar-nav-active-text: 29 78 216; /* text-blue-700 */
+  --sidebar-nav-hover-bg: 249 250 251; /* hover:bg-gray-50 */
+  --sidebar-user-name: 55 65 81; /* text-gray-700 */
+  --sidebar-user-email: 107 114 128; /* text-gray-500 */
+  --sidebar-mobile-overlay: 75 85 99 / 0.75; /* bg-gray-600/75 */
+
+  /* === CARDS === */
+  --card-background: 255 255 255; /* bg-white */
+  --card-border: 229 231 235; /* border-gray-200 */
+  --card-header-text: 17 24 39; /* text-gray-900 */
+  --card-body-text: 75 85 99; /* text-gray-600 */
+  --card-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+
+  /* === BUTTONS === */
+  --button-primary-bg: 37 99 235; /* bg-blue-600 */
+  --button-primary-bg-hover: 29 78 216; /* hover:bg-blue-700 */
+  --button-primary-text: 255 255 255; /* text-white */
+  --button-secondary-bg: 229 231 235; /* bg-gray-200 */
+  --button-secondary-bg-hover: 209 213 219; /* hover:bg-gray-300 */
+  --button-secondary-text: 55 65 81; /* text-gray-700 */
+  --button-success-bg: 22 163 74; /* bg-green-600 */
+  --button-success-bg-hover: 21 128 61; /* hover:bg-green-700 */
+  --button-success-text: 255 255 255; /* text-white */
+  --button-danger-bg: 220 38 38; /* bg-red-600 */
+  --button-danger-bg-hover: 185 28 28; /* hover:bg-red-700 */
+  --button-danger-text: 255 255 255; /* text-white */
+
+  /* === FORMS === */
+  --input-background: 255 255 255; /* bg-white */
+  --input-border: 209 213 219; /* border-gray-300 */
+  --input-border-focus: 59 130 246; /* focus:border-blue-500 */
+  --input-text: 17 24 39; /* text-gray-900 */
+  --input-placeholder: 107 114 128; /* placeholder-gray-500 */
+  --input-label: 55 65 81; /* text-gray-700 */
+  --input-help-text: 107 114 128; /* text-gray-500 */
+
+  /* === TEXT HIERARCHY === */
+  --text-heading: 17 24 39; /* text-gray-900 */
+  --text-body: 55 65 81; /* text-gray-700 */
+  --text-muted: 107 114 128; /* text-gray-500 */
+  --text-link: 37 99 235; /* text-blue-600 */
+  --text-link-hover: 59 130 246; /* hover:text-blue-500 */
+
+  /* === STATUS COLORS === */
+  --status-success-bg: 220 252 231; /* bg-green-100 */
+  --status-success-text: 22 163 74; /* text-green-600 */
+  --status-warning-bg: 254 243 199; /* bg-yellow-100 */
+  --status-warning-text: 217 119 6; /* text-yellow-600 */
+  --status-error-bg: 254 226 226; /* bg-red-100 */
+  --status-error-text: 220 38 38; /* text-red-600 */
+  --status-info-bg: 219 234 254; /* bg-blue-100 */
+  --status-info-text: 37 99 235; /* text-blue-600 */
+
+  /* === ICONS === */
+  --icon-neutral: 156 163 175; /* text-gray-400 */
+  --icon-success: 22 163 74; /* text-green-600 */
+  --icon-error: 220 38 38; /* text-red-600 */
+  --icon-warning: 217 119 6; /* text-yellow-600 */
+  --icon-info: 37 99 235; /* text-blue-600 */
+
+  /* === TABLES === */
+  --table-header-bg: 249 250 251; /* bg-gray-50 */
+  --table-header-text: 107 114 128; /* text-gray-500 */
+  --table-row-bg: 255 255 255; /* bg-white */
+  --table-row-text: 17 24 39; /* text-gray-900 */
+  --table-border: 229 231 235; /* divide-gray-200 */
+
+  /* === MODALS === */
+  --modal-overlay: 75 85 99 / 0.75; /* bg-gray-600/75 */
+  --modal-background: 255 255 255; /* bg-white */
+  --modal-border: 229 231 235; /* border-gray-200 */
+
+  /* === FOCUS & INTERACTION === */
+  --focus-ring: 59 130 246; /* ring-blue-500 */
+  --focus-ring-offset: 255 255 255; /* ring-offset-white */
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.dark {
+  /* === PAGE & LAYOUT === */
+  --page-background: 17 24 39; /* dark:bg-gray-900 */
+  --page-foreground: 243 244 246; /* dark:text-gray-100 */
+
+  /* === SIDEBAR === */
+  --sidebar-background: 17 24 39; /* dark:bg-gray-900 */
+  --sidebar-border: 55 65 81; /* dark:border-gray-700 */
+  --sidebar-brand-icon: 96 165 250; /* dark:text-blue-400 */
+  --sidebar-brand-text: 255 255 255; /* dark:text-white */
+  --sidebar-nav-text: 209 213 219; /* dark:text-gray-300 */
+  --sidebar-nav-text-hover: 255 255 255; /* dark:hover:text-white */
+  --sidebar-nav-active-bg: 30 58 138; /* dark:bg-blue-900 */
+  --sidebar-nav-active-text: 191 219 254; /* dark:text-blue-200 */
+  --sidebar-nav-hover-bg: 31 41 55; /* dark:hover:bg-gray-800 */
+  --sidebar-user-name: 209 213 219; /* dark:text-gray-300 */
+  --sidebar-user-email: 156 163 175; /* dark:text-gray-400 */
+  --sidebar-mobile-overlay: 75 85 99 / 0.75; /* dark:bg-gray-600/75 */
+
+  /* === CARDS === */
+  --card-background: 31 41 55; /* dark:bg-gray-800 */
+  --card-border: 55 65 81; /* dark:border-gray-700 */
+  --card-header-text: 255 255 255; /* dark:text-white */
+  --card-body-text: 156 163 175; /* dark:text-gray-400 */
+  --card-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3);
+
+  /* === BUTTONS === */
+  --button-primary-bg: 37 99 235; /* dark:bg-blue-600 */
+  --button-primary-bg-hover: 29 78 216; /* dark:hover:bg-blue-700 */
+  --button-primary-text: 255 255 255; /* dark:text-white */
+  --button-secondary-bg: 55 65 81; /* dark:bg-gray-700 */
+  --button-secondary-bg-hover: 75 85 99; /* dark:hover:bg-gray-600 */
+  --button-secondary-text: 209 213 219; /* dark:text-gray-300 */
+  --button-success-bg: 22 163 74; /* dark:bg-green-600 */
+  --button-success-bg-hover: 21 128 61; /* dark:hover:bg-green-700 */
+  --button-success-text: 255 255 255; /* dark:text-white */
+  --button-danger-bg: 220 38 38; /* dark:bg-red-600 */
+  --button-danger-bg-hover: 185 28 28; /* dark:hover:bg-red-700 */
+  --button-danger-text: 255 255 255; /* dark:text-white */
+
+  /* === FORMS === */
+  --input-background: 55 65 81; /* dark:bg-gray-700 */
+  --input-border: 75 85 99; /* dark:border-gray-600 */
+  --input-border-focus: 59 130 246; /* dark:focus:border-blue-500 */
+  --input-text: 255 255 255; /* dark:text-white */
+  --input-placeholder: 156 163 175; /* dark:placeholder-gray-400 */
+  --input-label: 209 213 219; /* dark:text-gray-300 */
+  --input-help-text: 156 163 175; /* dark:text-gray-400 */
+
+  /* === TEXT HIERARCHY === */
+  --text-heading: 255 255 255; /* dark:text-white */
+  --text-body: 209 213 219; /* dark:text-gray-300 */
+  --text-muted: 156 163 175; /* dark:text-gray-400 */
+  --text-link: 96 165 250; /* dark:text-blue-400 */
+  --text-link-hover: 147 197 253; /* dark:hover:text-blue-300 */
+
+  /* === STATUS COLORS === */
+  --status-success-bg: 6 78 59; /* dark:bg-green-900 */
+  --status-success-text: 74 222 128; /* dark:text-green-400 */
+  --status-warning-bg: 120 113 4; /* dark:bg-yellow-900 */
+  --status-warning-text: 251 191 36; /* dark:text-yellow-400 */
+  --status-error-bg: 127 29 29; /* dark:bg-red-900 */
+  --status-error-text: 248 113 113; /* dark:text-red-400 */
+  --status-info-bg: 30 58 138; /* dark:bg-blue-900 */
+  --status-info-text: 96 165 250; /* dark:text-blue-400 */
+
+  /* === ICONS === */
+  --icon-neutral: 156 163 175; /* dark:text-gray-400 */
+  --icon-success: 74 222 128; /* dark:text-green-400 */
+  --icon-error: 248 113 113; /* dark:text-red-400 */
+  --icon-warning: 251 191 36; /* dark:text-yellow-400 */
+  --icon-info: 96 165 250; /* dark:text-blue-400 */
+
+  /* === TABLES === */
+  --table-header-bg: 55 65 81; /* dark:bg-gray-700 */
+  --table-header-text: 209 213 219; /* dark:text-gray-300 */
+  --table-row-bg: 31 41 55; /* dark:bg-gray-800 */
+  --table-row-text: 255 255 255; /* dark:text-white */
+  --table-border: 55 65 81; /* dark:divide-gray-700 */
+
+  /* === MODALS === */
+  --modal-overlay: 75 85 99 / 0.75; /* dark:bg-gray-600/75 */
+  --modal-background: 31 41 55; /* dark:bg-gray-800 */
+  --modal-border: 55 65 81; /* dark:border-gray-700 */
+
+  /* === FOCUS & INTERACTION === */
+  --focus-ring: 59 130 246; /* dark:ring-blue-500 */
+  --focus-ring-offset: 31 41 55; /* dark:ring-offset-gray-800 */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.dark-2 {
+  /* === PAGE & LAYOUT === */
+  --page-background: 26 26 26; /* Deep charcoal black, close to #1A1A1A */
+  --page-foreground: 255 255 255; /* Pure white for readability */
+
+  /* === SIDEBAR === */
+  --sidebar-background: 26 26 26; /* Same as page background */
+  --sidebar-border: 51 51 51; /* Darker gray for subtle borders */
+  --sidebar-brand-icon: 76 208 225; /* Cyan for brand icon */
+  --sidebar-brand-text: 255 255 255; /* White for brand text */
+  --sidebar-nav-text: 224 224 224; /* Light gray for nav text */
+  --sidebar-nav-text-hover: 255 255 255; /* White on hover */
+  --sidebar-nav-active-bg: 77 77 77; /* Medium gray for active background */
+  --sidebar-nav-active-text: 76 208 225; /* Cyan for active text */
+  --sidebar-nav-hover-bg: 38 38 38; /* Slightly lighter dark gray on hover */
+  --sidebar-user-name: 224 224 224; /* Light gray */
+  --sidebar-user-email: 179 179 179; /* Muted gray */
+  --sidebar-mobile-overlay: 75 85 99 / 0.75; /* Standard overlay */
+
+  /* === CARDS === */
+  --card-background: 38 38 38; /* Slightly lighter than page background for distinction */
+  --card-border: 51 51 51; /* Darker gray for card borders */
+  --card-header-text: 255 255 255; /* White for header text */
+  --card-body-text: 179 179 179; /* Muted gray for body text */
+  --card-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.4); /* Slightly stronger shadow for dark cards */
+
+  /* === BUTTONS === */
+  --button-primary-bg: 76 208 225; /* Cyan for primary buttons */
+  --button-primary-bg-hover: 60 180 195; /* Darker cyan on hover */
+  --button-primary-text: 26 26 26; /* Dark text for primary buttons */
+  --button-secondary-bg: 51 51 51; /* Dark gray for secondary buttons */
+  --button-secondary-bg-hover: 77 77 77; /* Lighter gray on hover */
+  --button-secondary-text: 224 224 224; /* Light gray for secondary text */
+  --button-success-bg: 76 179 79; /* Vibrant green for success */
+  --button-success-bg-hover: 60 145 64; /* Darker green on hover */
+  --button-success-text: 255 255 255; /* White for success text */
+  --button-danger-bg: 229 64 64; /* Vibrant red for danger */
+  --button-danger-bg-hover: 195 50 50; /* Darker red on hover */
+  --button-danger-text: 255 255 255; /* White for danger text */
+
+  /* === FORMS === */
+  --input-background: 51 51 51; /* Dark gray for input backgrounds */
+  --input-border: 77 77 77; /* Slightly lighter gray for input borders */
+  --input-border-focus: 76 208 225; /* Cyan for focus border */
+  --input-text: 255 255 255; /* White for input text */
+  --input-placeholder: 179 179 179; /* Muted gray for placeholder */
+  --input-label: 224 224 224; /* Light gray for input labels */
+  --input-help-text: 179 179 179; /* Muted gray for help text */
+
+  /* === TEXT HIERARCHY === */
+  --text-heading: 255 255 255; /* White for headings */
+  --text-body: 224 224 224; /* Light gray for body text */
+  --text-muted: 179 179 179; /* Muted gray for muted text */
+  --text-link: 76 208 225; /* Cyan for links */
+  --text-link-hover: 60 180 195; /* Darker cyan on hover */
+
+  /* === STATUS COLORS === */
+  --status-success-bg: 51 102 54; /* Darker green for success background */
+  --status-success-text: 76 179 79; /* Vibrant green for success text */
+  --status-warning-bg: 153 102 0; /* Darker yellow/orange for warning background */
+  --status-warning-text: 255 193 7; /* Vibrant yellow for warning text */
+  --status-error-bg: 153 51 51; /* Darker red for error background */
+  --status-error-text: 229 64 64; /* Vibrant red for error text */
+  --status-info-bg: 51 102 153; /* Darker blue for info background */
+  --status-info-text: 76 208 225; /* Cyan for info text */
+
+  /* === ICONS === */
+  --icon-neutral: 179 179 179; /* Muted gray for neutral icons */
+  --icon-success: 76 179 79; /* Vibrant green for success icons */
+  --icon-error: 229 64 64; /* Vibrant red for error icons */
+  --icon-warning: 255 193 7; /* Vibrant yellow for warning icons */
+  --icon-info: 76 208 225; /* Cyan for info icons */
+
+  /* === TABLES === */
+  --table-header-bg: 38 38 38; /* Card background for table headers */
+  --table-header-text: 179 179 179; /* Muted gray for table header text */
+  --table-row-bg: 26 26 26; /* Page background for table rows */
+  --table-row-text: 255 255 255; /* White for table row text */
+  --table-border: 51 51 51; /* Darker gray for table borders */
+
+  /* === MODALS === */
+  --modal-overlay: 75 85 99 / 0.5; /* Standard overlay */
+  --modal-background: 38 38 38; /* Card background for modals */
+  --modal-border: 51 51 51; /* Darker gray for modal borders */
+
+  /* === FOCUS & INTERACTION === */
+  --focus-ring: 76 208 225; /* Cyan for focus ring */
+  --focus-ring-offset: 26 26 26; /* Page background for focus ring offset */
+}
+
+.soft {
+  /* === PAGE & LAYOUT === */
+  --page-background: 238 239 224; /* soft cream #EEEFE0 */
+  --page-foreground: 55 65 61; /* darker teal for text */
+
+  /* === SIDEBAR === */
+  --sidebar-background: 209 216 190; /* soft sage #D1D8BE */
+  --sidebar-border: 167 193 168; /* light sage #A7C1A8 */
+  --sidebar-brand-icon: 75 110 99; /* deep sage */
+  --sidebar-brand-text: 55 65 61; /* darker teal */
+  --sidebar-nav-text: 85 95 91; /* medium teal */
+  --sidebar-nav-text-hover: 55 65 61; /* darker on hover */
+  --sidebar-nav-active-bg: 167 193 168; /* light sage #A7C1A8 */
+  --sidebar-nav-active-text: 55 65 61; /* darker teal */
+  --sidebar-nav-hover-bg: 225 230 215; /* lighter cream */
+  --sidebar-user-name: 85 95 91; /* medium teal */
+  --sidebar-user-email: 115 125 121; /* muted teal */
+  --sidebar-mobile-overlay: 55 65 61 / 0.75; /* dark teal overlay */
+
+  /* === CARDS === */
+  --card-background: 255 255 255; /* pure white for contrast */
+  --card-border: 167 193 168; /* light sage #A7C1A8 */
+  --card-header-text: 55 65 61; /* darker teal */
+  --card-body-text: 85 95 91; /* medium teal */
+  --card-shadow: 0 2px 4px 0 rgb(129 154 145 / 0.15); /* soft sage shadow */
+
+  /* === BUTTONS === */
+  --button-primary-bg: 129 154 145; /* sage #819A91 */
+  --button-primary-bg-hover: 115 140 131; /* darker sage on hover */
+  --button-primary-text: 255 255 255; /* white text */
+  --button-secondary-bg: 209 216 190; /* soft sage #D1D8BE */
+  --button-secondary-bg-hover: 195 205 175; /* darker on hover */
+  --button-secondary-text: 55 65 61; /* darker teal */
+  --button-success-bg: 34 139 34; /* forest green */
+  --button-success-bg-hover: 24 119 24; /* darker green */
+  --button-success-text: 255 255 255; /* white */
+  --button-danger-bg: 165 42 42; /* muted red */
+  --button-danger-bg-hover: 145 32 32; /* darker red */
+  --button-danger-text: 255 255 255; /* white */
+
+  /* === FORMS === */
+  --input-background: 255 255 255; /* white for clarity */
+  --input-border: 167 193 168; /* light sage #A7C1A8 */
+  --input-border-focus: 129 154 145; /* sage focus */
+  --input-text: 55 65 61; /* darker teal */
+  --input-placeholder: 115 125 121; /* muted teal */
+  --input-label: 85 95 91; /* medium teal */
+  --input-help-text: 115 125 121; /* muted teal */
+
+  /* === TEXT HIERARCHY === */
+  --text-heading: 55 65 61; /* darker teal */
+  --text-body: 85 95 91; /* medium teal */
+  --text-muted: 115 125 121; /* muted teal */
+  --text-link: 129 154 145; /* sage links */
+  --text-link-hover: 105 130 121; /* darker sage on hover */
+
+  /* === STATUS COLORS === */
+  --status-success-bg: 220 245 220; /* very light green */
+  --status-success-text: 34 139 34; /* forest green */
+  --status-warning-bg: 255 248 220; /* cream yellow */
+  --status-warning-text: 184 134 11; /* golden brown */
+  --status-error-bg: 255 235 235; /* very light red */
+  --status-error-text: 165 42 42; /* muted red */
+  --status-info-bg: 225 240 235; /* very light sage */
+  --status-info-text: 129 154 145; /* sage */
+
+  /* === ICONS === */
+  --icon-neutral: 115 125 121; /* muted teal */
+  --icon-success: 34 139 34; /* forest green */
+  --icon-error: 165 42 42; /* muted red */
+  --icon-warning: 184 134 11; /* golden brown */
+  --icon-info: 129 154 145; /* sage */
+
+  /* === TABLES === */
+  --table-header-bg: 209 216 190; /* soft sage #D1D8BE */
+  --table-header-text: 85 95 91; /* medium teal */
+  --table-row-bg: 255 255 255; /* white rows */
+  --table-row-text: 55 65 61; /* darker teal */
+  --table-border: 167 193 168; /* light sage borders */
+
+  /* === MODALS === */
+  --modal-overlay: 55 65 61 / 0.75; /* dark teal overlay */
+  --modal-background: 255 255 255; /* white modal */
+  --modal-border: 167 193 168; /* light sage border */
+
+  /* === FOCUS & INTERACTION === */
+  --focus-ring: 129 154 145; /* sage focus ring */
+  --focus-ring-offset: 255 255 255; /* white offset */
+}
+
+.harvest {
+  /* Hex to RGB conversion for the provided colors */
+  /* #626F47 -> 98 111 71 */
+  /* #A4B465 -> 164 180 101 */
+  /* #F5ECD5 -> 245 236 213 */
+  /* #F0BB78 -> 240 187 120 */
+
+  /* === PAGE & LAYOUT === */
+  --page-background: 245 236 213; /* #F5ECD5 - Light, warm background */
+  --page-foreground: 98 111 71; /* #626F47 - Darker muted green for text */
+
+  /* === SIDEBAR === */
+  --sidebar-background: 240 187 120; /* #F0BB78 - Warm orange/brown for sidebar */
+  --sidebar-border: 164 180 101; /* #A4B465 - Muted yellow-green for borders */
+  --sidebar-brand-icon: 98 111 71; /* #626F47 - Darker muted green for brand icon */
+  --sidebar-brand-text: 98 111 71; /* #626F47 - Darker muted green for brand text */
+  --sidebar-nav-text: 70 80 50; /* Slightly darker than page foreground */
+  --sidebar-nav-text-hover: 98 111 71; /* Darker muted green on hover */
+  --sidebar-nav-active-bg: 164 180 101; /* #A4B465 - Muted yellow-green for active background */
+  --sidebar-nav-active-text: 98 111 71; /* Darker muted green for active text */
+  --sidebar-nav-hover-bg: 245 230 200; /* Lighter warm background on hover */
+  --sidebar-user-name: 70 80 50;
+  --sidebar-user-email: 120 130 90; /* Muted green-gray */
+  --sidebar-mobile-overlay: 98 111 71 / 0.75; /* Dark muted green overlay */
+
+  /* === CARDS === */
+  --card-background: 255 255 255; /* Pure white for contrast */
+  --card-border: 220 210 190; /* Soft light border */
+  --card-header-text: 98 111 71; /* Darker muted green */
+  --card-body-text: 70 80 50; /* Slightly darker than page foreground */
+  --card-shadow: 0 2px 4px 0 rgb(0 0 0 / 0.1); /* Standard light shadow */
+
+  /* === BUTTONS === */
+  --button-primary-bg: 98 111 71; /* #626F47 - Darker muted green for primary buttons */
+  --button-primary-bg-hover: 80 95 60; /* Slightly darker on hover */
+  --button-primary-text: 255 255 255; /* White text */
+  --button-secondary-bg: 164 180 101; /* #A4B465 - Muted yellow-green for secondary */
+  --button-secondary-bg-hover: 140 155 85; /* Darker secondary on hover */
+  --button-secondary-text: 98 111 71; /* Darker muted green */
+  --button-success-bg: 60 150 60; /* Standard green for success */
+  --button-success-bg-hover: 50 130 50;
+  --button-success-text: 255 255 255;
+  --button-danger-bg: 200 70 70; /* Standard red for danger */
+  --button-danger-bg-hover: 170 60 60;
+  --button-danger-text: 255 255 255;
+
+  /* === FORMS === */
+  --input-background: 255 255 255; /* White for clarity */
+  --input-border: 164 180 101; /* #A4B465 - Muted yellow-green */
+  --input-border-focus: 98 111 71; /* Darker muted green for focus */
+  --input-text: 98 111 71; /* Darker muted green */
+  --input-placeholder: 120 130 90; /* Muted green-gray */
+  --input-label: 70 80 50;
+  --input-help-text: 120 130 90;
+
+  /* === TEXT HIERARCHY === */
+  --text-heading: 98 111 71; /* Darker muted green */
+  --text-body: 70 80 50;
+  --text-muted: 120 130 90; /* Muted green-gray */
+  --text-link: 98 111 71; /* Darker muted green */
+  --text-link-hover: 80 95 60;
+
+  /* === STATUS COLORS === */
+  --status-success-bg: 220 245 220; /* Light green */
+  --status-success-text: 60 150 60; /* Standard green */
+  --status-warning-bg: 255 248 220; /* Cream yellow */
+  --status-warning-text: 200 150 0; /* Golden brown */
+  --status-error-bg: 255 235 235; /* Light red */
+  --status-error-text: 200 70 70; /* Standard red */
+  --status-info-bg: 230 240 250; /* Light blue */
+  --status-info-text: 98 111 71; /* Dark muted green */
+
+  /* === ICONS === */
+  --icon-neutral: 120 130 90; /* Muted green-gray */
+  --icon-success: 60 150 60; /* Standard green */
+  --icon-error: 200 70 70; /* Standard red */
+  --icon-warning: 200 150 0; /* Golden brown */
+  --icon-info: 98 111 71; /* Dark muted green */
+
+  /* === TABLES === */
+  --table-header-bg: 240 187 120; /* #F0BB78 - Sidebar background for headers */
+  --table-header-text: 98 111 71; /* Darker muted green */
+  --table-row-bg: 255 255 255; /* White rows */
+  --table-row-text: 70 80 50;
+  --table-border: 164 180 101; /* #A4B465 - Muted yellow-green borders */
+
+  /* === MODALS === */
+  --modal-overlay: 98 111 71 / 0.5; /* Dark muted green overlay */
+  --modal-background: 255 255 255; /* White modal */
+  --modal-border: 164 180 101; /* #A4B465 - Muted yellow-green border */
+
+  /* === FOCUS & INTERACTION === */
+  --focus-ring: 98 111 71; /* Darker muted green for focus ring */
+  --focus-ring-offset: 255 255 255; /* White offset */
+}
+.deepForest {
+  /* Hex to RGB conversion for the provided colors */
+  /* #18230F -> 24 35 15 */
+  /* #27391C -> 39 57 28 */
+  /* #255F38 -> 37 95 56 */
+  /* #1F7D53 -> 31 125 83 */
+
+  /* === PAGE & LAYOUT === */
+  --page-background: 24 35 15; /* #18230F - Very dark green, almost black */
+  --page-foreground: 255 255 255; /* White for primary text */
+
+  /* === SIDEBAR === */
+  --sidebar-background: 39 57 28; /* #27391C - Slightly lighter dark green for sidebar */
+  --sidebar-border: 37 95 56; /* #255F38 - Muted green for borders */
+  --sidebar-brand-icon: 31 125 83; /* #1F7D53 - Vibrant green for brand icon */
+  --sidebar-brand-text: 255 255 255; /* White for brand text */
+  --sidebar-nav-text: 200 210 190; /* Light green-gray for nav text */
+  --sidebar-nav-text-hover: 255 255 255; /* White on hover */
+  --sidebar-nav-active-bg: 37 95 56; /* #255F38 - Muted green for active background */
+  --sidebar-nav-active-text: 255 255 255; /* White for active text */
+  --sidebar-nav-hover-bg: 50 70 40; /* Slightly lighter dark green on hover */
+  --sidebar-user-name: 200 210 190;
+  --sidebar-user-email: 150 160 140; /* Muted gray-green */
+  --sidebar-mobile-overlay: 24 35 15 / 0.75; /* Dark green overlay */
+
+  /* === CARDS === */
+  --card-background: 39 57 28; /* #27391C - Same as sidebar for cards */
+  --card-border: 37 95 56; /* #255F38 - Muted green for card borders */
+  --card-header-text: 255 255 255; /* White for header text */
+  --card-body-text: 200 210 190; /* Light green-gray for body text */
+  --card-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.4); /* Standard shadow for dark cards */
+
+  /* === BUTTONS === */
+  --button-primary-bg: 31 125 83; /* #1F7D53 - Vibrant green for primary buttons */
+  --button-primary-bg-hover: 25 100 65; /* Darker vibrant green on hover */
+  --button-primary-text: 255 255 255; /* White text */
+  --button-secondary-bg: 50 70 40; /* Dark green for secondary buttons */
+  --button-secondary-bg-hover: 65 90 55; /* Lighter dark green on hover */
+  --button-secondary-text: 200 210 190; /* Light green-gray for secondary text */
+  --button-success-bg: 37 95 56; /* #255F38 - Muted green for success */
+  --button-success-bg-hover: 30 75 45;
+  --button-success-text: 255 255 255;
+  --button-danger-bg: 190 60 60; /* Standard red for danger */
+  --button-danger-bg-hover: 160 50 50;
+  --button-danger-text: 255 255 255;
+
+  /* === FORMS === */
+  --input-background: 50 70 40; /* Dark green for input backgrounds */
+  --input-border: 65 90 55; /* Slightly lighter dark green for input borders */
+  --input-border-focus: 31 125 83; /* #1F7D53 - Vibrant green for focus */
+  --input-text: 255 255 255; /* White for input text */
+  --input-placeholder: 150 160 140; /* Muted gray-green */
+  --input-label: 200 210 190;
+  --input-help-text: 150 160 140;
+
+  /* === TEXT HIERARCHY === */
+  --text-heading: 255 255 255; /* White for headings */
+  --text-body: 200 210 190; /* Light green-gray */
+  --text-muted: 150 160 140; /* Muted gray-green */
+  --text-link: 31 125 83; /* #1F7D53 - Vibrant green for links */
+  --text-link-hover: 25 100 65;
+
+  /* === STATUS COLORS === */
+  --status-success-bg: 20 60 30; /* Darker green for success background */
+  --status-success-text: 37 95 56; /* #255F38 - Muted green for success text */
+  --status-warning-bg: 100 70 0; /* Dark orange-brown for warning background */
+  --status-warning-text: 220 180 0; /* Golden yellow for warning text */
+  --status-error-bg: 100 30 30; /* Dark red for error background */
+  --status-error-text: 190 60 60; /* Standard red for error text */
+  --status-info-bg: 20 60 80; /* Dark blue for info background */
+  --status-info-text: 31 125 83; /* #1F7D53 - Vibrant green for info text */
+
+  /* === ICONS === */
+  --icon-neutral: 150 160 140; /* Muted gray-green */
+  --icon-success: 37 95 56; /* #255F38 - Muted green for success icons */
+  --icon-error: 190 60 60; /* Standard red for error icons */
+  --icon-warning: 220 180 0; /* Golden yellow for warning icons */
+  --icon-info: 31 125 83; /* #1F7D53 - Vibrant green for info icons */
+
+  /* === TABLES === */
+  --table-header-bg: 39 57 28; /* #27391C - Sidebar background for headers */
+  --table-header-text: 200 210 190; /* Light green-gray */
+  --table-row-bg: 24 35 15; /* #18230F - Page background for table rows */
+  --table-row-text: 255 255 255; /* White */
+  --table-border: 50 70 40; /* Dark green for borders */
+
+  /* === MODALS === */
+  --modal-overlay: 24 35 15 / 0.5; /* Dark green overlay */
+  --modal-background: 39 57 28; /* #27391C - Card background for modals */
+  --modal-border: 37 95 56; /* #255F38 - Muted green for borders */
+
+  /* === FOCUS & INTERACTION === */
+  --focus-ring: 31 125 83; /* #1F7D53 - Vibrant green for focus ring */
+  --focus-ring-offset: 24 35 15; /* #18230F - Page background for focus ring offset */
+}
+.finDark {
+  /* Main Backgrounds */
+  --page-background: 17 25 34; /* Dark Teal-Blue (#111922) - Deep, professional background */
+  --page-foreground: 236 240 241; /* Light Gray (#ECF0F1) - For main text, good contrast */
+
+  /* Sidebar */
+  --sidebar-background: 23 32 42; /* Slightly darker than page background for distinction (#17202A) */
+  --sidebar-border: 44 62 80; /* Muted blue-gray for subtle borders (#2C3E50) */
+  --sidebar-brand-icon: 52 152 219; /* Bright Blue for brand icon, tech-focused (#3498DB) */
+  --sidebar-brand-text: 236 240 241; /* Light Gray */
+  --sidebar-nav-text: 189 195 199; /* Muted light gray for inactive nav items (#BDC3C7) */
+  --sidebar-nav-text-hover: 255 255 255; /* White on hover for emphasis */
+  --sidebar-nav-active-bg: 44 62 80; /* Muted blue-gray for active item background (#2C3E50) */
+  --sidebar-nav-active-text: 52 152 219; /* Bright Blue for active item text */
+  --sidebar-nav-hover-bg: 33 46 61; /* Darker blue-gray on hover */
+  --sidebar-user-name: 189 195 199;
+  --sidebar-user-email: 149 165 166; /* Even more muted gray */
+  --sidebar-mobile-overlay: 17 25 34 / 0.75; /* Dark overlay */
+
+  /* Cards */
+  --card-background: 23 32 42; /* Same as sidebar, provides consistency (#17202A) */
+  --card-border: 44 62 80; /* Muted blue-gray for card borders */
+  --card-header-text: 236 240 241; /* Light Gray */
+  --card-body-text: 189 195 199; /* Muted light gray */
+  --card-shadow: 0 1px 4px 0 rgb(0 0 0 / 0.5); /* Slightly more pronounced shadow */
+
+  /* Buttons */
+  --button-primary-bg: 52 152 219; /* Bright Blue (#3498DB) - Call to action */
+  --button-primary-bg-hover: 41 128 185; /* Darker blue on hover (#2980B9) */
+  --button-primary-text: 255 255 255; /* White */
+  --button-secondary-bg: 44 62 80; /* Muted blue-gray (#2C3E50) */
+  --button-secondary-bg-hover: 52 73 94; /* Slightly lighter on hover (#34495E) */
+  --button-secondary-text: 236 240 241; /* Light Gray */
+  --button-success-bg: 39 174 96; /* Emerald Green (#27AE60) - For positive financial actions */
+  --button-success-bg-hover: 33 147 80; /* Darker emerald */
+  --button-success-text: 255 255 255;
+  --button-danger-bg: 231 76 60; /* Alizarin Red (#E74C3C) - For negative financial actions, alerts */
+  --button-danger-bg-hover: 192 57 43; /* Darker alizarin */
+  --button-danger-text: 255 255 255;
+
+  /* Forms */
+  --input-background: 33 46 61; /* Darker blue-gray (#212E3D) */
+  --input-border: 44 62 80; /* Muted blue-gray */
+  --input-border-focus: 52 152 219; /* Bright Blue */
+  --input-text: 236 240 241; /* Light Gray */
+  --input-placeholder: 149 165 166; /* Muted gray */
+  --input-label: 189 195 199;
+  --input-help-text: 149 165 166;
+
+  /* Text Hierarchy */
+  --text-heading: 236 240 241; /* Light Gray */
+  --text-body: 189 195 199; /* Muted light gray */
+  --text-muted: 149 165 166; /* Muted gray */
+  --text-link: 52 152 219; /* Bright Blue */
+  --text-link-hover: 41 128 185;
+
+  /* Status Colors (Crucial for finance apps!) */
+  --status-success-bg: 23 83 55; /* Darker emerald for background (#175337) */
+  --status-success-text: 39 174 96; /* Emerald Green */
+  --status-warning-bg: 153 102 0; /* Darker orange for warning background */
+  --status-warning-text: 243 156 18; /* Orange (#F39C12) - For pending, alerts */
+  --status-error-bg: 102 41 33; /* Darker red for error background (#662921) */
+  --status-error-text: 231 76 60; /* Alizarin Red */
+  --status-info-bg: 28 66 100; /* Darker blue for info background (#1C4264) */
+  --status-info-text: 52 152 219; /* Bright Blue */
+
+  /* Icons */
+  --icon-neutral: 149 165 166; /* Muted gray */
+  --icon-success: 39 174 96; /* Emerald Green */
+  --icon-error: 231 76 60; /* Alizarin Red */
+  --icon-warning: 243 156 18; /* Orange */
+  --icon-info: 52 152 219; /* Bright Blue */
+
+  /* Tables */
+  --table-header-bg: 33 46 61; /* Darker blue-gray (#212E3D) */
+  --table-header-text: 189 195 199; /* Muted light gray */
+  --table-row-bg: 23 32 42; /* Card background for rows (#17202A) */
+  --table-row-text: 236 240 241; /* Light Gray */
+  --table-border: 44 62 80; /* Muted blue-gray borders */
+
+  /* Modals */
+  --modal-overlay: 17 25 34 / 0.5; /* Dark overlay */
+  --modal-background: 23 32 42; /* Card background (#17202A) */
+  --modal-border: 44 62 80; /* Muted blue-gray borders */
+
+  /* Focus & Interaction */
+  --focus-ring: 52 152 219; /* Bright Blue for focus ring */
+  --focus-ring-offset: 17 25 34; /* Page background for offset */
+}
+.freshLight {
+  /* Hex to RGB conversions will be used internally for clarity in comments,
+     but the values provided are direct RGB. */
+
+  /* === PAGE & LAYOUT === */
+  --page-background: 245 247 250; /* Very light gray, almost off-white (#F5F7FA) */
+  --page-foreground: 36 41 46; /* Deep dark gray for primary text (#24292E) */
+
+  /* === SIDEBAR === */
+  --sidebar-background: 255 255 255; /* Pure white for clean sidebar contrast */
+  --sidebar-border: 220 223 226; /* Light gray for subtle border (#DCDFE2) */
+  --sidebar-brand-icon: 39 125 161; /* Refreshing Blue-Green (#277DA1) for brand icon */
+  --sidebar-brand-text: 36 41 46; /* Deep dark gray */
+  --sidebar-nav-text: 78 86 94; /* Medium gray for nav text (#4E565E) */
+  --sidebar-nav-text-hover: 36 41 46; /* Darker on hover */
+  --sidebar-nav-active-bg: 224 235 242; /* Very light blue-gray for active background (#E0EBF2) */
+  --sidebar-nav-active-text: 39 125 161; /* Refreshing Blue-Green for active text */
+  --sidebar-nav-hover-bg: 240 242 245; /* Lighter hover background */
+  --sidebar-user-name: 78 86 94;
+  --sidebar-user-email: 128 138 148; /* Muted gray */
+  --sidebar-mobile-overlay: 36 41 46 / 0.75; /* Dark gray overlay */
+
+  /* === CARDS === */
+  --card-background: 255 255 255; /* Pure white for cards */
+  --card-border: 220 223 226; /* Light gray for card borders */
+  --card-header-text: 36 41 46; /* Deep dark gray */
+  --card-body-text: 78 86 94; /* Medium gray */
+  --card-shadow: 0 2px 5px 0 rgb(0 0 0 / 0.08); /* Soft, subtle shadow */
+
+  /* === BUTTONS === */
+  --button-primary-bg: 39 125 161; /* Refreshing Blue-Green (#277DA1) */
+  --button-primary-bg-hover: 30 100 130; /* Darker blue-green on hover */
+  --button-primary-text: 255 255 255; /* White text */
+  --button-secondary-bg: 220 223 226; /* Light gray */
+  --button-secondary-bg-hover: 200 205 210; /* Darker light gray on hover */
+  --button-secondary-text: 78 86 94; /* Medium gray */
+  --button-success-bg: 68 157 68; /* Standard Green (#449D44) */
+  --button-success-bg-hover: 55 125 55;
+  --button-success-text: 255 255 255;
+  --button-danger-bg: 217 83 79; /* Soft Red (#D9534F) */
+  --button-danger-bg-hover: 180 65 60;
+  --button-danger-text: 255 255 255;
+
+  /* === FORMS === */
+  --input-background: 255 255 255; /* White */
+  --input-border: 200 205 210; /* Darker light gray */
+  --input-border-focus: 39 125 161; /* Refreshing Blue-Green */
+  --input-text: 36 41 46; /* Deep dark gray */
+  --input-placeholder: 128 138 148; /* Muted gray */
+  --input-label: 78 86 94;
+  --input-help-text: 128 138 148;
+
+  /* === TEXT HIERARCHY === */
+  --text-heading: 36 41 46; /* Deep dark gray */
+  --text-body: 78 86 94; /* Medium gray */
+  --text-muted: 128 138 148; /* Muted gray */
+  --text-link: 39 125 161; /* Refreshing Blue-Green */
+  --text-link-hover: 30 100 130;
+
+  /* === STATUS COLORS === */
+  --status-success-bg: 232 249 232; /* Very light green */
+  --status-success-text: 68 157 68; /* Standard Green */
+  --status-warning-bg: 255 249 229; /* Very light yellow */
+  --status-warning-text: 240 173 78; /* Muted Orange (#F0AD4E) */
+  --status-error-bg: 254 235 234; /* Very light red */
+  --status-error-text: 217 83 79; /* Soft Red */
+  --status-info-bg: 229 242 247; /* Very light blue */
+  --status-info-text: 39 125 161; /* Refreshing Blue-Green */
+
+  /* === ICONS === */
+  --icon-neutral: 128 138 148; /* Muted gray */
+  --icon-success: 68 157 68; /* Standard Green */
+  --icon-error: 217 83 79; /* Soft Red */
+  --icon-warning: 240 173 78; /* Muted Orange */
+  --icon-info: 39 125 161; /* Refreshing Blue-Green */
+
+  /* === TABLES === */
+  --table-header-bg: 240 242 245; /* Lighter hover background */
+  --table-header-text: 78 86 94; /* Medium gray */
+  --table-row-bg: 255 255 255; /* White rows */
+  --table-row-text: 36 41 46; /* Deep dark gray */
+  --table-border: 220 223 226; /* Light gray borders */
+
+  /* === MODALS === */
+  --modal-overlay: 36 41 46 / 0.5; /* Dark gray overlay */
+  --modal-background: 255 255 255; /* White modal */
+  --modal-border: 220 223 226; /* Light gray border */
+
+  /* === FOCUS & INTERACTION === */
+  --focus-ring: 39 125 161; /* Refreshing Blue-Green for focus ring */
+  --focus-ring-offset: 255 255 255; /* White offset */
+}
+.playful {
+  /* Hex to RGB conversions will be used internally for clarity in comments. */
+
+  /* === PAGE & LAYOUT === */
+  --page-background: 240 248 255; /* Alice Blue - a very light, friendly background (#F0F8FF) */
+  --page-foreground: 50 50 50; /* Soft dark gray for primary text (#323232) */
+
+  /* === SIDEBAR === */
+  --sidebar-background: 255 255 255; /* Pure white for a clean canvas */
+  --sidebar-border: 220 230 250; /* Light, soft blue for borders (#DCE6FA) */
+  --sidebar-brand-icon: 255 105 180; /* Hot Pink! for brand icon (#FF69B4) */
+  --sidebar-brand-text: 50 50 50; /* Soft dark gray */
+  --sidebar-nav-text: 80 80 80; /* Medium gray for nav text */
+  --sidebar-nav-text-hover: 255 105 180; /* Hot Pink on hover */
+  --sidebar-nav-active-bg: 255 230 245; /* Very light pink for active background (#FFE6F5) */
+  --sidebar-nav-active-text: 255 105 180; /* Hot Pink for active text */
+  --sidebar-nav-hover-bg: 245 250 255; /* Lighter blue-white on hover */
+  --sidebar-user-name: 80 80 80;
+  --sidebar-user-email: 150 150 150; /* Muted gray */
+  --sidebar-mobile-overlay: 50 50 50 / 0.75; /* Dark gray overlay */
+
+  /* === CARDS === */
+  --card-background: 255 255 255; /* Pure white for cards */
+  --card-border: 220 230 250; /* Light, soft blue for card borders */
+  --card-header-text: 50 50 50; /* Soft dark gray */
+  --card-body-text: 80 80 80; /* Medium gray */
+  --card-shadow: 0 4px 10px 0 rgb(0 0 0 / 0.08); /* A bit more prominent shadow for fun pop */
+
+  /* === BUTTONS === */
+  --button-primary-bg: 100 149 237; /* Cornflower Blue (#6495ED) - Primary playful action */
+  --button-primary-bg-hover: 80 120 200; /* Darker cornflower blue on hover */
+  --button-primary-text: 255 255 255; /* White text */
+  --button-secondary-bg: 255 105 180; /* Hot Pink (#FF69B4) - Secondary fun action */
+  --button-secondary-bg-hover: 220 80 150; /* Darker hot pink on hover */
+  --button-secondary-text: 255 255 255; /* White text */
+  --button-success-bg: 60 180 75; /* Vivid Green (#3CB44B) */
+  --button-success-bg-hover: 50 150 65;
+  --button-success-text: 255 255 255;
+  --button-danger-bg: 255 99 71; /* Tomato Red (#FF6347) */
+  --button-danger-bg-hover: 220 70 50;
+  --button-danger-text: 255 255 255;
+
+  /* === FORMS === */
+  --input-background: 255 255 255; /* White */
+  --input-border: 200 210 230; /* Light blue-gray */
+  --input-border-focus: 100 149 237; /* Cornflower Blue */
+  --input-text: 50 50 50; /* Soft dark gray */
+  --input-placeholder: 150 150 150; /* Muted gray */
+  --input-label: 80 80 80;
+  --input-help-text: 150 150 150;
+
+  /* === TEXT HIERARCHY === */
+  --text-heading: 50 50 50; /* Soft dark gray */
+  --text-body: 80 80 80; /* Medium gray */
+  --text-muted: 150 150 150; /* Muted gray */
+  --text-link: 100 149 237; /* Cornflower Blue */
+  --text-link-hover: 80 120 200;
+
+  /* === STATUS COLORS === */
+  --status-success-bg: 230 255 230; /* Very light green */
+  --status-success-text: 60 180 75; /* Vivid Green */
+  --status-warning-bg: 255 245 220; /* Very light orange-yellow */
+  --status-warning-text: 255 165 0; /* Orange (#FFA500) */
+  --status-error-bg: 255 230 230; /* Very light red */
+  --status-error-text: 255 99 71; /* Tomato Red */
+  --status-info-bg: 230 245 255; /* Very light blue */
+  --status-info-text: 100 149 237; /* Cornflower Blue */
+
+  /* === ICONS === */
+  --icon-neutral: 150 150 150; /* Muted gray */
+  --icon-success: 60 180 75; /* Vivid Green */
+  --icon-error: 255 99 71; /* Tomato Red */
+  --icon-warning: 255 165 0; /* Orange */
+  --icon-info: 100 149 237; /* Cornflower Blue */
+
+  /* === TABLES === */
+  --table-header-bg: 245 250 255; /* Lighter blue-white for headers */
+  --table-header-text: 80 80 80; /* Medium gray */
+  --table-row-bg: 255 255 255; /* White rows */
+  --table-row-text: 50 50 50; /* Soft dark gray */
+  --table-border: 220 230 250; /* Light, soft blue borders */
+
+  /* === MODALS === */
+  --modal-overlay: 50 50 50 / 0.5; /* Dark gray overlay */
+  --modal-background: 255 255 255; /* White modal */
+  --modal-border: 220 230 250; /* Light, soft blue border */
+
+  /* === FOCUS & INTERACTION === */
+  --focus-ring: 255 105 180; /* Hot Pink for focus ring */
+  --focus-ring-offset: 255 255 255; /* White offset */
+}
+.luxProfessional {
+  /* Hex to RGB conversions will be used internally for clarity in comments. */
+
+  /* === PAGE & LAYOUT === */
+  --page-background: 26 26 31; /* Very deep charcoal/near-black, for a luxurious feel (#1A1A1F) */
+  --page-foreground: 220 220 220; /* Soft off-white for main text, elegant contrast (#DCDCDC) */
+
+  /* === SIDEBAR === */
+  --sidebar-background: 34 34 39; /* Slightly lighter than page background, deep charcoal (#222227) */
+  --sidebar-border: 68 68 79; /* Muted dark gray-blue for subtle borders (#44444F) */
+  --sidebar-brand-icon: 199 178 120; /* Muted Gold for brand icon, opulent (#C7B278) */
+  --sidebar-brand-text: 220 220 220; /* Soft off-white */
+  --sidebar-nav-text: 170 170 185; /* Muted light gray-blue for nav text (#AAAAAB) */
+  --sidebar-nav-text-hover: 220 220 220; /* Soft off-white on hover */
+  --sidebar-nav-active-bg: 68 68 79; /* Muted dark gray-blue for active background */
+  --sidebar-nav-active-text: 199 178 120; /* Muted Gold for active text */
+  --sidebar-nav-hover-bg: 48 48 56; /* Darker charcoal on hover */
+  --sidebar-user-name: 170 170 185;
+  --sidebar-user-email: 120 120 135; /* More muted gray-blue */
+  --sidebar-mobile-overlay: 26 26 31 / 0.75; /* Deep dark overlay */
+
+  /* === CARDS === */
+  --card-background: 34 34 39; /* Same as sidebar, consistent deep charcoal (#222227) */
+  --card-border: 68 68 79; /* Muted dark gray-blue for card borders */
+  --card-header-text: 220 220 220; /* Soft off-white */
+  --card-body-text: 170 170 185; /* Muted light gray-blue */
+  --card-shadow: 0 5px 15px 0 rgb(0 0 0 / 0.5); /* Pronounced, elegant shadow */
+
+  /* === BUTTONS === */
+  --button-primary-bg: 199 178 120; /* Muted Gold (#C7B278) - Primary opulent action */
+  --button-primary-bg-hover: 160 140 90; /* Darker muted gold on hover */
+  --button-primary-text: 26 26 31; /* Very deep charcoal for text */
+  --button-secondary-bg: 68 68 79; /* Muted dark gray-blue (#44444F) - Secondary elegant action */
+  --button-secondary-bg-hover: 85 85 99; /* Slightly lighter on hover */
+  --button-secondary-text: 220 220 220; /* Soft off-white */
+  --button-success-bg: 60 179 113; /* Medium Sea Green for success, professional but positive (#3CB371) */
+  --button-success-bg-hover: 45 140 90;
+  --button-success-text: 255 255 255;
+  --button-danger-bg: 178 34 34; /* Firebrick Red for danger, serious but not alarming (#B22222) */
+  --button-danger-bg-hover: 140 25 25;
+  --button-danger-text: 255 255 255;
+
+  /* === FORMS === */
+  --input-background: 48 48 56; /* Darker charcoal for input backgrounds */
+  --input-border: 68 68 79; /* Muted dark gray-blue */
+  --input-border-focus: 199 178 120; /* Muted Gold for focus */
+  --input-text: 220 220 220; /* Soft off-white */
+  --input-placeholder: 120 120 135; /* More muted gray-blue */
+  --input-label: 170 170 185;
+  --input-help-text: 120 120 135;
+
+  /* === TEXT HIERARCHY === */
+  --text-heading: 220 220 220; /* Soft off-white */
+  --text-body: 170 170 185; /* Muted light gray-blue */
+  --text-muted: 120 120 135; /* More muted gray-blue */
+  --text-link: 199 178 120; /* Muted Gold */
+  --text-link-hover: 160 140 90;
+
+  /* === STATUS COLORS === */
+  --status-success-bg: 30 89 56; /* Darker green for success background */
+  --status-success-text: 60 179 113; /* Medium Sea Green */
+  --status-warning-bg: 120 80 0; /* Deep orange-brown for warning background */
+  --status-warning-text: 255 185 50; /* Goldenrod Yellow (#FFB932) */
+  --status-error-bg: 90 20 20; /* Darker red for error background */
+  --status-error-text: 178 34 34; /* Firebrick Red */
+  --status-info-bg: 30 60 90; /* Deep blue for info background */
+  --status-info-text: 100 149 237; /* Cornflower Blue (standard blue, can be adjusted if needed) */
+
+  /* === ICONS === */
+  --icon-neutral: 120 120 135; /* More muted gray-blue */
+  --icon-success: 60 179 113; /* Medium Sea Green */
+  --icon-error: 178 34 34; /* Firebrick Red */
+  --icon-warning: 255 185 50; /* Goldenrod Yellow */
+  --icon-info: 100 149 237; /* Cornflower Blue */
+
+  /* === TABLES === */
+  --table-header-bg: 48 48 56; /* Darker charcoal for headers */
+  --table-header-text: 170 170 185; /* Muted light gray-blue */
+  --table-row-bg: 34 34 39; /* Card background for rows */
+  --table-row-text: 220 220 220; /* Soft off-white */
+  --table-border: 68 68 79; /* Muted dark gray-blue borders */
+
+  /* === MODALS === */
+  --modal-overlay: 26 26 31 / 0.5; /* Deep dark overlay */
+  --modal-background: 34 34 39; /* Card background */
+  --modal-border: 68 68 79; /* Muted dark gray-blue borders */
+
+  /* === FOCUS & INTERACTION === */
+  --focus-ring: 199 178 120; /* Muted Gold for focus ring */
+  --focus-ring-offset: 26 26 31; /* Very deep charcoal for offset */
+}
+.luxProfessionalLight {
+  /* Hex to RGB conversions will be used internally for clarity in comments. */
+
+  /* === PAGE & LAYOUT === */
+  --page-background: 247 247 247; /* Very light, subtle off-white/gray for a clean, spacious feel (#F7F7F7) */
+  --page-foreground: 40 40 45; /* Deep, muted dark gray for primary text, elegant and readable (#28282D) */
+
+  /* === SIDEBAR === */
+  --sidebar-background: 255 255 255; /* Pure white for a crisp, clean sidebar */
+  --sidebar-border: 225 225 225; /* Very light gray for subtle borders (#E1E1E1) */
+  --sidebar-brand-icon: 110 80 160; /* Deep, muted plum/amethyst for brand icon, sophisticated (#6E50A0) */
+  --sidebar-brand-text: 40 40 45; /* Deep muted dark gray */
+  --sidebar-nav-text: 90 90 95; /* Medium gray for nav text (#5A5A5F) */
+  --sidebar-nav-text-hover: 40 40 45; /* Darker on hover */
+  --sidebar-nav-active-bg: 240 240 240; /* Very light cool gray for active background (#F0F0F0) */
+  --sidebar-nav-active-text: 110 80 160; /* Deep muted plum for active text */
+  --sidebar-nav-hover-bg: 245 245 245; /* Lighter hover background */
+  --sidebar-user-name: 90 90 95;
+  --sidebar-user-email: 140 140 145; /* Muted gray */
+  --sidebar-mobile-overlay: 40 40 45 / 0.75; /* Deep muted dark gray overlay */
+
+  /* === CARDS === */
+  --card-background: 255 255 255; /* Pure white for cards */
+  --card-border: 225 225 225; /* Very light gray for card borders */
+  --card-header-text: 40 40 45; /* Deep muted dark gray */
+  --card-body-text: 90 90 95; /* Medium gray */
+  --card-shadow: 0 3px 10px 0 rgb(0 0 0 / 0.08); /* Soft, subtle shadow for depth */
+
+  /* === BUTTONS === */
+  --button-primary-bg: 110 80 160; /* Deep muted plum (#6E50A0) - Primary sophisticated action */
+  --button-primary-bg-hover: 90 65 130; /* Darker plum on hover */
+  --button-primary-text: 255 255 255; /* White text */
+  --button-secondary-bg: 225 225 225; /* Very light gray (#E1E1E1) - Secondary elegant action */
+  --button-secondary-bg-hover: 210 210 210; /* Darker light gray on hover */
+  --button-secondary-text: 90 90 95; /* Medium gray */
+  --button-success-bg: 60 170 100; /* Subtle Green for success, professional and positive (#3CAAA4) */
+  --button-success-bg-hover: 48 136 80;
+  --button-success-text: 255 255 255;
+  --button-danger-bg: 200 80 80; /* Muted Red for danger, serious but not alarming (#C85050) */
+  --button-danger-bg-hover: 160 65 65;
+  --button-danger-text: 255 255 255;
+
+  /* === FORMS === */
+  --input-background: 255 255 255; /* White */
+  --input-border: 210 210 210; /* Darker light gray */
+  --input-border-focus: 110 80 160; /* Deep muted plum for focus */
+  --input-text: 40 40 45; /* Deep muted dark gray */
+  --input-placeholder: 140 140 145; /* Muted gray */
+  --input-label: 90 90 95;
+  --input-help-text: 140 140 145;
+
+  /* === TEXT HIERARCHY === */
+  --text-heading: 40 40 45; /* Deep muted dark gray */
+  --text-body: 90 90 95; /* Medium gray */
+  --text-muted: 140 140 145; /* Muted gray */
+  --text-link: 110 80 160; /* Deep muted plum */
+  --text-link-hover: 90 65 130;
+
+  /* === STATUS COLORS === */
+  --status-success-bg: 235 250 240; /* Very light green */
+  --status-success-text: 60 170 100; /* Subtle Green */
+  --status-warning-bg: 255 245 225; /* Very light amber */
+  --status-warning-text: 210 160 30; /* Polished Gold/Brass tone (#D2A01E) */
+  --status-error-bg: 255 235 235; /* Very light red */
+  --status-error-text: 200 80 80; /* Muted Red */
+  --status-info-bg: 230 240 250; /* Very light blue */
+  --status-info-text: 80 140 200; /* A standard blue, for informational purposes (#508CC8) */
+
+  /* === ICONS === */
+  --icon-neutral: 140 140 145; /* Muted gray */
+  --icon-success: 60 170 100; /* Subtle Green */
+  --icon-error: 200 80 80; /* Muted Red */
+  --icon-warning: 210 160 30; /* Polished Gold/Brass tone */
+  --icon-info: 80 140 200; /* Standard Blue */
+
+  /* === TABLES === */
+  --table-header-bg: 240 240 240; /* Very light cool gray for headers */
+  --table-header-text: 90 90 95; /* Medium gray */
+  --table-row-bg: 255 255 255; /* White rows */
+  --table-row-text: 40 40 45; /* Deep muted dark gray */
+  --table-border: 225 225 225; /* Very light gray borders */
+
+  /* === MODALS === */
+  --modal-overlay: 40 40 45 / 0.5; /* Deep muted dark gray overlay */
+  --modal-background: 255 255 255; /* White modal */
+  --modal-border: 225 225 225; /* Very light gray border */
+
+  /* === FOCUS & INTERACTION === */
+  --focus-ring: 110 80 160; /* Deep muted plum for focus ring */
+  --focus-ring-offset: 255 255 255; /* White offset */
+}
+
+
+.earthyDark {
+  /* Hex to RGB conversion for the provided colors */
+  /* #181C14 -> 24 28 20 */
+  /* #3C3D37 -> 60 61 55 */
+  /* #697565 -> 105 117 101 */
+  /* #ECDFCC -> 236 223 204 */
+
+  /* === PAGE & LAYOUT === */
+  --page-background: 24 28 20; /* #181C14 - Very dark, earthy green-gray */
+  --page-foreground: 236 223 204; /* #ECDFCC - Light, warm off-white for text */
+
+  /* === SIDEBAR === */
+  --sidebar-background: 60 61 55; /* #3C3D37 - Muted dark gray-green for sidebar */
+  --sidebar-border: 105 117 101; /* #697565 - Lighter muted green for borders */
+  --sidebar-brand-icon: 236 223 204; /* #ECDFCC - Light, warm off-white for brand icon */
+  --sidebar-brand-text: 236 223 204; /* Light, warm off-white for brand text */
+  --sidebar-nav-text: 180 190 170; /* Muted light gray-green for nav text */
+  --sidebar-nav-text-hover: 236 223 204; /* Light off-white on hover */
+  --sidebar-nav-active-bg: 105 117 101; /* #697565 - Lighter muted green for active background */
+  --sidebar-nav-active-text: 24 28 20; /* Dark background color for active text */
+  --sidebar-nav-hover-bg: 75 80 70; /* Slightly lighter muted dark gray-green on hover */
+  --sidebar-user-name: 180 190 170;
+  --sidebar-user-email: 140 150 130; /* More muted gray-green */
+  --sidebar-mobile-overlay: 24 28 20 / 0.75; /* Dark earthy overlay */
+
+  /* === CARDS === */
+  --card-background: 60 61 55; /* #3C3D37 - Same as sidebar for cards */
+  --card-border: 105 117 101; /* #697565 - Lighter muted green for card borders */
+  --card-header-text: 236 223 204; /* Light off-white for header text */
+  --card-body-text: 180 190 170; /* Muted light gray-green for body text */
+  --card-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.4); /* Standard shadow for dark cards */
+
+  /* === BUTTONS === */
+  --button-primary-bg: 105 117 101; /* #697565 - Lighter muted green for primary buttons */
+  --button-primary-bg-hover: 90 100 85; /* Darker primary on hover */
+  --button-primary-text: 24 28 20; /* Dark background color for primary button text */
+  --button-secondary-bg: 75 80 70; /* Darker muted dark gray-green for secondary buttons */
+  --button-secondary-bg-hover: 90 95 85; /* Lighter secondary on hover */
+  --button-secondary-text: 236 223 204; /* Light off-white for secondary text */
+  --button-success-bg: 80 140 80; /* A pleasant green for success */
+  --button-success-bg-hover: 60 120 60;
+  --button-success-text: 255 255 255;
+  --button-danger-bg: 200 80 80; /* A soft red for danger */
+  --button-danger-bg-hover: 170 65 65;
+  --button-danger-text: 255 255 255;
+
+  /* === FORMS === */
+  --input-background: 75 80 70; /* Darker muted dark gray-green for input backgrounds */
+  --input-border: 90 95 85; /* Slightly lighter for input borders */
+  --input-border-focus: 236 223 204; /* #ECDFCC - Light off-white for focus */
+  --input-text: 236 223 204; /* Light off-white for input text */
+  --input-placeholder: 140 150 130; /* More muted gray-green */
+  --input-label: 180 190 170;
+  --input-help-text: 140 150 130;
+
+  /* === TEXT HIERARCHY === */
+  --text-heading: 236 223 204; /* Light off-white for headings */
+  --text-body: 180 190 170; /* Muted light gray-green */
+  --text-muted: 140 150 130; /* More muted gray-green */
+  --text-link: 105 117 101; /* #697565 - Lighter muted green for links */
+  --text-link-hover: 90 100 85;
+
+  /* === STATUS COLORS === */
+  --status-success-bg: 40 90 40; /* Darker green for success background */
+  --status-success-text: 80 140 80; /* Pleasant green for success text */
+  --status-warning-bg: 120 90 20; /* Dark orange-brown for warning background */
+  --status-warning-text: 230 190 50; /* Golden yellow for warning text */
+  --status-error-bg: 100 40 40; /* Dark red for error background */
+  --status-error-text: 200 80 80; /* Soft red for error text */
+  --status-info-bg: 40 80 100; /* Dark blue for info background */
+  --status-info-text: 105 117 101; /* #697565 - Lighter muted green for info text */
+
+  /* === ICONS === */
+  --icon-neutral: 140 150 130; /* More muted gray-green */
+  --icon-success: 80 140 80; /* Pleasant green for success icons */
+  --icon-error: 200 80 80; /* Soft red for error icons */
+  --icon-warning: 230 190 50; /* Golden yellow for warning icons */
+  --icon-info: 105 117 101; /* #697565 - Lighter muted green for info icons */
+
+  /* === TABLES === */
+  --table-header-bg: 60 61 55; /* #3C3D37 - Sidebar background for headers */
+  --table-header-text: 180 190 170; /* Muted light gray-green */
+  --table-row-bg: 24 28 20; /* #181C14 - Page background for table rows */
+  --table-row-text: 236 223 204; /* Light off-white */
+  --table-border: 75 80 70; /* Darker muted dark gray-green for borders */
+
+  /* === MODALS === */
+  --modal-overlay: 24 28 20 / 0.5; /* Dark earthy overlay */
+  --modal-background: 60 61 55; /* #3C3D37 - Card background for modals */
+  --modal-border: 105 117 101; /* #697565 - Lighter muted green for borders */
+
+  /* === FOCUS & INTERACTION === */
+  --focus-ring: 236 223 204; /* #ECDFCC - Light off-white for focus ring */
+  --focus-ring-offset: 24 28 20; /* #181C14 - Page background for focus ring offset */
+}
+
+.forest {
+  /* Hex to RGB conversion for the provided colors */
+  /* #2F5249 -> 47 82 73 */
+  /* #437057 -> 67 112 87 */
+  /* #97B067 -> 151 176 103 */
+  /* #E3DE61 -> 227 222 97 */
+
+  /* === PAGE & LAYOUT === */
+  --page-background: 47 82 73; /* #2F5249 - Dark green for the main background */
+  --page-foreground: 255 255 255; /* White for main text for contrast */
+
+  /* === SIDEBAR === */
+  --sidebar-background: 67 112 87; /* #437057 - Slightly lighter green for sidebar */
+  --sidebar-border: 151 176 103; /* #97B067 - Muted green for borders */
+  --sidebar-brand-icon: 227 222 97; /* #E3DE61 - Bright yellow for brand icon */
+  --sidebar-brand-text: 255 255 255; /* White for brand text */
+  --sidebar-nav-text: 220 230 200; /* Light off-white/green for nav text */
+  --sidebar-nav-text-hover: 255 255 255; /* White on hover */
+  --sidebar-nav-active-bg: 151 176 103; /* #97B067 - Muted green for active background */
+  --sidebar-nav-active-text: 47 82 73; /* #2F5249 - Dark green for active text */
+  --sidebar-nav-hover-bg: 80 120 95; /* Slightly darker green on hover */
+  --sidebar-user-name: 220 230 200; /* Light off-white/green */
+  --sidebar-user-email: 180 190 170; /* Muted gray-green */
+  --sidebar-mobile-overlay: 47 82 73 / 0.75; /* Dark green overlay */
+
+  /* === CARDS === */
+  --card-background: 67 112 87; /* #437057 - Same as sidebar for card background */
+  --card-border: 151 176 103; /* #97B067 - Muted green for card borders */
+  --card-header-text: 255 255 255; /* White for header text */
+  --card-body-text: 220 230 200; /* Light off-white/green for body text */
+  --card-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3); /* Standard shadow for dark cards */
+
+  /* === BUTTONS === */
+  --button-primary-bg: 151 176 103; /* #97B067 - Muted green for primary buttons */
+  --button-primary-bg-hover: 130 150 85; /* Darker muted green on hover */
+  --button-primary-text: 47 82 73; /* #2F5249 - Dark green for primary button text */
+  --button-secondary-bg: 80 120 95; /* Darker green for secondary buttons */
+  --button-secondary-bg-hover: 95 135 105; /* Lighter green on hover */
+  --button-secondary-text: 220 230 200; /* Light off-white/green for secondary text */
+  --button-success-bg: 100 160 50; /* A brighter green for success */
+  --button-success-bg-hover: 80 130 40; /* Darker success green */
+  --button-success-text: 255 255 255; /* White for success text */
+  --button-danger-bg: 200 60 60; /* A clear red for danger */
+  --button-danger-bg-hover: 170 50 50; /* Darker danger red */
+  --button-danger-text: 255 255 255; /* White for danger text */
+
+  /* === FORMS === */
+  --input-background: 80 120 95; /* Darker green for input backgrounds */
+  --input-border: 120 140 100; /* Slightly lighter green for input borders */
+  --input-border-focus: 227 222 97; /* #E3DE61 - Yellow for focus border */
+  --input-text: 255 255 255; /* White for input text */
+  --input-placeholder: 180 190 170; /* Muted gray-green for placeholder */
+  --input-label: 220 230 200; /* Light off-white/green for input labels */
+  --input-help-text: 180 190 170; /* Muted gray-green for help text */
+
+  /* === TEXT HIERARCHY === */
+  --text-heading: 255 255 255; /* White for headings */
+  --text-body: 220 230 200; /* Light off-white/green for body text */
+  --text-muted: 180 190 170; /* Muted gray-green for muted text */
+  --text-link: 227 222 97; /* #E3DE61 - Yellow for links */
+  --text-link-hover: 240 235 120; /* Lighter yellow on hover */
+
+  /* === STATUS COLORS === */
+  --status-success-bg: 60 100 50; /* Darker green for success background */
+  --status-success-text: 100 160 50; /* Brighter green for success text */
+  --status-warning-bg: 150 120 30; /* Darker yellow-brown for warning background */
+  --status-warning-text: 227 222 97; /* #E3DE61 - Yellow for warning text */
+  --status-error-bg: 120 40 40; /* Darker red for error background */
+  --status-error-text: 200 60 60; /* Red for error text */
+  --status-info-bg: 80 120 150; /* Muted blue for info background */
+  --status-info-text: 151 176 103; /* #97B067 - Muted green for info text */
+
+  /* === ICONS === */
+  --icon-neutral: 180 190 170; /* Muted gray-green for neutral icons */
+  --icon-success: 100 160 50; /* Brighter green for success icons */
+  --icon-error: 200 60 60; /* Red for error icons */
+  --icon-warning: 227 222 97; /* #E3DE61 - Yellow for warning icons */
+  --icon-info: 151 176 103; /* #97B067 - Muted green for info icons */
+
+  /* === TABLES === */
+  --table-header-bg: 67 112 87; /* #437057 - Card background for table headers */
+  --table-header-text: 220 230 200; /* Light off-white/green for table header text */
+  --table-row-bg: 47 82 73; /* #2F5249 - Page background for table rows */
+  --table-row-text: 255 255 255; /* White for table row text */
+  --table-border: 80 120 95; /* Darker green for table borders */
+
+  /* === MODALS === */
+  --modal-overlay: 47 82 73 / 0.5; /* Dark green overlay */
+  --modal-background: 67 112 87; /* #437057 - Card background for modals */
+  --modal-border: 151 176 103; /* #97B067 - Muted green for modal borders */
+
+  /* === FOCUS & INTERACTION === */
+  --focus-ring: 227 222 97; /* #E3DE61 - Yellow for focus ring */
+  --focus-ring-offset: 47 82 73; /* #2F5249 - Page background for focus ring offset */
+}
+
+/* === BASE STYLES === */
+* {
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: rgb(var(--page-background));
+  color: rgb(var(--page-foreground));
+  font-feature-settings: "rlig" 1, "calt" 1;
+  margin: 0;
+  padding: 0;
+}
+
+/* === COMPONENT UTILITY CLASSES === */
+
+/* Page & Layout */
+.bg-page { background-color: rgb(var(--page-background)); }
+.text-page { color: rgb(var(--page-foreground)); }
+
+/* Sidebar */
+.bg-sidebar { background-color: rgb(var(--sidebar-background)); }
+.border-sidebar { border-color: rgb(var(--sidebar-border)); }
+.text-sidebar-brand-icon { color: rgb(var(--sidebar-brand-icon)); }
+.text-sidebar-brand-text { color: rgb(var(--sidebar-brand-text)); }
+.text-sidebar-nav { color: rgb(var(--sidebar-nav-text)); }
+.text-sidebar-nav-hover:hover { color: rgb(var(--sidebar-nav-text-hover)); }
+.bg-sidebar-nav-active { background-color: rgb(var(--sidebar-nav-active-bg)); }
+.text-sidebar-nav-active { color: rgb(var(--sidebar-nav-active-text)); }
+.bg-sidebar-nav-hover:hover { background-color: rgb(var(--sidebar-nav-hover-bg)); }
+.text-sidebar-user-name { color: rgb(var(--sidebar-user-name)); }
+.text-sidebar-user-email { color: rgb(var(--sidebar-user-email)); }
+.bg-sidebar-mobile-overlay { background-color: rgb(var(--sidebar-mobile-overlay)); }
+
+/* Cards */
+.bg-card { background-color: rgb(var(--card-background)); }
+.border-card { border-color: rgb(var(--card-border)); }
+.text-card-header { color: rgb(var(--card-header-text)); }
+.text-card-body { color: rgb(var(--card-body-text)); }
+.shadow-card { box-shadow: var(--card-shadow); }
+
+/* Buttons */
+.bg-button-primary { background-color: rgb(var(--button-primary-bg)); }
+.bg-button-primary:hover { background-color: rgb(var(--button-primary-bg-hover)); }
+.text-button-primary { color: rgb(var(--button-primary-text)); }
+.bg-button-secondary { background-color: rgb(var(--button-secondary-bg)); }
+.bg-button-secondary:hover { background-color: rgb(var(--button-secondary-bg-hover)); }
+.text-button-secondary { color: rgb(var(--button-secondary-text)); }
+.bg-button-success { background-color: rgb(var(--button-success-bg)); }
+.bg-button-success:hover { background-color: rgb(var(--button-success-bg-hover)); }
+.text-button-success { color: rgb(var(--button-success-text)); }
+.bg-button-danger { background-color: rgb(var(--button-danger-bg)); }
+.bg-button-danger:hover { background-color: rgb(var(--button-danger-bg-hover)); }
+.text-button-danger { color: rgb(var(--button-danger-text)); }
+
+/* Forms */
+.bg-input { background-color: rgb(var(--input-background)); }
+.border-input { border-color: rgb(var(--input-border)); }
+.border-input-focus:focus { border-color: rgb(var(--input-border-focus)); }
+.text-input { color: rgb(var(--input-text)); }
+.text-input-label { color: rgb(var(--input-label)); }
+.text-input-help { color: rgb(var(--input-help-text)); }
+
+/* Text Hierarchy */
+.text-heading { color: rgb(var(--text-heading)); }
+.text-body { color: rgb(var(--text-body)); }
+.text-muted { color: rgb(var(--text-muted)); }
+.text-link { color: rgb(var(--text-link)); }
+.text-link:hover { color: rgb(var(--text-link-hover)); }
+
+/* Status Colors */
+.bg-status-success { background-color: rgb(var(--status-success-bg)); }
+.text-status-success { color: rgb(var(--status-success-text)); }
+.bg-status-warning { background-color: rgb(var(--status-warning-bg)); }
+.text-status-warning { color: rgb(var(--status-warning-text)); }
+.bg-status-error { background-color: rgb(var(--status-error-bg)); }
+.text-status-error { color: rgb(var(--status-error-text)); }
+.bg-status-info { background-color: rgb(var(--status-info-bg)); }
+.text-status-info { color: rgb(var(--status-info-text)); }
+
+/* Icons */
+.text-icon-neutral { color: rgb(var(--icon-neutral)); }
+.text-icon-success { color: rgb(var(--icon-success)); }
+.text-icon-error { color: rgb(var(--icon-error)); }
+.text-icon-warning { color: rgb(var(--icon-warning)); }
+.text-icon-info { color: rgb(var(--icon-info)); }
+
+/* Tables */
+.bg-table-header { background-color: rgb(var(--table-header-bg)); }
+.text-table-header { color: rgb(var(--table-header-text)); }
+.bg-table-row { background-color: rgb(var(--table-row-bg)); }
+.text-table-row { color: rgb(var(--table-row-text)); }
+.border-table { border-color: rgb(var(--table-border)); }
+
+/* Modals */
+.bg-modal-overlay { background-color: rgb(var(--modal-overlay)); }
+.bg-modal { background-color: rgb(var(--modal-background)); }
+.border-modal { border-color: rgb(var(--modal-border)); }
+
+/* Focus & Interaction */
+.ring-focus { ring-color: rgb(var(--focus-ring)); }
+.ring-offset-focus { ring-offset-color: rgb(var(--focus-ring-offset)); }
+
+/* Additional Status and Semantic Colors */
+.border-card-border { border-color: rgb(var(--card-border)); }
+.divide-table-border { border-color: rgb(var(--table-border)); }
+.bg-button-secondary-hover:hover { background-color: rgb(var(--button-secondary-bg-hover)); }
+.bg-muted { background-color: rgb(var(--table-header-bg)); }
+/* === ENHANCED STYLES === */
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgb(var(--card-background));
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--text-muted));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--text-body));
+}
+
+/* Form input focus states */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid rgb(var(--focus-ring));
+  outline-offset: 2px;
+}
+
+/* Smooth transitions */
+* {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
 }

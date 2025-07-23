@@ -4,7 +4,9 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Upload, X } from 'lucide-react'
+import { ArrowLeft, Upload, X, Scan, Loader } from 'lucide-react'
+import { useBudgetAlerts } from '@/hooks/useBudgetAlerts'
+import { analyzeReceiptImage, compressImage, type ReceiptData } from '@/lib/receiptAnalysis'
 
 interface Category {
   id: string
@@ -23,6 +25,7 @@ interface Account {
 export default function NewExpense() {
   const { data: session } = useSession()
   const router = useRouter()
+  const { handleBudgetAlert } = useBudgetAlerts()
   
   const [formData, setFormData] = useState({
     amount: '',
@@ -40,6 +43,9 @@ export default function NewExpense() {
   const [error, setError] = useState('')
   const [uploadingFile, setUploadingFile] = useState(false)
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
+  const [analyzingReceipt, setAnalyzingReceipt] = useState(false)
+  const [receiptData, setReceiptData] = useState<ReceiptData | null>(null)
+  const [showReceiptAnalysis, setShowReceiptAnalysis] = useState(false)
 
   useEffect(() => {
     if (session) {
@@ -93,6 +99,13 @@ export default function NewExpense() {
       })
 
       if (response.ok) {
+        const data = await response.json()
+        
+        // Handle budget alerts if present
+        if (data.budgetAlert) {
+          handleBudgetAlert(data.budgetAlert)
+        }
+        
         router.push('/expenses')
       } else {
         const data = await response.json()
@@ -121,8 +134,11 @@ export default function NewExpense() {
     setError('')
 
     try {
+      // Compress image before upload
+      const compressedFile = await compressImage(file, 1024, 0.8)
+      
       const formData = new FormData()
-      formData.append('file', file)
+      formData.append('file', compressedFile)
 
       const response = await fetch('/api/upload', {
         method: 'POST',
@@ -136,6 +152,9 @@ export default function NewExpense() {
           receiptUrl: data.url
         }))
         setUploadedFile(file)
+        
+        // Automatically start OCR analysis
+        analyzeReceipt(file)
       } else {
         const error = await response.json()
         setError(error.error || 'Failed to upload file')
@@ -147,36 +166,120 @@ export default function NewExpense() {
     }
   }
 
+  const analyzeReceipt = async (file: File) => {
+    setAnalyzingReceipt(true)
+    setError('')
+
+    try {
+      console.log('🔍 Starting receipt analysis for file:', file.name)
+      const result = await analyzeReceiptImage(file)
+      console.log('📊 OCR Result:', result)
+      
+      if (result.success && result.data) {
+        setReceiptData(result.data)
+        setShowReceiptAnalysis(true)
+        
+        // Show success message
+        if (result.data.amount || result.data.merchantName || result.data.date) {
+          console.log('✅ Receipt analyzed successfully:', result.data)
+          // Auto-apply if we have key data
+          if (result.data.amount && result.data.merchantName) {
+            console.log('🚀 Auto-applying receipt data...')
+            const dataToApply = result.data
+            setTimeout(() => {
+              if (dataToApply) {
+                applyReceiptDataWithData(dataToApply)
+              }
+            }, 1500) // Give user a moment to see the modal
+          }
+        } else {
+          console.log('⚠️ No useful data extracted from receipt')
+        }
+      } else {
+        console.error('❌ Receipt analysis failed:', result.error)
+        setError(result.error || 'Failed to analyze receipt')
+      }
+    } catch (error) {
+      console.error('Receipt analysis error:', error)
+      setError('Failed to analyze receipt')
+    } finally {
+      setAnalyzingReceipt(false)
+    }
+  }
+
+  const applyReceiptDataWithData = (data: ReceiptData) => {
+    const updates: any = {}
+    
+    if (data.amount) {
+      updates.amount = data.amount.toString()
+    }
+    
+    if (data.date) {
+      updates.date = data.date
+    }
+    
+    if (data.merchantName) {
+      updates.description = data.merchantName
+    }
+    
+    // Try to match category
+    if (data.category) {
+      const matchingCategory = categories.find(cat => 
+        cat.name.toLowerCase().includes(data.category!.toLowerCase()) ||
+        data.category!.toLowerCase().includes(cat.name.toLowerCase())
+      )
+      if (matchingCategory) {
+        updates.categoryId = matchingCategory.id
+      }
+    }
+
+    console.log('📝 Applying receipt data to form:', updates)
+    setFormData(prev => ({ ...prev, ...updates }))
+    setShowReceiptAnalysis(false)
+  }
+
+  const applyReceiptData = () => {
+    if (!receiptData) return
+    applyReceiptDataWithData(receiptData)
+  }
+
+  const dismissReceiptAnalysis = () => {
+    setShowReceiptAnalysis(false)
+    setReceiptData(null)
+  }
+
   const removeUploadedFile = () => {
     setFormData(prev => ({
       ...prev,
       receiptUrl: ''
     }))
     setUploadedFile(null)
+    setReceiptData(null)
+    setShowReceiptAnalysis(false)
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-page">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <Link
             href="/expenses"
-            className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+            className="inline-flex items-center text-sm font-medium text-link text-link:hover"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Expenses
           </Link>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 shadow dark:shadow-gray-900/20 rounded-lg">
+        <div className="bg-card shadow-card rounded-lg">
           <div className="px-4 py-5 sm:p-6">
-            <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-6">
+            <h3 className="text-lg font-medium leading-6 text-card-header mb-6">
               Add New Expense
             </h3>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label htmlFor="amount" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label htmlFor="amount" className="block text-sm font-medium text-input-label">
                   Amount *
                 </label>
                 <div className="mt-1">
@@ -188,14 +291,14 @@ export default function NewExpense() {
                     required
                     value={formData.amount}
                     onChange={handleInputChange}
-                    className="block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="block w-full border-input rounded-md shadow-sm ring-focus border-input-focus:focus sm:text-sm bg-input text-input"
                     placeholder="0.00"
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label htmlFor="description" className="block text-sm font-medium text-input-label">
                   Description
                 </label>
                 <div className="mt-1">
@@ -205,7 +308,7 @@ export default function NewExpense() {
                     rows={3}
                     value={formData.description}
                     onChange={handleInputChange}
-                    className="block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="block w-full border-input rounded-md shadow-sm ring-focus border-input-focus:focus sm:text-sm bg-input text-input"
                     placeholder="What did you spend on?"
                   />
                 </div>
@@ -213,7 +316,7 @@ export default function NewExpense() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label htmlFor="categoryId" className="block text-sm font-medium text-input-label">
                     Category *
                   </label>
                   <div className="mt-1">
@@ -223,7 +326,7 @@ export default function NewExpense() {
                       required
                       value={formData.categoryId}
                       onChange={handleInputChange}
-                      className="block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="block w-full border-input rounded-md shadow-sm ring-focus border-input-focus:focus sm:text-sm bg-input text-input"
                     >
                       <option value="">Select a category</option>
                       {categories.map((category) => (
@@ -236,7 +339,7 @@ export default function NewExpense() {
                 </div>
 
                 <div>
-                  <label htmlFor="accountId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label htmlFor="accountId" className="block text-sm font-medium text-input-label">
                     Account (Optional)
                   </label>
                   <div className="mt-1">
@@ -245,7 +348,7 @@ export default function NewExpense() {
                       id="accountId"
                       value={formData.accountId}
                       onChange={handleInputChange}
-                      className="block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="block w-full border-input rounded-md shadow-sm ring-focus border-input-focus:focus sm:text-sm bg-input text-input"
                     >
                       {accounts
                         .filter(account => account.type === 'OTHERS_FIXED')
@@ -269,7 +372,7 @@ export default function NewExpense() {
               </div>
 
               <div>
-                <label htmlFor="date" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label htmlFor="date" className="block text-sm font-medium text-input-label">
                   Date
                 </label>
                 <div className="mt-1">
@@ -279,24 +382,24 @@ export default function NewExpense() {
                     id="date"
                     value={formData.date}
                     onChange={handleInputChange}
-                    className="block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="block w-full border-input rounded-md shadow-sm ring-focus border-input-focus:focus sm:text-sm bg-input text-input"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block text-sm font-medium text-input-label">
                   Receipt Image
                 </label>
                 <div className="mt-1">
                   {!uploadedFile ? (
-                    <div className="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-md">
+                    <div className="flex justify-center px-6 pt-5 pb-6 border-2 border-input border-dashed rounded-md">
                       <div className="space-y-1 text-center">
                         <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                        <div className="flex text-sm text-gray-600 dark:text-gray-400">
+                        <div className="flex text-sm text-muted">
                           <label
                             htmlFor="file-upload"
-                            className="relative cursor-pointer bg-white dark:bg-gray-800 rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
+                            className="relative cursor-pointer bg-card rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
                           >
                             <span>Upload a file</span>
                             <input
@@ -311,27 +414,55 @@ export default function NewExpense() {
                           </label>
                           <p className="pl-1">or drag and drop</p>
                         </div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                        <p className="text-xs text-muted">
                           PNG, JPG, GIF up to 5MB
                         </p>
                         {uploadingFile && (
-                          <p className="text-xs text-blue-600">Uploading...</p>
+                          <p className="text-xs text-blue-600">Uploading and compressing...</p>
+                        )}
+                        {analyzingReceipt && (
+                          <div className="flex items-center justify-center space-x-2 text-xs text-blue-600">
+                            <Loader className="h-4 w-4 animate-spin" />
+                            <span>Analyzing receipt with OCR...</span>
+                          </div>
                         )}
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
-                      <div className="flex items-center">
-                        <Upload className="h-5 w-5 text-gray-400 mr-2" />
-                        <span className="text-sm text-gray-900 dark:text-white">{uploadedFile.name}</span>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3 bg-muted rounded-md">
+                        <div className="flex items-center">
+                          <Upload className="h-5 w-5 text-gray-400 mr-2" />
+                          <div className="flex flex-col">
+                            <span className="text-sm text-heading">{uploadedFile.name}</span>
+                            {analyzingReceipt && (
+                              <div className="flex items-center space-x-2 text-xs text-blue-600 mt-1">
+                                <Loader className="h-3 w-3 animate-spin" />
+                                <span>Analyzing with OCR...</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          {receiptData && !analyzingReceipt && (
+                            <button
+                              type="button"
+                              onClick={() => setShowReceiptAnalysis(true)}
+                              className="text-blue-600 hover:text-blue-800 p-1"
+                              title="View receipt analysis"
+                            >
+                              <Scan className="h-4 w-4" />
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={removeUploadedFile}
+                            className="text-red-600 hover:text-red-800"
+                          >
+                            <X className="h-5 w-5" />
+                          </button>
+                        </div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={removeUploadedFile}
-                        className="text-red-600 hover:text-red-800"
-                      >
-                        <X className="h-5 w-5" />
-                      </button>
                     </div>
                   )}
                 </div>
@@ -346,19 +477,19 @@ export default function NewExpense() {
                   onChange={handleInputChange}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
-                <label htmlFor="isRecurring" className="ml-2 block text-sm text-gray-900 dark:text-white">
+                <label htmlFor="isRecurring" className="ml-2 block text-sm text-heading">
                   This is a recurring expense
                 </label>
               </div>
 
               {error && (
-                <div className="text-red-600 dark:text-red-400 text-sm">{error}</div>
+                <div className="text-status-error text-sm">{error}</div>
               )}
 
               <div className="flex justify-end space-x-3">
                 <Link
                   href="/expenses"
-                  className="bg-white dark:bg-gray-700 py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="bg-input py-2 px-4 border border-input rounded-md shadow-sm text-sm font-medium text-input-label hover:bg-button-secondary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
                   Cancel
                 </Link>
@@ -374,6 +505,72 @@ export default function NewExpense() {
           </div>
         </div>
       </div>
+
+      {/* Receipt Analysis Modal */}
+      {showReceiptAnalysis && receiptData && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-card rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div className="px-6 py-4 border-b border-input">
+              <h3 className="text-lg font-medium text-card-header">Receipt Analysis Results</h3>
+            </div>
+            <div className="px-6 py-4">
+              <div className="space-y-3">
+                {receiptData.merchantName && (
+                  <div>
+                    <label className="text-sm font-medium text-input-label">Merchant:</label>
+                    <p className="text-sm text-heading">{receiptData.merchantName}</p>
+                  </div>
+                )}
+                {receiptData.amount && (
+                  <div>
+                    <label className="text-sm font-medium text-input-label">Amount:</label>
+                    <p className="text-sm text-heading">${receiptData.amount.toFixed(2)}</p>
+                  </div>
+                )}
+                {receiptData.date && (
+                  <div>
+                    <label className="text-sm font-medium text-input-label">Date:</label>
+                    <p className="text-sm text-heading">{receiptData.date}</p>
+                  </div>
+                )}
+                {receiptData.category && (
+                  <div>
+                    <label className="text-sm font-medium text-input-label">Suggested Category:</label>
+                    <p className="text-sm text-heading">{receiptData.category}</p>
+                  </div>
+                )}
+                {receiptData.items && receiptData.items.length > 0 && (
+                  <div>
+                    <label className="text-sm font-medium text-input-label">Items:</label>
+                    <div className="text-sm text-heading max-h-20 overflow-y-auto">
+                      {receiptData.items.slice(0, 5).map((item, index) => (
+                        <p key={index}>• {item}</p>
+                      ))}
+                      {receiptData.items.length > 5 && (
+                        <p className="text-muted">... and {receiptData.items.length - 5} more items</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="px-6 py-4 border-t border-input flex justify-end space-x-3">
+              <button
+                onClick={dismissReceiptAnalysis}
+                className="px-4 py-2 text-sm font-medium text-input-label bg-input border border-input rounded-md hover:bg-button-secondary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Dismiss
+              </button>
+              <button
+                onClick={applyReceiptData}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Apply to Form
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

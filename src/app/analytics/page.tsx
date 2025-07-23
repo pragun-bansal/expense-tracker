@@ -89,8 +89,8 @@ export default function Analytics() {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded shadow">
-          <p className="font-medium text-gray-900 dark:text-white">{label}</p>
+        <div className="bg-card p-3 border border-card-border rounded shadow">
+          <p className="font-medium text-heading">{label}</p>
           {payload.map((item: any, index: number) => (
             <p key={index} style={{ color: item.color }} className="text-sm">
               {item.name}: {formatCurrency(item.value)}
@@ -120,8 +120,8 @@ export default function Analytics() {
       <div className="mb-8">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Analytics</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">
+            <h1 className="text-3xl font-bold text-heading">Analytics</h1>
+            <p className="text-muted mt-2">
               Financial insights and trends
             </p>
           </div>
@@ -129,7 +129,7 @@ export default function Analytics() {
             <select
               value={period}
               onChange={(e) => setPeriod(e.target.value)}
-              className="border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="border-input rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-input text-heading"
             >
               <option value="month">This Month</option>
               <option value="quarter">Last 3 Months</option>
@@ -141,48 +141,48 @@ export default function Analytics() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow dark:shadow-gray-900/20">
+        <div className="bg-card p-6 rounded-lg shadow-card">
           <div className="flex items-center">
-            <TrendingUp className="h-8 w-8 text-green-600 dark:text-green-400" />
+            <TrendingUp className="h-8 w-8 text-status-success" />
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Income</p>
-              <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+              <p className="text-sm font-medium text-muted">Total Income</p>
+              <p className="text-2xl font-semibold text-heading">
                 {formatCurrency(data.summary.totalIncome)}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow dark:shadow-gray-900/20">
+        <div className="bg-card p-6 rounded-lg shadow-card">
           <div className="flex items-center">
-            <TrendingDown className="h-8 w-8 text-red-600 dark:text-red-400" />
+            <TrendingDown className="h-8 w-8 text-status-error" />
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Expenses</p>
-              <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+              <p className="text-sm font-medium text-muted">Total Expenses</p>
+              <p className="text-2xl font-semibold text-heading">
                 {formatCurrency(data.summary.totalExpenses)}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow dark:shadow-gray-900/20">
+        <div className="bg-card p-6 rounded-lg shadow-card">
           <div className="flex items-center">
-            <DollarSign className={`h-8 w-8 ${data.summary.netIncome >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`} />
+            <DollarSign className={`h-8 w-8 ${data.summary.netIncome >= 0 ? 'text-status-success' : 'text-status-error'}`} />
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Net Income</p>
-              <p className={`text-2xl font-semibold ${data.summary.netIncome >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+              <p className="text-sm font-medium text-muted">Net Income</p>
+              <p className={`text-2xl font-semibold ${data.summary.netIncome >= 0 ? 'text-status-success' : 'text-status-error'}`}>
                 {formatCurrency(data.summary.netIncome)}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow dark:shadow-gray-900/20">
+        <div className="bg-card p-6 rounded-lg shadow-card">
           <div className="flex items-center">
-            <PieChartIcon className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+            <PieChartIcon className="h-8 w-8 text-status-info" />
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Net Worth</p>
-              <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+              <p className="text-sm font-medium text-muted">Net Worth</p>
+              <p className="text-2xl font-semibold text-heading">
                 {formatCurrency(data.summary.netWorth)}
               </p>
             </div>
@@ -193,8 +193,8 @@ export default function Analytics() {
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         {/* Expense by Category Pie Chart */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow dark:shadow-gray-900/20">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+        <div className="bg-card p-6 rounded-lg shadow-card">
+          <h3 className="text-lg font-medium text-heading mb-4">
             Expenses by Category
           </h3>
           {data.expensesByCategory.length > 0 ? (
@@ -218,15 +218,15 @@ export default function Analytics() {
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex items-center justify-center h-[300px] text-gray-500 dark:text-gray-400">
+            <div className="flex items-center justify-center h-[300px] text-muted">
               No expense data available
             </div>
           )}
         </div>
 
         {/* Income by Category Pie Chart */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow dark:shadow-gray-900/20">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+        <div className="bg-card p-6 rounded-lg shadow-card">
+          <h3 className="text-lg font-medium text-heading mb-4">
             Income by Category
           </h3>
           {data.incomesByCategory.length > 0 ? (
@@ -250,7 +250,7 @@ export default function Analytics() {
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex items-center justify-center h-[300px] text-gray-500 dark:text-gray-400">
+            <div className="flex items-center justify-center h-[300px] text-muted">
               No income data available
             </div>
           )}
@@ -258,8 +258,8 @@ export default function Analytics() {
       </div>
 
       {/* Monthly Trends */}
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow dark:shadow-gray-900/20 mb-8">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+      <div className="bg-card p-6 rounded-lg shadow-card mb-8">
+        <h3 className="text-lg font-medium text-heading mb-4">
           Monthly Trends (Last 12 Months)
         </h3>
         <ResponsiveContainer width="100%" height={400}>
@@ -277,8 +277,8 @@ export default function Analytics() {
       </div>
 
       {/* Account Balances */}
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow dark:shadow-gray-900/20">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+      <div className="bg-card p-6 rounded-lg shadow-card">
+        <h3 className="text-lg font-medium text-heading mb-4">
           Account Balances
         </h3>
         {data.accountBalances.length > 0 ? (
@@ -292,7 +292,7 @@ export default function Analytics() {
             </BarChart>
           </ResponsiveContainer>
         ) : (
-          <div className="flex items-center justify-center h-[300px] text-gray-500 dark:text-gray-400">
+          <div className="flex items-center justify-center h-[300px] text-muted">
             No account data available
           </div>
         )}

@@ -2,7 +2,7 @@ export function CurrencyLoader() {
   return (
     <div className="flex items-center justify-center min-h-screen">
       <div className="flex flex-col items-center gap-6 p-8">
-        <div className="relative w-64 h-48 bg-white dark:bg-gray-800 rounded-[12px] shadow-lg border border-green-200/30 overflow-hidden">
+        <div className="relative w-64 h-48 bg-card rounded-[12px] shadow-lg border border-green-200/30 overflow-hidden">
           {/* Header */}
           <div className="h-12 bg-green-50 dark:bg-gray-700 border-b border-green-200/30 flex items-center px-4">
             <div className="w-20 h-3 bg-green-400/40 rounded animate-pulse"></div>
@@ -71,7 +71,7 @@ export function CurrencyLoader() {
           <h3 className="text-[15px] font-semibold text-gray-700 dark:text-white mb-2">
             Loading Financial Data
           </h3>
-          <p className="text-gray-500 dark:text-gray-400 text-[12px] animate-pulse">
+          <p className="text-muted text-[12px] animate-pulse">
             Calculating your expenses...
           </p>
         </div>

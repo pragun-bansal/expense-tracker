@@ -83,9 +83,9 @@ export default function Settings() {
 
   const getAlertColor = (level: string) => {
     switch (level) {
-      case 'exceeded': return 'text-red-600 dark:text-red-400'
-      case 'warning': return 'text-yellow-600 dark:text-yellow-400'
-      default: return 'text-green-600 dark:text-green-400'
+      case 'exceeded': return 'text-status-error'
+      case 'warning': return 'text-status-warning'
+      default: return 'text-status-success'
     }
   }
 
@@ -105,43 +105,43 @@ export default function Settings() {
     <div>
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Settings</h1>
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+        <h1 className="text-2xl sm:text-3xl font-bold text-heading">Settings</h1>
+        <p className="mt-2 text-sm text-body">
           Configure your account preferences and notifications
         </p>
       </div>
 
       <div className="space-y-8">
         {/* Profile Settings */}
-        <div className="bg-white dark:bg-gray-800 shadow dark:shadow-gray-900/20 rounded-lg">
+        <div className="bg-card shadow-card rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <div className="flex items-center mb-4">
-              <User className="h-5 w-5 text-gray-500 dark:text-gray-400 mr-2" />
-              <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white">
+              <User className="h-5 w-5 text-muted mr-2" />
+              <h3 className="text-lg font-medium leading-6 text-heading">
                 Profile Information
               </h3>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block text-sm font-medium text-input-label">
                   Name
                 </label>
                 <input
                   type="text"
                   value={session?.user?.name || ''}
                   disabled
-                  className="mt-1 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white sm:text-sm"
+                  className="mt-1 block w-full border-input rounded-md shadow-sm bg-input text-heading sm:text-sm"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block text-sm font-medium text-input-label">
                   Email
                 </label>
                 <input
                   type="email"
                   value={session?.user?.email || ''}
                   disabled
-                  className="mt-1 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white sm:text-sm"
+                  className="mt-1 block w-full border-input rounded-md shadow-sm bg-input text-heading sm:text-sm"
                 />
               </div>
             </div>
@@ -149,19 +149,19 @@ export default function Settings() {
         </div>
 
         {/* Notification Settings */}
-        <div className="bg-white dark:bg-gray-800 shadow dark:shadow-gray-900/20 rounded-lg">
+        <div className="bg-card shadow-card rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center">
-                <Bell className="h-5 w-5 text-gray-500 dark:text-gray-400 mr-2" />
-                <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white">
+                <Bell className="h-5 w-5 text-muted mr-2" />
+                <h3 className="text-lg font-medium leading-6 text-heading">
                   Notification Preferences
                 </h3>
               </div>
               <button
                 onClick={handleTestNotifications}
                 disabled={processing}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50"
+                className="inline-flex items-center px-4 py-2 border border-input text-sm font-medium rounded-md text-input-label bg-button-secondary hover:bg-button-secondary-hover disabled:opacity-50"
               >
                 <RefreshCw className={`h-4 w-4 mr-2 ${processing ? 'animate-spin' : ''}`} />
                 {processing ? 'Processing...' : 'Test Notifications'}
@@ -171,10 +171,10 @@ export default function Settings() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="text-sm font-medium text-input-label">
                     Email Notifications
                   </label>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <p className="text-sm text-muted">
                     Receive notifications via email
                   </p>
                 </div>
@@ -188,10 +188,10 @@ export default function Settings() {
               
               <div className="flex items-center justify-between">
                 <div>
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="text-sm font-medium text-input-label">
                     Budget Alerts
                   </label>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <p className="text-sm text-muted">
                     Get notified when budgets reach 80% or are exceeded
                   </p>
                 </div>
@@ -205,10 +205,10 @@ export default function Settings() {
               
               <div className="flex items-center justify-between">
                 <div>
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="text-sm font-medium text-input-label">
                     Weekly Reports
                   </label>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <p className="text-sm text-muted">
                     Receive weekly spending summaries
                   </p>
                 </div>
@@ -222,10 +222,10 @@ export default function Settings() {
               
               <div className="flex items-center justify-between">
                 <div>
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="text-sm font-medium text-input-label">
                     Monthly Reports
                   </label>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <p className="text-sm text-muted">
                     Receive monthly spending summaries
                   </p>
                 </div>
@@ -252,37 +252,37 @@ export default function Settings() {
 
         {/* Budget Alerts Status */}
         {budgetAlerts && (
-          <div className="bg-white dark:bg-gray-800 shadow dark:shadow-gray-900/20 rounded-lg">
+          <div className="bg-card shadow-card rounded-lg">
             <div className="px-4 py-5 sm:p-6">
               <div className="flex items-center mb-4">
-                <Mail className="h-5 w-5 text-gray-500 dark:text-gray-400 mr-2" />
-                <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white">
+                <Mail className="h-5 w-5 text-muted mr-2" />
+                <h3 className="text-lg font-medium leading-6 text-heading">
                   Budget Alert Status
                 </h3>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <div className="text-2xl font-bold text-heading">
                     {budgetAlerts.totalBudgets}
                   </div>
-                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                  <div className="text-sm text-muted">
                     Total Budgets
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                  <div className="text-2xl font-bold text-status-warning">
                     {budgetAlerts.alertsCount}
                   </div>
-                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                  <div className="text-sm text-muted">
                     Active Alerts
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                  <div className="text-2xl font-bold text-status-success">
                     {budgetAlerts.totalBudgets - budgetAlerts.alertsCount}
                   </div>
-                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                  <div className="text-sm text-muted">
                     On Track
                   </div>
                 </div>
@@ -290,18 +290,18 @@ export default function Settings() {
 
               {budgetAlerts.budgetAlerts.length > 0 && (
                 <div className="space-y-3">
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <h4 className="text-sm font-medium text-input-label">
                     Current Budget Status
                   </h4>
                   {budgetAlerts.budgetAlerts.map((alert) => (
-                    <div key={alert.budgetId} className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
+                    <div key={alert.budgetId} className="flex items-center justify-between p-3 border border-card-border rounded-lg">
                       <div className="flex items-center">
                         <span className="text-lg mr-3">{getAlertIcon(alert.alertLevel)}</span>
                         <div>
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">
+                          <div className="text-sm font-medium text-heading">
                             {alert.categoryName}
                           </div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                          <div className="text-xs text-muted">
                             ${alert.currentSpending.toFixed(2)} of ${alert.amount.toFixed(2)} ({alert.period})
                           </div>
                         </div>
@@ -318,35 +318,35 @@ export default function Settings() {
         )}
 
         {/* Security Settings */}
-        <div className="bg-white dark:bg-gray-800 shadow dark:shadow-gray-900/20 rounded-lg">
+        <div className="bg-card shadow-card rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <div className="flex items-center mb-4">
-              <Shield className="h-5 w-5 text-gray-500 dark:text-gray-400 mr-2" />
-              <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white">
+              <Shield className="h-5 w-5 text-muted mr-2" />
+              <h3 className="text-lg font-medium leading-6 text-heading">
                 Security
               </h3>
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block text-sm font-medium text-input-label">
                   Change Password
                 </label>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                <p className="text-sm text-muted mb-2">
                   Update your account password
                 </p>
-                <button className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                <button className="inline-flex items-center px-4 py-2 border border-input text-sm font-medium rounded-md text-input-label bg-button-secondary hover:bg-button-secondary-hover">
                   Change Password
                 </button>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block text-sm font-medium text-input-label">
                   Two-Factor Authentication
                 </label>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                <p className="text-sm text-muted mb-2">
                   Add an extra layer of security to your account
                 </p>
-                <button className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                <button className="inline-flex items-center px-4 py-2 border border-input text-sm font-medium rounded-md text-input-label bg-button-secondary hover:bg-button-secondary-hover">
                   Enable 2FA
                 </button>
               </div>

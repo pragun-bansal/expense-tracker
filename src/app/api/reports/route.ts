@@ -107,6 +107,35 @@ async function generateSummaryReport(userId: string, dateFilter: any) {
     return acc
   }, {} as Record<string, number>)
 
+  // Calculate actual spending for each budget based on expenses within budget period
+  const budgetStatus = await Promise.all(budgets.map(async (budget) => {
+    const budgetExpenses = await prisma.expense.aggregate({
+      where: {
+        userId: budget.userId,
+        categoryId: budget.categoryId,
+        date: {
+          gte: budget.startDate,
+          lte: budget.endDate
+        }
+      },
+      _sum: {
+        amount: true
+      }
+    })
+
+    const actualSpent = budgetExpenses._sum.amount || 0
+    const remaining = budget.amount - actualSpent
+    const percentageUsed = budget.amount > 0 ? (actualSpent / budget.amount) * 100 : 0
+
+    return {
+      category: budget.category.name,
+      budgetAmount: budget.amount,
+      spent: actualSpent,
+      remaining: remaining,
+      percentageUsed: percentageUsed.toFixed(1)
+    }
+  }))
+
   return {
     summary: {
       totalExpenses,
@@ -117,13 +146,7 @@ async function generateSummaryReport(userId: string, dateFilter: any) {
     },
     expensesByCategory,
     incomeByCategory,
-    budgetStatus: budgets.map(budget => ({
-      category: budget.category.name,
-      budgetAmount: budget.amount,
-      spent: budget.spent,
-      remaining: budget.amount - budget.spent,
-      percentageUsed: ((budget.spent / budget.amount) * 100).toFixed(1)
-    }))
+    budgetStatus
   }
 }
 
@@ -231,17 +254,33 @@ async function generateBudgetReport(userId: string, dateFilter: any) {
     include: { category: true }
   })
 
-  const budgetAnalysis = budgets.map(budget => {
-    const percentageUsed = (budget.spent / budget.amount) * 100
-    const remaining = budget.amount - budget.spent
+  const budgetAnalysis = await Promise.all(budgets.map(async (budget) => {
+    // Calculate actual spending for this budget based on expenses within budget period
+    const budgetExpenses = await prisma.expense.aggregate({
+      where: {
+        userId: budget.userId,
+        categoryId: budget.categoryId,
+        date: {
+          gte: budget.startDate,
+          lte: budget.endDate
+        }
+      },
+      _sum: {
+        amount: true
+      }
+    })
+
+    const actualSpent = budgetExpenses._sum.amount || 0
+    const percentageUsed = budget.amount > 0 ? (actualSpent / budget.amount) * 100 : 0
+    const remaining = budget.amount - actualSpent
     const daysInPeriod = budget.period === 'MONTHLY' ? 30 : budget.period === 'WEEKLY' ? 7 : 365
     const dailyBudget = budget.amount / daysInPeriod
-    const dailySpent = budget.spent / daysInPeriod
+    const dailySpent = actualSpent / daysInPeriod
 
     return {
       category: budget.category.name,
       budgetAmount: budget.amount,
-      spent: budget.spent,
+      spent: actualSpent,
       remaining,
       percentageUsed: percentageUsed.toFixed(1),
       status: percentageUsed >= 100 ? 'over' : percentageUsed >= 80 ? 'warning' : 'good',
@@ -251,14 +290,16 @@ async function generateBudgetReport(userId: string, dateFilter: any) {
       startDate: budget.startDate,
       endDate: budget.endDate
     }
-  })
+  }))
+
+  const totalActualSpent = budgetAnalysis.reduce((sum, budget) => sum + budget.spent, 0)
 
   return {
     budgets: budgetAnalysis,
     summary: {
       totalBudgets: budgets.length,
       totalBudgetAmount: budgets.reduce((sum, budget) => sum + budget.amount, 0),
-      totalSpent: budgets.reduce((sum, budget) => sum + budget.spent, 0),
+      totalSpent: totalActualSpent,
       overBudgetCount: budgetAnalysis.filter(budget => budget.status === 'over').length,
       warningCount: budgetAnalysis.filter(budget => budget.status === 'warning').length
     }

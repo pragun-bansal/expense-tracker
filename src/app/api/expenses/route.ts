@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { getOrCreateOthersAccount } from '@/lib/specialAccounts'
+import { checkBudgetAlert } from '@/lib/budgetAlerts'
 
 export async function GET(request: NextRequest) {
   try {
@@ -115,7 +116,22 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    return NextResponse.json(expense)
+    // Check for budget alerts after creating the expense
+    let budgetAlert = null
+    try {
+      budgetAlert = await checkBudgetAlert(session.user.id, categoryId)
+      if (budgetAlert) {
+        console.log(`Budget alert check result:`, budgetAlert)
+      }
+    } catch (alertError) {
+      console.error('Error checking budget alert:', alertError)
+      // Don't fail the expense creation if alert check fails
+    }
+
+    return NextResponse.json({
+      ...expense,
+      budgetAlert
+    })
   } catch (error) {
     console.error('Error creating expense:', error)
     return NextResponse.json(
@@ -224,7 +240,22 @@ export async function PUT(request: NextRequest) {
       })
     }
 
-    return NextResponse.json(expense)
+    // Check for budget alerts after updating the expense
+    let budgetAlert = null
+    try {
+      budgetAlert = await checkBudgetAlert(session.user.id, categoryId)
+      if (budgetAlert) {
+        console.log(`Budget alert check result after update:`, budgetAlert)
+      }
+    } catch (alertError) {
+      console.error('Error checking budget alert after update:', alertError)
+      // Don't fail the expense update if alert check fails
+    }
+
+    return NextResponse.json({
+      ...expense,
+      budgetAlert
+    })
   } catch (error) {
     console.error('Error updating expense:', error)
     return NextResponse.json(

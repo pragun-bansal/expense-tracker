@@ -110,15 +110,15 @@ export default function Accounts() {
     <div>
       <div className="sm:flex sm:items-center sm:justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Accounts</h1>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          <h1 className="text-3xl font-bold text-heading">Accounts</h1>
+          <p className="mt-2 text-sm text-body">
             Total Balance: ${totalBalance.toFixed(2)}
           </p>
         </div>
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
           <button
             onClick={() => setShowAddForm(true)}
-            className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:w-auto"
+            className="inline-flex items-center justify-center rounded-md border border-transparent bg-button-primary px-4 py-2 text-sm font-medium text-button-primary shadow-sm bg-button-primary:hover focus:outline-none focus:ring-2 ring-focus focus:ring-offset-2 sm:w-auto"
           >
             <PlusCircle className="h-4 w-4 mr-2" />
             Add Account
@@ -128,15 +128,15 @@ export default function Accounts() {
 
       {/* Add Account Form */}
       {showAddForm && (
-        <div className="bg-white dark:bg-gray-800 shadow dark:shadow-gray-900/20 rounded-lg mb-8">
+        <div className="bg-card shadow-card rounded-lg mb-8">
           <div className="px-4 py-5 sm:p-6">
-            <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
+            <h3 className="text-lg font-medium leading-6 text-card-header mb-4">
               Add New Account
             </h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label htmlFor="name" className="block text-sm font-medium text-input-label">
                     Account Name *
                   </label>
                   <input
@@ -145,19 +145,19 @@ export default function Accounts() {
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="mt-1 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="mt-1 block w-full border-input rounded-md shadow-sm ring-focus border-input-focus:focus sm:text-sm bg-input text-input"
                     placeholder="My Bank Account"
                   />
                 </div>
                 <div>
-                  <label htmlFor="type" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label htmlFor="type" className="block text-sm font-medium text-input-label">
                     Account Type *
                   </label>
                   <select
                     id="type"
                     value={formData.type}
                     onChange={(e) => setFormData({...formData, type: e.target.value})}
-                    className="mt-1 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="mt-1 block w-full border-input rounded-md shadow-sm ring-focus border-input-focus:focus sm:text-sm bg-input text-input"
                   >
                     <option value="BANK">Bank Account</option>
                     <option value="CASH">Cash</option>
@@ -169,7 +169,7 @@ export default function Accounts() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="balance" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label htmlFor="balance" className="block text-sm font-medium text-input-label">
                     Initial Balance
                   </label>
                   <input
@@ -178,11 +178,11 @@ export default function Accounts() {
                     id="balance"
                     value={formData.balance}
                     onChange={(e) => setFormData({...formData, balance: parseFloat(e.target.value) || 0})}
-                    className="mt-1 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="mt-1 block w-full border-input rounded-md shadow-sm ring-focus border-input-focus:focus sm:text-sm bg-input text-input"
                   />
                 </div>
                 <div>
-                  <label htmlFor="color" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label htmlFor="color" className="block text-sm font-medium text-input-label">
                     Color
                   </label>
                   <input
@@ -190,7 +190,7 @@ export default function Accounts() {
                     id="color"
                     value={formData.color}
                     onChange={(e) => setFormData({...formData, color: e.target.value})}
-                    className="mt-1 block w-full h-10 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    className="mt-1 block w-full h-10 border-input rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
               </div>
@@ -198,7 +198,7 @@ export default function Accounts() {
                 <button
                   type="button"
                   onClick={() => setShowAddForm(false)}
-                  className="bg-white dark:bg-gray-700 py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
+                  className="bg-input py-2 px-4 border border-input rounded-md shadow-sm text-sm font-medium text-input-label hover:bg-button-secondary-hover"
                 >
                   Cancel
                 </button>
@@ -217,10 +217,10 @@ export default function Accounts() {
       {/* Special Accounts Section */}
       {specialAccounts.length > 0 && (
         <div className="mb-8">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">System Accounts</h3>
+          <h3 className="text-lg font-medium text-heading mb-4">System Accounts</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {specialAccounts.map((account) => (
-              <div key={account.id} className="bg-white dark:bg-gray-800 overflow-hidden shadow dark:shadow-gray-900/20 rounded-lg border border-blue-200 dark:border-blue-600">
+              <div key={account.id} className="bg-card overflow-hidden shadow-card rounded-lg border border-status-info">
                 <div className="px-4 py-5 sm:p-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
@@ -234,10 +234,10 @@ export default function Accounts() {
                         />
                       </div>
                       <div className="ml-4">
-                        <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                        <h3 className="text-lg font-medium text-heading">
                           {account.name}
                         </h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <p className="text-sm text-muted">
                           {account.type === 'OTHERS_FIXED' ? 'Default Account' : 'Group Lending & Borrowing'}
                         </p>
                       </div>
@@ -245,12 +245,12 @@ export default function Accounts() {
                     <div className="text-right">
                       <p className={`text-lg font-semibold ${
                         account.balance >= 0 
-                          ? 'text-green-600 dark:text-green-400' 
-                          : 'text-red-600 dark:text-red-400'
+                          ? 'text-status-success' 
+                          : 'text-status-error'
                       }`}>
                         ${account.balance.toFixed(2)}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                      <p className="text-xs text-muted">
                         {account.type === 'GROUP_LENDING' 
                           ? (account.balance >= 0 ? 'Net Lending' : 'Net Borrowing')
                           : 'Miscellaneous'
@@ -267,10 +267,10 @@ export default function Accounts() {
 
       {/* Regular Accounts Section */}
       <div className="mb-8">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Personal Accounts</h3>
+        <h3 className="text-lg font-medium text-heading mb-4">Personal Accounts</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {regularAccounts.map((account) => (
-          <div key={account.id} className="bg-white dark:bg-gray-800 overflow-hidden shadow dark:shadow-gray-900/20 rounded-lg">
+          <div key={account.id} className="bg-card overflow-hidden shadow-card rounded-lg">
             <div className="px-4 py-5 sm:p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
@@ -284,24 +284,24 @@ export default function Accounts() {
                     />
                   </div>
                   <div className="ml-3">
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">{account.name}</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{getAccountTypeDisplay(account.type)}</p>
+                    <h3 className="text-lg font-medium text-heading">{account.name}</h3>
+                    <p className="text-sm text-muted">{getAccountTypeDisplay(account.type)}</p>
                   </div>
                 </div>
                 <div className="flex space-x-2">
                   <button
                     onClick={() => handleDelete(account.id)}
-                    className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                    className="text-status-error hover:text-red-700"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
               </div>
               <div className="mt-4">
-                <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                <div className="text-2xl font-bold text-heading">
                   ${account.balance.toFixed(2)}
                 </div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">Current Balance</div>
+                <div className="text-sm text-muted">Current Balance</div>
               </div>
             </div>
           </div>
@@ -312,8 +312,8 @@ export default function Accounts() {
       {regularAccounts.length === 0 && !showAddForm && (
         <div className="text-center py-12">
           <CreditCard className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No accounts</h3>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Get started by creating your first account.</p>
+          <h3 className="mt-2 text-sm font-medium text-heading">No accounts</h3>
+          <p className="mt-1 text-sm text-muted">Get started by creating your first account.</p>
           <div className="mt-6">
             <button
               onClick={() => setShowAddForm(true)}

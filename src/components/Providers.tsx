@@ -3,7 +3,9 @@
 import { SessionProvider } from 'next-auth/react'
 import { ReactNode } from 'react'
 import { ThemeProvider } from './ThemeProvider'
+import { ToastProvider } from '@/contexts/ToastContext'
 import Layout from './Layout'
+import ToastContainer from './ToastContainer'
 
 export default function Providers({ children }: { children: ReactNode }) {
   return (
@@ -11,12 +13,17 @@ export default function Providers({ children }: { children: ReactNode }) {
       <ThemeProvider
         attribute="class"
         defaultTheme="system"
-        enableSystem
-        disableTransitionOnChange
+        enableSystem={true}
+        disableTransitionOnChange={false}
+        themes={['light', 'soft','dark-2','forest','harvest','deepForest','earthyDark','finDark','freshLight','playful','luxProfessional','luxProfessionalLight' ,'dark' ,'system']}
+        storageKey="theme"
       >
-        <Layout>
-          {children}
-        </Layout>
+        <ToastProvider>
+          <Layout>
+            {children}
+          </Layout>
+          <ToastContainer />
+        </ToastProvider>
       </ThemeProvider>
     </SessionProvider>
   )

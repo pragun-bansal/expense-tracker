@@ -50,6 +50,16 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const { id } = await params
     const { amount, description, frequency, startDate, endDate, accountId, categoryId, isActive } = await request.json()
 
+    // Validate frequency
+    const validFrequencies = ['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY']
+    if (frequency && !validFrequencies.includes(frequency)) {
+      console.error(`Invalid frequency in request: "${frequency}"`)
+      return NextResponse.json(
+        { error: `Invalid frequency: "${frequency}". Valid values are: ${validFrequencies.join(', ')}` },
+        { status: 400 }
+      )
+    }
+
     // Verify ownership
     const existingExpense = await prisma.recurringExpense.findFirst({
       where: {
@@ -64,8 +74,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     // Calculate next due date if frequency or start date changed
     let nextDueDate = existingExpense.nextDueDate
-    if (frequency !== existingExpense.frequency || startDate !== existingExpense.startDate.toISOString()) {
-      nextDueDate = calculateNextDueDate(new Date(startDate), frequency)
+    if (frequency && (frequency !== existingExpense.frequency || (startDate && startDate !== existingExpense.startDate.toISOString().split('T')[0]))) {
+      nextDueDate = calculateNextDueDate(new Date(startDate || existingExpense.startDate), frequency)
     }
 
     const updatedExpense = await prisma.recurringExpense.update({
@@ -135,6 +145,8 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
 function calculateNextDueDate(startDate: Date, frequency: string): Date {
   const nextDate = new Date(startDate)
   
+  console.log(`Calculating next due date for frequency: "${frequency}" (type: ${typeof frequency})`)
+  
   switch (frequency) {
     case 'DAILY':
       nextDate.setDate(nextDate.getDate() + 1)
@@ -149,7 +161,8 @@ function calculateNextDueDate(startDate: Date, frequency: string): Date {
       nextDate.setFullYear(nextDate.getFullYear() + 1)
       break
     default:
-      throw new Error('Invalid frequency')
+      console.error(`Invalid frequency received: "${frequency}" (type: ${typeof frequency})`)
+      throw new Error(`Invalid frequency: "${frequency}". Valid values are: DAILY, WEEKLY, MONTHLY, YEARLY`)
   }
   
   return nextDate

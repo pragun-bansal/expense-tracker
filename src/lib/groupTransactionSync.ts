@@ -1,5 +1,6 @@
 import { prisma } from './prisma'
 import { getOrCreateOthersAccount, getOrCreateGroupLendingAccount } from './specialAccounts'
+import { checkBudgetAlert } from './budgetAlerts'
 
 export async function createPersonalTransactionsForGroupExpense(
   groupExpenseId: string,
@@ -56,6 +57,13 @@ export async function createPersonalTransactionsForGroupExpense(
       })
       await updateAccountBalance(accountId, -lender.amount)
       
+      // Check for budget alerts after creating group expense
+      try {
+        await checkBudgetAlert(lender.userId, defaultGroupCategory.id)
+      } catch (error) {
+        console.error('Error checking budget alert for group expense:', error)
+      }
+      
       // Track net lending in Group Lending/Borrowing account
       const groupLendingAccount = await getOrCreateGroupLendingAccount(lender.userId)
       await prisma.income.create({
@@ -90,6 +98,13 @@ export async function createPersonalTransactionsForGroupExpense(
       })
       await updateAccountBalance(accountId, -lender.amount)
       
+      // Check for budget alerts after creating group expense
+      try {
+        await checkBudgetAlert(lender.userId, defaultGroupCategory.id)
+      } catch (error) {
+        console.error('Error checking budget alert for group expense:', error)
+      }
+      
       // Track net borrowing in Group Lending/Borrowing account
       const groupLendingAccount = await getOrCreateGroupLendingAccount(lender.userId)
       await prisma.expense.create({
@@ -120,6 +135,13 @@ export async function createPersonalTransactionsForGroupExpense(
         }
       })
       await updateAccountBalance(accountId, -lender.amount)
+      
+      // Check for budget alerts after creating group expense
+      try {
+        await checkBudgetAlert(lender.userId, defaultGroupCategory.id)
+      } catch (error) {
+        console.error('Error checking budget alert for group expense:', error)
+      }
       // No entry in Group Lending/Borrowing account since it's net zero
     }
   }
@@ -143,6 +165,13 @@ export async function createPersonalTransactionsForGroupExpense(
         groupType: 'BORROWER'
       }
     })
+    
+    // Check for budget alerts after creating group expense
+    try {
+      await checkBudgetAlert(split.userId, defaultGroupCategory.id)
+    } catch (error) {
+      console.error('Error checking budget alert for group expense borrower:', error)
+    }
 
     // Track borrowing in Group Lending/Borrowing account (negative = money borrowed)
     const groupLendingAccount = await getOrCreateGroupLendingAccount(split.userId)

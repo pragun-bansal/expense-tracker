@@ -214,8 +214,8 @@ export default function Transactions() {
       {/* Header */}
       <div className="sm:flex sm:items-center sm:justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Transaction History</h1>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          <h1 className="text-3xl font-bold text-heading">Transaction History</h1>
+          <p className="mt-2 text-sm text-body">
             All your income and expenses in one place
           </p>
         </div>
@@ -232,36 +232,36 @@ export default function Transactions() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow dark:shadow-gray-900/20">
+        <div className="bg-card p-6 rounded-lg shadow-card">
           <div className="flex items-center">
-            <ArrowUpCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
+            <ArrowUpCircle className="h-8 w-8 text-status-success" />
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Income</p>
-              <p className="text-2xl font-semibold text-green-600 dark:text-green-400">
+              <p className="text-sm font-medium text-body">Total Income</p>
+              <p className="text-2xl font-semibold text-status-success">
                 ${totalIncome.toFixed(2)}
               </p>
             </div>
           </div>
         </div>
         
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow dark:shadow-gray-900/20">
+        <div className="bg-card p-6 rounded-lg shadow-card">
           <div className="flex items-center">
-            <ArrowDownCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
+            <ArrowDownCircle className="h-8 w-8 text-status-error" />
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Expenses</p>
-              <p className="text-2xl font-semibold text-red-600 dark:text-red-400">
+              <p className="text-sm font-medium text-body">Total Expenses</p>
+              <p className="text-2xl font-semibold text-status-error">
                 ${totalExpenses.toFixed(2)}
               </p>
             </div>
           </div>
         </div>
         
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow dark:shadow-gray-900/20">
+        <div className="bg-card p-6 rounded-lg shadow-card">
           <div className="flex items-center">
-            <Calendar className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+            <Calendar className="h-8 w-8 text-status-info" />
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Net Amount</p>
-              <p className={`text-2xl font-semibold ${totalIncome - totalExpenses >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+              <p className="text-sm font-medium text-body">Net Amount</p>
+              <p className={`text-2xl font-semibold ${totalIncome - totalExpenses >= 0 ? 'text-status-success' : 'text-status-error'}`}>
                 ${(totalIncome - totalExpenses).toFixed(2)}
               </p>
             </div>
@@ -270,11 +270,11 @@ export default function Transactions() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white dark:bg-gray-800 shadow dark:shadow-gray-900/20 rounded-lg mb-8">
+      <div className="bg-card shadow-card rounded-lg mb-8">
         <div className="px-4 py-5 sm:p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
             <div>
-              <label htmlFor="search" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="search" className="block text-sm font-medium text-input-label">
                 Search
               </label>
               <div className="mt-1 relative rounded-md shadow-sm">
@@ -286,21 +286,21 @@ export default function Transactions() {
                   id="search"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-700 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 dark:text-white"
+                  className="block w-full pl-10 pr-3 py-2 border border-input rounded-md leading-5 bg-input placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 ring-focus focus:border-blue-500 sm:text-sm text-heading"
                   placeholder="Search transactions..."
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="type" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="type" className="block text-sm font-medium text-input-label">
                 Type
               </label>
               <select
                 id="type"
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value)}
-                className="mt-1 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="mt-1 block w-full border-input rounded-md shadow-sm ring-focus focus:border-blue-500 sm:text-sm bg-input text-heading"
               >
                 <option value="">All Types</option>
                 <option value="income">Income</option>
@@ -309,14 +309,14 @@ export default function Transactions() {
             </div>
 
             <div>
-              <label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="category" className="block text-sm font-medium text-input-label">
                 Category
               </label>
               <select
                 id="category"
                 value={filterCategory}
                 onChange={(e) => setFilterCategory(e.target.value)}
-                className="mt-1 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="mt-1 block w-full border-input rounded-md shadow-sm ring-focus focus:border-blue-500 sm:text-sm bg-input text-heading"
               >
                 <option value="">All Categories</option>
                 {categories.map((category: any) => (
@@ -328,14 +328,14 @@ export default function Transactions() {
             </div>
 
             <div>
-              <label htmlFor="account" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="account" className="block text-sm font-medium text-input-label">
                 Account
               </label>
               <select
                 id="account"
                 value={filterAccount}
                 onChange={(e) => setFilterAccount(e.target.value)}
-                className="mt-1 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="mt-1 block w-full border-input rounded-md shadow-sm ring-focus focus:border-blue-500 sm:text-sm bg-input text-heading"
               >
                 <option value="">All Accounts</option>
                 {accounts.map((account: any) => (
@@ -347,7 +347,7 @@ export default function Transactions() {
             </div>
 
             <div>
-              <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="startDate" className="block text-sm font-medium text-input-label">
                 Start Date
               </label>
               <input
@@ -355,12 +355,12 @@ export default function Transactions() {
                 id="startDate"
                 value={dateRange.startDate}
                 onChange={(e) => setDateRange({...dateRange, startDate: e.target.value})}
-                className="mt-1 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="mt-1 block w-full border-input rounded-md shadow-sm ring-focus focus:border-blue-500 sm:text-sm bg-input text-heading"
               />
             </div>
 
             <div>
-              <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="endDate" className="block text-sm font-medium text-input-label">
                 End Date
               </label>
               <input
@@ -368,7 +368,7 @@ export default function Transactions() {
                 id="endDate"
                 value={dateRange.endDate}
                 onChange={(e) => setDateRange({...dateRange, endDate: e.target.value})}
-                className="mt-1 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="mt-1 block w-full border-input rounded-md shadow-sm ring-focus focus:border-blue-500 sm:text-sm bg-input text-heading"
               />
             </div>
           </div>
@@ -376,71 +376,71 @@ export default function Transactions() {
       </div>
 
       {/* Transactions Table */}
-      <div className="bg-white dark:bg-gray-800 shadow dark:shadow-gray-900/20 overflow-hidden rounded-lg">
+      <div className="bg-card shadow-card overflow-hidden rounded-lg">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-700">
+          <table className="min-w-full divide-y divide-table-border">
+            <thead className="bg-muted">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-input-label uppercase tracking-wider">
                   Date
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-input-label uppercase tracking-wider">
                   Type
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-input-label uppercase tracking-wider">
                   Description
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-input-label uppercase tracking-wider">
                   Category
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-input-label uppercase tracking-wider">
                   Account
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-input-label uppercase tracking-wider">
                   Amount
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-input-label uppercase tracking-wider">
                   Source
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-input-label uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody className="bg-card divide-y divide-table-border">
               {filteredTransactions.map((transaction) => (
                 <tr key={`${transaction.type}-${transaction.id}`}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-heading">
                     {new Date(transaction.date).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       {transaction.type === 'income' ? (
-                        <ArrowUpCircle className="h-4 w-4 text-green-600 dark:text-green-400 mr-2" />
+                        <ArrowUpCircle className="h-4 w-4 text-status-success mr-2" />
                       ) : (
-                        <ArrowDownCircle className="h-4 w-4 text-red-600 dark:text-red-400 mr-2" />
+                        <ArrowDownCircle className="h-4 w-4 text-status-error mr-2" />
                       )}
-                      <span className={`text-sm font-medium ${transaction.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                      <span className={`text-sm font-medium ${transaction.type === 'income' ? 'text-status-success' : 'text-status-error'}`}>
                         {transaction.type === 'income' ? 'Income' : 'Expense'}
                       </span>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900 dark:text-white">{transaction.description}</div>
+                    <div className="text-sm text-heading">{transaction.description}</div>
                     <div className="flex items-center space-x-2 mt-1">
                       {transaction.isRecurring && (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-status-info text-status-info">
                           Recurring
                         </span>
                       )}
                       {transaction.groupExpense && (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-status-info text-status-info">
                           <Users className="h-3 w-3 mr-1" />
                           Group
                         </span>
                       )}
                       {transaction.groupType && (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-muted text-body">
                           {transaction.groupType.replace('_', ' ').toLowerCase()}
                         </span>
                       )}
@@ -457,21 +457,21 @@ export default function Transactions() {
                       {transaction.category.name}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-heading">
                     {transaction.account.name}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <span className={transaction.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
+                    <span className={transaction.type === 'income' ? 'text-status-success' : 'text-status-error'}>
                       {transaction.type === 'income' ? '+' : '-'}${transaction.amount.toFixed(2)}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-heading">
                     {transaction.groupExpense ? (
                       <div>
-                        <div className="font-medium text-purple-600 dark:text-purple-400">
+                        <div className="font-medium text-status-info">
                           {transaction.groupExpense.group.name}
                         </div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                        <div className="text-xs text-muted">
                           Group Transaction
                         </div>
                       </div>
@@ -488,7 +488,7 @@ export default function Transactions() {
                           setEditingTransaction(transaction)
                           setShowEditModal(true)
                         }}
-                        className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                        className="text-link hover:text-link-hover"
                       >
                         <Edit className="h-4 w-4" />
                       </button>
@@ -505,16 +505,16 @@ export default function Transactions() {
 
       {filteredTransactions.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-500 dark:text-gray-400">No transactions found. Try adjusting your filters.</p>
+          <p className="text-muted">No transactions found. Try adjusting your filters.</p>
         </div>
       )}
 
       {/* Edit Transaction Modal */}
       {showEditModal && editingTransaction && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
+        <div className="fixed inset-0 bg-modal-overlay overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-card">
             <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+              <h3 className="text-lg font-medium text-heading mb-4">
                 Edit {editingTransaction.type === 'income' ? 'Income' : 'Expense'}
               </h3>
               <EditTransactionForm 
@@ -567,7 +567,7 @@ function EditTransactionForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label className="block text-sm font-medium text-input-label mb-1">
           Amount *
         </label>
         <input
@@ -576,31 +576,31 @@ function EditTransactionForm({
           required
           value={formData.amount}
           onChange={(e) => setFormData({...formData, amount: parseFloat(e.target.value) || 0})}
-          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+          className="w-full border border-input rounded-md px-3 py-2 bg-input text-heading"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label className="block text-sm font-medium text-input-label mb-1">
           Description
         </label>
         <input
           type="text"
           value={formData.description}
           onChange={(e) => setFormData({...formData, description: e.target.value})}
-          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+          className="w-full border border-input rounded-md px-3 py-2 bg-input text-heading"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label className="block text-sm font-medium text-input-label mb-1">
           Category *
         </label>
         <select
           required
           value={formData.categoryId}
           onChange={(e) => setFormData({...formData, categoryId: e.target.value})}
-          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+          className="w-full border border-input rounded-md px-3 py-2 bg-input text-heading"
         >
           {categories.filter(cat => cat.type === transaction.type.toUpperCase()).map(category => (
             <option key={category.id} value={category.id}>
@@ -611,14 +611,14 @@ function EditTransactionForm({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label className="block text-sm font-medium text-input-label mb-1">
           Account *
         </label>
         <select
           required
           value={formData.accountId}
           onChange={(e) => setFormData({...formData, accountId: e.target.value})}
-          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+          className="w-full border border-input rounded-md px-3 py-2 bg-input text-heading"
         >
           {accounts.map(account => (
             <option key={account.id} value={account.id}>
@@ -629,7 +629,7 @@ function EditTransactionForm({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label className="block text-sm font-medium text-input-label mb-1">
           Date *
         </label>
         <input
@@ -637,20 +637,20 @@ function EditTransactionForm({
           required
           value={formData.date}
           onChange={(e) => setFormData({...formData, date: e.target.value})}
-          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+          className="w-full border border-input rounded-md px-3 py-2 bg-input text-heading"
         />
       </div>
 
       {transaction.type === 'income' && (
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-input-label mb-1">
             Source
           </label>
           <input
             type="text"
             value={formData.source}
             onChange={(e) => setFormData({...formData, source: e.target.value})}
-            className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            className="w-full border border-input rounded-md px-3 py-2 bg-input text-heading"
           />
         </div>
       )}
@@ -659,7 +659,7 @@ function EditTransactionForm({
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+          className="px-4 py-2 text-input-label border border-input rounded-md hover:bg-button-secondary-hover"
         >
           Cancel
         </button>

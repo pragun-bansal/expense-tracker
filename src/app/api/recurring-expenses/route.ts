@@ -49,6 +49,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Validate frequency
+    const validFrequencies = ['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY']
+    if (!validFrequencies.includes(frequency)) {
+      return NextResponse.json(
+        { error: `Invalid frequency: "${frequency}". Valid values are: ${validFrequencies.join(', ')}` },
+        { status: 400 }
+      )
+    }
+
     // Calculate next due date based on frequency
     const nextDueDate = calculateNextDueDate(new Date(startDate), frequency)
 
@@ -83,6 +92,8 @@ export async function POST(request: NextRequest) {
 function calculateNextDueDate(startDate: Date, frequency: string): Date {
   const nextDate = new Date(startDate)
   
+  console.log(`Calculating next due date for frequency: "${frequency}" (type: ${typeof frequency})`)
+  
   switch (frequency) {
     case 'DAILY':
       nextDate.setDate(nextDate.getDate() + 1)
@@ -97,7 +108,8 @@ function calculateNextDueDate(startDate: Date, frequency: string): Date {
       nextDate.setFullYear(nextDate.getFullYear() + 1)
       break
     default:
-      throw new Error('Invalid frequency')
+      console.error(`Invalid frequency received: "${frequency}" (type: ${typeof frequency})`)
+      throw new Error(`Invalid frequency: "${frequency}". Valid values are: DAILY, WEEKLY, MONTHLY, YEARLY`)
   }
   
   return nextDate

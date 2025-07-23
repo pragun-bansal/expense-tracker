@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { createPersonalTransactionsForGroupExpense } from '@/lib/groupTransactionSync'
+import { createGroupExpenseNotification } from '@/lib/notifications'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -220,16 +221,16 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       }
     })
 
+    const addedByName = session.user.name || session.user.email || 'Someone'
+    
     for (const member of groupMembers) {
-      await prisma.notification.create({
-        data: {
-          userId: member.userId,
-          title: 'New Group Expense Added',
-          message: `${session.user.name || session.user.email} added "${description}" for $${amount}`,
-          type: 'GROUP_EXPENSE_ADDED',
-          relatedId: groupExpense.id
-        }
-      })
+      await createGroupExpenseNotification(
+        member.userId,
+        groupId,
+        description,
+        parseFloat(amount),
+        addedByName
+      )
     }
 
     // Fetch the complete expense with splits and lenders

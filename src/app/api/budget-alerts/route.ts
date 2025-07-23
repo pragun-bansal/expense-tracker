@@ -55,18 +55,36 @@ export async function POST(request: NextRequest) {
       const spending = currentSpending._sum.amount || 0
       const percentUsed = budget.amount > 0 ? (spending / budget.amount) * 100 : 0
 
+      // Debug logging
+      console.log(`Budget Debug - ${budget.category.name}:`, {
+        budgetAmount: budget.amount,
+        currentSpending: spending,
+        percentUsed: percentUsed.toFixed(1),
+        userEmail: budget.user.email,
+        dateRange: { start: budget.startDate, end: budget.endDate }
+      })
+
       // Check if notification should be sent (80% threshold or exceeded)
       const shouldNotify = percentUsed >= 80
 
       if (shouldNotify && budget.user.email) {
+        console.log(`Budget ${budget.category.name} needs notification - ${percentUsed.toFixed(1)}% used`)
+        
         // Check if we've already sent a notification for this budget recently
-        const recentNotification = await prisma.$queryRaw<any[]>`
-          SELECT * FROM budget_notifications 
-          WHERE budget_id = ${budget.id} 
-          AND created_at > datetime('now', '-1 day')
-        `
+        const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
+        const recentNotification = await prisma.budgetNotification.findFirst({
+          where: {
+            budgetId: budget.id,
+            userId: budget.userId,
+            createdAt: {
+              gte: oneDayAgo
+            }
+          }
+        })
 
-        if (recentNotification.length === 0) {
+        console.log(`Recent notification check:`, recentNotification ? 'Found recent notification' : 'No recent notification')
+
+        if (!recentNotification) {
           // Generate and send email
           const emailTemplate = generateBudgetAlertEmail(
             budget.user.name || 'User',
@@ -81,24 +99,19 @@ export async function POST(request: NextRequest) {
 
           emailTemplate.to = budget.user.email
 
+          console.log(`Attempting to send email to: ${budget.user.email}`)
           const emailSent = await sendEmail(emailTemplate)
+          console.log(`Email send result: ${emailSent}`)
 
           if (emailSent) {
-            // Record the notification (create table if it doesn't exist)
-            await prisma.$executeRaw`
-              CREATE TABLE IF NOT EXISTS budget_notifications (
-                id TEXT PRIMARY KEY,
-                budget_id TEXT NOT NULL,
-                user_id TEXT NOT NULL,
-                sent_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-              )
-            `
-
-            await prisma.$executeRaw`
-              INSERT INTO budget_notifications (id, budget_id, user_id, sent_at)
-              VALUES (${crypto.randomUUID()}, ${budget.id}, ${budget.userId}, ${new Date().toISOString()})
-            `
+            // Record the notification
+            await prisma.budgetNotification.create({
+              data: {
+                budgetId: budget.id,
+                userId: budget.userId,
+                sentAt: new Date()
+              }
+            })
 
             notifications.push({
               budgetId: budget.id,

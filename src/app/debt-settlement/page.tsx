@@ -120,9 +120,9 @@ export default function DebtSettlement() {
   }
 
   const getBalanceColor = (balance: number) => {
-    if (balance > 0) return 'text-green-600 dark:text-green-400'
-    if (balance < 0) return 'text-red-600 dark:text-red-400'
-    return 'text-gray-600 dark:text-gray-400'
+    if (balance > 0) return 'text-status-success'
+    if (balance < 0) return 'text-status-error'
+    return 'text-muted'
   }
 
   const getBalanceText = (balance: number) => {
@@ -138,23 +138,23 @@ export default function DebtSettlement() {
     <div>
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Debt Settlement</h1>
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+        <h1 className="text-2xl sm:text-3xl font-bold text-heading">Debt Settlement</h1>
+        <p className="mt-2 text-sm text-muted">
           Optimize debt settlement within your groups
         </p>
       </div>
 
       {/* Group Selection */}
-      <div className="bg-white dark:bg-gray-800 shadow dark:shadow-gray-900/20 rounded-lg mb-8">
+      <div className="bg-card shadow-card rounded-lg mb-8">
         <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
+          <h3 className="text-lg font-medium leading-6 text-heading mb-4">
             Select Group
           </h3>
           <div className="flex flex-col sm:flex-row gap-4">
             <select
               value={selectedGroup}
               onChange={(e) => setSelectedGroup(e.target.value)}
-              className="flex-1 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="flex-1 block w-full border-input rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-input text-heading"
             >
               <option value="">Select a group</option>
               {groups.map((group) => (
@@ -180,34 +180,34 @@ export default function DebtSettlement() {
         <div className="space-y-8">
           {/* Summary Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow dark:shadow-gray-900/20">
+            <div className="bg-card p-6 rounded-lg shadow-card">
               <div className="flex items-center">
-                <Users className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                <Users className="h-8 w-8 text-status-info" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Members</p>
-                  <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  <p className="text-sm font-medium text-muted">Total Members</p>
+                  <p className="text-2xl font-semibold text-heading">
                     {settlementResult.userDebts.length}
                   </p>
                 </div>
               </div>
             </div>
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow dark:shadow-gray-900/20">
+            <div className="bg-card p-6 rounded-lg shadow-card">
               <div className="flex items-center">
-                <ArrowRight className="h-8 w-8 text-green-600 dark:text-green-400" />
+                <ArrowRight className="h-8 w-8 text-status-success" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Optimized Transactions</p>
-                  <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  <p className="text-sm font-medium text-muted">Optimized Transactions</p>
+                  <p className="text-2xl font-semibold text-heading">
                     {settlementResult.totalTransactions}
                   </p>
                 </div>
               </div>
             </div>
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow dark:shadow-gray-900/20">
+            <div className="bg-card p-6 rounded-lg shadow-card">
               <div className="flex items-center">
-                <AlertCircle className="h-8 w-8 text-orange-600 dark:text-orange-400" />
+                <AlertCircle className="h-8 w-8 text-status-warning" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Original Transactions</p>
-                  <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  <p className="text-sm font-medium text-muted">Original Transactions</p>
+                  <p className="text-2xl font-semibold text-heading">
                     {settlementResult.originalTransactions}
                   </p>
                 </div>
@@ -216,23 +216,23 @@ export default function DebtSettlement() {
           </div>
 
           {/* User Debt Summary */}
-          <div className="bg-white dark:bg-gray-800 shadow dark:shadow-gray-900/20 rounded-lg">
+          <div className="bg-card shadow-card rounded-lg">
             <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
+              <h3 className="text-lg font-medium leading-6 text-heading mb-4">
                 Current Debt Summary
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {settlementResult.userDebts.map((debt) => (
-                  <div key={debt.userId} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                  <div key={debt.userId} className="border border-card-border rounded-lg p-4">
                     <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium text-gray-900 dark:text-white">
+                      <h4 className="font-medium text-heading">
                         {debt.userName}
                       </h4>
                       <span className={`text-sm font-medium ${getBalanceColor(debt.netBalance)}`}>
                         {getBalanceText(debt.netBalance)}
                       </span>
                     </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                    <div className="text-sm text-muted space-y-1">
                       <div>Owed: ${debt.totalOwed.toFixed(2)}</div>
                       <div>Owes: ${debt.totalOwes.toFixed(2)}</div>
                     </div>
@@ -244,10 +244,10 @@ export default function DebtSettlement() {
 
           {/* Optimized Settlements */}
           {settlementResult.settlements.length > 0 ? (
-            <div className="bg-white dark:bg-gray-800 shadow dark:shadow-gray-900/20 rounded-lg">
+            <div className="bg-card shadow-card rounded-lg">
               <div className="px-4 py-5 sm:p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white">
+                  <h3 className="text-lg font-medium leading-6 text-heading">
                     Optimized Settlement Plan
                   </h3>
                   {isGroupAdmin && (
@@ -263,29 +263,29 @@ export default function DebtSettlement() {
                 </div>
                 <div className="space-y-4">
                   {settlementResult.settlements.map((settlement, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                    <div key={index} className="flex items-center justify-between p-4 border border-card-border rounded-lg">
                       <div className="flex items-center space-x-4">
                         <div className="text-sm">
-                          <span className="font-medium text-gray-900 dark:text-white">
+                          <span className="font-medium text-heading">
                             {settlement.fromName}
                           </span>
-                          <span className="text-gray-500 dark:text-gray-400 mx-2">pays</span>
-                          <span className="font-medium text-gray-900 dark:text-white">
+                          <span className="text-muted mx-2">pays</span>
+                          <span className="font-medium text-heading">
                             {settlement.toName}
                           </span>
                         </div>
                         <ArrowRight className="h-4 w-4 text-gray-400" />
                       </div>
-                      <div className="text-lg font-semibold text-green-600 dark:text-green-400">
+                      <div className="text-lg font-semibold text-status-success">
                         ${settlement.amount.toFixed(2)}
                       </div>
                     </div>
                   ))}
                 </div>
-                <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <div className="mt-4 p-4 bg-status-info rounded-lg">
                   <div className="flex items-center">
-                    <AlertCircle className="h-5 w-5 text-blue-600 dark:text-blue-400 mr-2" />
-                    <span className="text-sm text-blue-600 dark:text-blue-400">
+                    <AlertCircle className="h-5 w-5 text-status-info mr-2" />
+                    <span className="text-sm text-status-info">
                       This plan reduces {settlementResult.originalTransactions} transactions to {settlementResult.totalTransactions} optimized settlements.
                     </span>
                   </div>
@@ -293,14 +293,14 @@ export default function DebtSettlement() {
               </div>
             </div>
           ) : (
-            <div className="bg-white dark:bg-gray-800 shadow dark:shadow-gray-900/20 rounded-lg">
+            <div className="bg-card shadow-card rounded-lg">
               <div className="px-4 py-5 sm:p-6">
                 <div className="text-center py-8">
                   <CheckCircle className="mx-auto h-12 w-12 text-green-400" />
-                  <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
+                  <h3 className="mt-2 text-sm font-medium text-heading">
                     All Debts Settled!
                   </h3>
-                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  <p className="mt-1 text-sm text-muted">
                     No outstanding debts in this group.
                   </p>
                 </div>
@@ -314,10 +314,10 @@ export default function DebtSettlement() {
       {!settlementResult && (
         <div className="text-center py-12">
           <Calculator className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
+          <h3 className="mt-2 text-sm font-medium text-heading">
             No Settlement Calculated
           </h3>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-1 text-sm text-muted">
             Select a group and calculate debt settlement to see optimization results.
           </p>
         </div>
