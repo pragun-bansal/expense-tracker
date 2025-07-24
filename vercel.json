@@ -1,0 +1,21 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "functions": {
+    "app/api/**/*.ts": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "env": {
+    "NEXTAUTH_URL": "@nextauth_url",
+    "NEXTAUTH_SECRET": "@nextauth_secret",
+    "DATABASE_URL": "@database_url",
+    "EMAIL_FROM": "@email_from",
+    "EMAIL_SERVER_HOST": "@email_server_host",
+    "EMAIL_SERVER_PORT": "@email_server_port",
+    "EMAIL_SERVER_USER": "@email_server_user",
+    "EMAIL_SERVER_PASSWORD": "@email_server_password"
+  }
+}
