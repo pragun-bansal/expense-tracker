@@ -29,6 +29,11 @@ model User {
   recurringExpenses RecurringExpense[]
   notifications     Notification[]
   budgetNotifications BudgetNotification[]
+  settlementsAsBorrower Settlement[] @relation("BorrowerSettlements")
+  settlementsAsLender   Settlement[] @relation("LenderSettlements")
+  activityLogs      ActivityLog[]
+  lendings          Lending[]
+  borrowings        Borrowing[]
 
   @@map("users")
 }
@@ -47,9 +52,13 @@ model Account {
   transfersFrom     Transfer[]         @relation("TransferFrom")
   transfersTo       Transfer[]         @relation("TransferTo")
   recurringExpenses RecurringExpense[]
-  groupExpenses     GroupExpense[]
-  groupLenders      GroupLender[]
-  settlementSplits  ExpenseSplit[]
+  groupExpenses         GroupExpense[]
+  groupLenders          GroupLender[]
+  settlementSplits      ExpenseSplit[]
+  borrowerSettlements   Settlement[] @relation("BorrowerSettlementAccount")
+  lenderSettlements     Settlement[] @relation("LenderSettlementAccount")
+  lendings              Lending[]
+  borrowings            Borrowing[]
 
   @@map("accounts")
 }
@@ -67,6 +76,8 @@ model Category {
   incomes           Income[]
   budgets           Budget[]
   recurringExpenses RecurringExpense[]
+  lendings          Lending[]
+  borrowings        Borrowing[]
 
   @@map("categories")
 }
@@ -144,8 +155,10 @@ model Group {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  members   GroupMember[]
-  expenses  GroupExpense[]
+  members     GroupMember[]
+  expenses    GroupExpense[]
+  settlements Settlement[]
+  activityLogs ActivityLog[]
 
   @@map("groups")
 }
@@ -185,6 +198,8 @@ model GroupExpense {
   comments        Comment[]
   personalExpenses Expense[]
   personalIncomes  Income[]
+  lendings         Lending[]
+  borrowings       Borrowing[]
 
   @@map("group_expenses")
 }
@@ -315,6 +330,28 @@ model BudgetNotification {
   @@map("budget_notifications")
 }
 
+model Settlement {
+  id                   String   @id @default(auto()) @map("_id") @db.ObjectId
+  amount               Float
+  groupId              String   @db.ObjectId
+  borrowerUserId       String   @db.ObjectId
+  lenderUserId         String   @db.ObjectId
+  borrowerAccountId    String?  @db.ObjectId  // Account borrower paid from
+  lenderAccountId      String?  @db.ObjectId  // Account lender received in
+  settledAt            DateTime @default(now())
+  settledByUserId      String   @db.ObjectId  // Who recorded the settlement
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  group          Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  borrower       User     @relation("BorrowerSettlements", fields: [borrowerUserId], references: [id], onDelete: Cascade)
+  lender         User     @relation("LenderSettlements", fields: [lenderUserId], references: [id], onDelete: Cascade)
+  borrowerAccount Account? @relation("BorrowerSettlementAccount", fields: [borrowerAccountId], references: [id])
+  lenderAccount   Account? @relation("LenderSettlementAccount", fields: [lenderAccountId], references: [id])
+
+  @@map("settlements")
+}
+
 enum AccountType {
   CASH
   BANK
@@ -366,4 +403,77 @@ enum GroupTransactionType {
   BORROWER
   SETTLEMENT_RECEIVED
   SETTLEMENT_PAID
+}
+
+model ActivityLog {
+  id          String           @id @default(auto()) @map("_id") @db.ObjectId
+  action      ActivityAction
+  description String
+  metadata    Json?            // Additional data about the action
+  userId      String           @db.ObjectId
+  groupId     String?          @db.ObjectId
+  entityType  String?          // Type of entity (expense, settlement, member, etc.)
+  entityId    String?          @db.ObjectId
+  createdAt   DateTime         @default(now())
+
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group       Group?           @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@map("activity_logs")
+}
+
+enum ActivityAction {
+  EXPENSE_ADDED
+  EXPENSE_EDITED
+  EXPENSE_DELETED
+  SETTLEMENT_ADDED
+  SETTLEMENT_DELETED
+  MEMBER_ADDED
+  MEMBER_REMOVED
+  GROUP_NAME_CHANGED
+  GROUP_DESCRIPTION_CHANGED
+  GROUP_CREATED
+  GROUP_DELETED
+}
+
+model Lending {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  amount          Float
+  description     String
+  date            DateTime  @default(now())
+  userId          String    @db.ObjectId
+  accountId       String    @db.ObjectId
+  categoryId      String?   @db.ObjectId
+  groupExpenseId  String?   @db.ObjectId
+  groupType       GroupTransactionType?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account         Account      @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  category        Category?    @relation(fields: [categoryId], references: [id])
+  groupExpense    GroupExpense? @relation(fields: [groupExpenseId], references: [id])
+
+  @@map("lendings")
+}
+
+model Borrowing {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  amount          Float
+  description     String
+  date            DateTime  @default(now())
+  userId          String    @db.ObjectId
+  accountId       String    @db.ObjectId
+  categoryId      String?   @db.ObjectId
+  groupExpenseId  String?   @db.ObjectId
+  groupType       GroupTransactionType?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account         Account      @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  category        Category?    @relation(fields: [categoryId], references: [id])
+  groupExpense    GroupExpense? @relation(fields: [groupExpenseId], references: [id])
+
+  @@map("borrowings")
 }

@@ -24,7 +24,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: 'Access denied' }, { status: 403 })
     }
 
-    // Get all group expenses with lenders and splits
+    // Get all group expenses with lenders and splits (same as stats API)
     const expenses = await prisma.groupExpense.findMany({
       where: {
         groupId
@@ -55,36 +55,53 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       }
     })
 
-    // Calculate net balances for each user
+    // Get all group members
+    const groupMembers = await prisma.groupMember.findMany({
+      where: {
+        groupId
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        }
+      }
+    })
+
+    // Calculate net balances (same logic as stats API)
     const userBalances: { [userId: string]: number } = {}
     const userInfo: { [userId: string]: { name: string; email: string } } = {}
 
+    // Initialize all group members
+    for (const member of groupMembers) {
+      const userId = member.user.id
+      userBalances[userId] = 0
+      userInfo[userId] = {
+        name: member.user.name || '',
+        email: member.user.email || ''
+      }
+    }
+
+    // Calculate from expenses - same as stats API
     for (const expense of expenses) {
       // Lenders get positive balance (money they lent out)
       for (const lender of expense.lenders) {
         const lenderId = lender.userId
-        if (!userBalances[lenderId]) {
-          userBalances[lenderId] = 0
-          userInfo[lenderId] = {
-            name: lender.user.name || '',
-            email: lender.user.email || ''
-          }
+        if (userBalances[lenderId] !== undefined) {
+          userBalances[lenderId] += lender.amount
         }
-        userBalances[lenderId] += lender.amount
       }
 
-      // Users who owe get negative balance (debts)
+      // Borrowers get negative balance (money they owe) - only count unsettled splits
       for (const split of expense.splits) {
         if (!split.settled) {
           const userId = split.userId
-          if (!userBalances[userId]) {
-            userBalances[userId] = 0
-            userInfo[userId] = {
-              name: split.user.name || '',
-              email: split.user.email || ''
-            }
+          if (userBalances[userId] !== undefined) {
+            userBalances[userId] -= split.amount
           }
-          userBalances[userId] -= split.amount
         }
       }
     }
@@ -93,7 +110,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const balances = Object.entries(userBalances).map(([userId, balance]) => ({
       userId,
       user: userInfo[userId],
-      balance: Number(balance.toFixed(2))
+      balance: Math.round(Number(balance) * 100) / 100 // Round to 2 decimal places
     }))
 
     // Calculate simplified settlements (who owes whom)
@@ -103,8 +120,16 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       amount: number
     }> = []
 
-    const debtors = balances.filter(b => b.balance < 0).sort((a, b) => a.balance - b.balance)
-    const creditors = balances.filter(b => b.balance > 0).sort((a, b) => b.balance - a.balance)
+    // Create copies for settlement calculation to avoid mutating original balances
+    const debtors = balances
+      .filter(b => b.balance < 0)
+      .map(b => ({ ...b })) // Create shallow copy
+      .sort((a, b) => a.balance - b.balance)
+    
+    const creditors = balances
+      .filter(b => b.balance > 0)
+      .map(b => ({ ...b })) // Create shallow copy  
+      .sort((a, b) => b.balance - a.balance)
 
     let debtorIndex = 0
     let creditorIndex = 0

@@ -20,6 +20,11 @@ export async function createPersonalTransactionsForGroupExpense(
     amount: number
   }>
 ) {
+  console.log(`\n=== CREATING GROUP TRANSACTIONS ===`)
+  console.log(`Group Expense: ${groupExpense.description}`)
+  console.log(`Lenders:`, lenders)
+  console.log(`Splits:`, splits)
+  
   // Get or create default categories
   const defaultGroupCategory = await getOrCreateGroupCategory()
 
@@ -66,7 +71,8 @@ export async function createPersonalTransactionsForGroupExpense(
       
       // Track net lending in Group Lending/Borrowing account
       const groupLendingAccount = await getOrCreateGroupLendingAccount(lender.userId)
-      await prisma.income.create({
+      console.log(`  Creating net lending for ${lender.userId}: $${netAmount}`)
+      await prisma.lending.create({
         data: {
           amount: netAmount,
           description: `[Group Net] ${groupExpense.description}`,
@@ -79,6 +85,7 @@ export async function createPersonalTransactionsForGroupExpense(
         }
       })
       await updateAccountBalance(groupLendingAccount.id, netAmount)
+      console.log(`  Updated Group Lending account balance: ${groupLendingAccount.id} by +${netAmount}`)
     } else if (netAmount < 0) {
       // User is a net borrower (borrowed more than they lent)
       
@@ -106,7 +113,7 @@ export async function createPersonalTransactionsForGroupExpense(
       
       // Track net borrowing in Group Lending/Borrowing account only
       const groupLendingAccount = await getOrCreateGroupLendingAccount(lender.userId)
-      await prisma.expense.create({
+      await prisma.borrowing.create({
         data: {
           amount: Math.abs(netAmount),
           description: `[Group] ${groupExpense.description}`,
@@ -158,7 +165,7 @@ export async function createPersonalTransactionsForGroupExpense(
 
     // Track borrowing in Group Lending/Borrowing account only (negative = money borrowed)
     const groupLendingAccount = await getOrCreateGroupLendingAccount(split.userId)
-    await prisma.expense.create({
+    await prisma.borrowing.create({
       data: {
         amount: split.amount,
         description: `[Group] ${groupExpense.description}`,
@@ -221,8 +228,8 @@ export async function createPersonalTransactionsForSettlement(
       await updateAccountBalance(othersAccount.id, -settlementAmount)
     }
 
-    // Reduce borrower's debt in Group Lending/Borrowing account (add income to offset the debt)
-    await prisma.income.create({
+    // Reduce borrower's debt in Group Lending/Borrowing account (create offsetting lending)
+    await prisma.lending.create({
       data: {
         amount: settlementAmount,
         description: `[Group Settlement] Debt reduction to ${await getUserName(lenderUserId)}`,
@@ -253,8 +260,8 @@ export async function createPersonalTransactionsForSettlement(
       await updateAccountBalance(settlementAccountId, settlementAmount)
     }
 
-    // Reduce lender's credit in Group Lending/Borrowing account (add expense to offset the credit)
-    await prisma.expense.create({
+    // Reduce lender's credit in Group Lending/Borrowing account (create offsetting borrowing)
+    await prisma.borrowing.create({
       data: {
         amount: settlementAmount,
         description: `[Group Settlement] Credit reduction from ${await getUserName(borrowerUserId)}`,
@@ -287,7 +294,7 @@ export async function createPersonalTransactionsForSettlement(
       await updateAccountBalance(settlementAccountId, settlementAmount)
 
       // Reduce lender's credit in Group Lending/Borrowing account
-      await prisma.expense.create({
+      await prisma.borrowing.create({
         data: {
           amount: settlementAmount,
           description: `[Group Settlement] Credit reduction from ${await getUserName(borrowerUserId)}`,
@@ -302,7 +309,7 @@ export async function createPersonalTransactionsForSettlement(
       await updateAccountBalance(lenderGroupLendingAccount.id, -settlementAmount)
 
       // Reduce borrower's debt in Group Lending/Borrowing account
-      await prisma.income.create({
+      await prisma.lending.create({
         data: {
           amount: settlementAmount,
           description: `[Group Settlement] Debt reduction to ${await getUserName(lenderUserId)}`,

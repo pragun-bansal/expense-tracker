@@ -8,7 +8,7 @@ import { CurrencyLoader } from '@/components/CurrencyLoader'
 
 interface Transaction {
   id: string
-  type: 'income' | 'expense'
+  type: 'income' | 'expense' | 'lending' | 'borrowing'
   amount: number
   description: string
   date: string
@@ -68,16 +68,27 @@ export default function Transactions() {
     try {
       setLoading(true)
       
-      // Fetch both expenses and income
-      const [expenseResponse, incomeResponse] = await Promise.all([
+      // Fetch all transaction types
+      const [expenseResponse, incomeResponse, lendingResponse, borrowingResponse] = await Promise.all([
         fetch('/api/expenses'),
-        fetch('/api/income')
+        fetch('/api/income'),
+        fetch('/api/lending'),
+        fetch('/api/borrowing')
       ])
       
-      const [expenseData, incomeData] = await Promise.all([
+      // Check for API errors
+      if (!expenseResponse.ok) console.error('Expenses API error:', expenseResponse.status)
+      if (!incomeResponse.ok) console.error('Income API error:', incomeResponse.status)
+      if (!lendingResponse.ok) console.error('Lending API error:', lendingResponse.status)
+      if (!borrowingResponse.ok) console.error('Borrowing API error:', borrowingResponse.status)
+      
+      const [expenseData, incomeData, lendingData, borrowingData] = await Promise.all([
         expenseResponse.json(),
-        incomeResponse.json()
+        incomeResponse.json(),
+        lendingResponse.json(),
+        borrowingResponse.json()
       ])
+      
       
       // Combine and format transactions
       const expenseTransactions = expenseData.expenses?.map((expense: any) => ({
@@ -90,7 +101,17 @@ export default function Transactions() {
         type: 'income' as const
       })) || []
       
-      const allTransactions = [...expenseTransactions, ...incomeTransactions]
+      const lendingTransactions = lendingData.lendings?.map((lending: any) => ({
+        ...lending,
+        type: 'lending' as const
+      })) || []
+      
+      const borrowingTransactions = borrowingData.borrowings?.map((borrowing: any) => ({
+        ...borrowing,
+        type: 'borrowing' as const
+      })) || []
+      
+      const allTransactions = [...expenseTransactions, ...incomeTransactions, ...lendingTransactions, ...borrowingTransactions]
       
       // Sort transactions
       allTransactions.sort((a, b) => {
@@ -138,13 +159,13 @@ export default function Transactions() {
   }
 
   const filteredTransactions = transactions.filter(transaction => {
-    const matchesSearch = transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         transaction.category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = transaction.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         transaction.category?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (transaction.source && transaction.source.toLowerCase().includes(searchTerm.toLowerCase()))
     
     const matchesType = !filterType || transaction.type === filterType
-    const matchesCategory = !filterCategory || transaction.category.id === filterCategory
-    const matchesAccount = !filterAccount || transaction.account.id === filterAccount
+    const matchesCategory = !filterCategory || transaction.category?.id === filterCategory
+    const matchesAccount = !filterAccount || transaction.account?.id === filterAccount
     
     const matchesDateRange = (!dateRange.startDate || new Date(transaction.date) >= new Date(dateRange.startDate)) &&
                             (!dateRange.endDate || new Date(transaction.date) <= new Date(dateRange.endDate))
@@ -159,6 +180,15 @@ export default function Transactions() {
   const totalExpenses = filteredTransactions
     .filter(t => t.type === 'expense')
     .reduce((sum, t) => sum + t.amount, 0)
+  
+  const totalLending = filteredTransactions
+    .filter(t => t.type === 'lending')
+    .reduce((sum, t) => sum + t.amount, 0)
+  
+  const totalBorrowing = filteredTransactions
+    .filter(t => t.type === 'borrowing')
+    .reduce((sum, t) => sum + t.amount, 0)
+  
 
   const exportTransactions = () => {
     const csvContent = [
@@ -185,7 +215,9 @@ export default function Transactions() {
 
   const handleSaveTransaction = async (updatedTransaction: any) => {
     try {
-      const endpoint = updatedTransaction.type === 'income' ? '/api/income' : '/api/expenses'
+      const endpoint = updatedTransaction.type === 'income' ? '/api/income' : 
+                      updatedTransaction.type === 'expense' ? '/api/expenses' :
+                      updatedTransaction.type === 'lending' ? '/api/lending' : '/api/borrowing'
       const response = await fetch(endpoint, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -246,7 +278,7 @@ export default function Transactions() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
         <div className="bg-card p-6 rounded-lg shadow-card">
           <div className="flex items-center">
             <ArrowUpCircle className="h-8 w-8 text-status-success" />
@@ -266,6 +298,30 @@ export default function Transactions() {
               <p className="text-sm font-medium text-body">Total Expenses</p>
               <p className="text-2xl font-semibold text-status-error">
                 ${totalExpenses.toFixed(2)}
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-card p-6 rounded-lg shadow-card">
+          <div className="flex items-center">
+            <Users className="h-8 w-8 text-green-600" />
+            <div className="ml-4">
+              <p className="text-sm font-medium text-body">Total Lending</p>
+              <p className="text-2xl font-semibold text-green-600">
+                ${totalLending.toFixed(2)}
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-card p-6 rounded-lg shadow-card">
+          <div className="flex items-center">
+            <Users className="h-8 w-8 text-orange-600" />
+            <div className="ml-4">
+              <p className="text-sm font-medium text-body">Total Borrowing</p>
+              <p className="text-2xl font-semibold text-orange-600">
+                ${totalBorrowing.toFixed(2)}
               </p>
             </div>
           </div>
@@ -320,6 +376,8 @@ export default function Transactions() {
                 <option value="">All Types</option>
                 <option value="income">Income</option>
                 <option value="expense">Expense</option>
+                <option value="lending">Lending</option>
+                <option value="borrowing">Borrowing</option>
               </select>
             </div>
 
@@ -432,11 +490,21 @@ export default function Transactions() {
                     <div className="flex items-center">
                       {transaction.type === 'income' ? (
                         <ArrowUpCircle className="h-4 w-4 text-status-success mr-2" />
-                      ) : (
+                      ) : transaction.type === 'expense' ? (
                         <ArrowDownCircle className="h-4 w-4 text-status-error mr-2" />
+                      ) : transaction.type === 'lending' ? (
+                        <Users className="h-4 w-4 text-green-600 mr-2" />
+                      ) : (
+                        <Users className="h-4 w-4 text-orange-600 mr-2" />
                       )}
-                      <span className={`text-sm font-medium ${transaction.type === 'income' ? 'text-status-success' : 'text-status-error'}`}>
-                        {transaction.type === 'income' ? 'Income' : 'Expense'}
+                      <span className={`text-sm font-medium ${
+                        transaction.type === 'income' ? 'text-status-success' : 
+                        transaction.type === 'expense' ? 'text-status-error' :
+                        transaction.type === 'lending' ? 'text-green-600' : 'text-orange-600'
+                      }`}>
+                        {transaction.type === 'income' ? 'Income' : 
+                         transaction.type === 'expense' ? 'Expense' :
+                         transaction.type === 'lending' ? 'Lending' : 'Borrowing'}
                       </span>
                     </div>
                   </td>
@@ -476,8 +544,12 @@ export default function Transactions() {
                     {transaction.account.name}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <span className={transaction.type === 'income' ? 'text-status-success' : 'text-status-error'}>
-                      {transaction.type === 'income' ? '+' : '-'}${transaction.amount.toFixed(2)}
+                    <span className={
+                      transaction.type === 'income' ? 'text-status-success' : 
+                      transaction.type === 'expense' ? 'text-status-error' :
+                      transaction.type === 'lending' ? 'text-green-600' : 'text-orange-600'
+                    }>
+                      {transaction.type === 'income' || transaction.type === 'lending' ? '+' : '-'}${transaction.amount.toFixed(2)}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-heading">
@@ -497,7 +569,7 @@ export default function Transactions() {
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    {!transaction.groupExpense ? (
+                    {!transaction.groupExpense && (transaction.type === 'income' || transaction.type === 'expense') ? (
                       <button
                         onClick={() => {
                           setEditingTransaction(transaction)
@@ -507,8 +579,10 @@ export default function Transactions() {
                       >
                         <Edit className="h-4 w-4" />
                       </button>
-                    ) : (
+                    ) : transaction.groupExpense ? (
                       <span className="text-gray-400 text-xs">Group transaction</span>
+                    ) : (
+                      <span className="text-gray-400 text-xs">Group lending/borrowing</span>
                     )}
                   </td>
                 </tr>
@@ -530,7 +604,9 @@ export default function Transactions() {
           <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-card">
             <div className="mt-3">
               <h3 className="text-lg font-medium text-heading mb-4">
-                Edit {editingTransaction.type === 'income' ? 'Income' : 'Expense'}
+                Edit {editingTransaction.type === 'income' ? 'Income' : 
+                      editingTransaction.type === 'expense' ? 'Expense' :
+                      editingTransaction.type === 'lending' ? 'Lending' : 'Borrowing'}
               </h3>
               <EditTransactionForm 
                 transaction={editingTransaction}

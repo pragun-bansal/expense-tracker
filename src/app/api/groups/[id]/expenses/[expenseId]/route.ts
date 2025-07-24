@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { createPersonalTransactionsForGroupExpense } from '@/lib/groupTransactionSync'
+import { logActivity } from '@/lib/activityLogger'
 
 export async function DELETE(
   request: NextRequest, 
@@ -53,6 +54,10 @@ export async function DELETE(
       }, { status: 403 })
     }
 
+    // Store expense details for activity logging
+    const expenseDescription = expense.description || 'Unnamed expense'
+    const expenseAmount = expense.amount
+
     // Get all personal transactions related to this group expense before deleting
     const relatedExpenses = await prisma.expense.findMany({
       where: { groupExpenseId: expenseId }
@@ -98,6 +103,21 @@ export async function DELETE(
     // Delete the expense (splits and lenders will be cascade deleted)
     await prisma.groupExpense.delete({
       where: { id: expenseId }
+    })
+
+    // Log activity
+    await logActivity({
+      action: 'EXPENSE_DELETED',
+      description: `Deleted expense "${expenseDescription}" worth $${expenseAmount.toFixed(2)}`,
+      userId: session.user.id,
+      groupId,
+      entityType: 'expense',
+      entityId: expenseId,
+      metadata: {
+        expenseName: expenseDescription,
+        amount: expenseAmount,
+        deletedBy: session.user.name || session.user.email || 'Unknown'
+      }
     })
 
     return NextResponse.json({ message: 'Expense deleted successfully' })
@@ -159,6 +179,10 @@ export async function PUT(
       }, { status: 403 })
     }
 
+    // Store original expense details for activity logging
+    const originalDescription = expense.description || 'Unnamed expense'
+    const originalAmount = expense.amount
+
     const { 
       description, 
       amount, 
@@ -183,20 +207,35 @@ export async function PUT(
       )
     }
 
+    // Convert amount to number for validation
+    const amountNumber = parseFloat(amount)
+    
     // Validate split amounts
-    const totalSplitAmount = splits.reduce((sum: number, split: any) => sum + split.amount, 0)
-    if (Math.abs(totalSplitAmount - amount) > 0.01) {
+    const totalSplitAmount = splits.reduce((sum: number, split: any) => sum + parseFloat(split.amount), 0)
+    if (Math.abs(totalSplitAmount - amountNumber) > 0.01) {
+      console.error('Split validation failed:', {
+        totalSplitAmount,
+        amountNumber,
+        difference: Math.abs(totalSplitAmount - amountNumber),
+        splits: splits.map((s: any) => ({ ...s, amount: parseFloat(s.amount) }))
+      })
       return NextResponse.json(
-        { error: 'Split amounts must equal the total expense amount' },
+        { error: `Split amounts (${totalSplitAmount.toFixed(2)}) must equal the total expense amount (${amountNumber.toFixed(2)})` },
         { status: 400 }
       )
     }
 
     // Validate lender amounts
-    const totalLenderAmount = lenders.reduce((sum: number, lender: any) => sum + lender.amount, 0)
-    if (Math.abs(totalLenderAmount - amount) > 0.01) {
+    const totalLenderAmount = lenders.reduce((sum: number, lender: any) => sum + parseFloat(lender.amount), 0)
+    if (Math.abs(totalLenderAmount - amountNumber) > 0.01) {
+      console.error('Lender validation failed:', {
+        totalLenderAmount,
+        amountNumber,
+        difference: Math.abs(totalLenderAmount - amountNumber),
+        lenders: lenders.map((l: any) => ({ ...l, amount: parseFloat(l.amount) }))
+      })
       return NextResponse.json(
-        { error: 'Lender amounts must equal the total expense amount' },
+        { error: `Lender amounts (${totalLenderAmount.toFixed(2)}) must equal the total expense amount (${amountNumber.toFixed(2)})` },
         { status: 400 }
       )
     }
@@ -248,7 +287,7 @@ export async function PUT(
       where: { id: expenseId },
       data: {
         description,
-        amount: parseFloat(amount),
+        amount: amountNumber,
         date: date ? new Date(date) : undefined,
         splitType: splitType || 'EQUAL',
         receiptUrl: receiptUrl || null
@@ -294,7 +333,7 @@ export async function PUT(
         updatedExpense.id,
         {
           description,
-          amount: parseFloat(amount),
+          amount: amountNumber,
           date: date ? new Date(date) : new Date(),
           groupId: expense.groupId
         },
@@ -331,6 +370,40 @@ export async function PUT(
             }
           }
         }
+      }
+    })
+
+    // Generate detailed change description
+    const changes = []
+    if (originalDescription !== description) {
+      changes.push(`name from "${originalDescription}" to "${description}"`)
+    }
+    if (Math.abs(originalAmount - amountNumber) > 0.01) {
+      changes.push(`amount from $${originalAmount.toFixed(2)} to $${amountNumber.toFixed(2)}`)
+    }
+    
+    const changeDescription = changes.length > 0 
+      ? `Updated ${changes.join(' and ')} for expense "${description}"`
+      : `Updated expense "${description}"`
+
+    // Log activity
+    await logActivity({
+      action: 'EXPENSE_EDITED',
+      description: changeDescription,
+      userId: session.user.id,
+      groupId,
+      entityType: 'expense',
+      entityId: expenseId,
+      metadata: {
+        expenseName: description,
+        originalName: originalDescription,
+        newAmount: amountNumber,
+        originalAmount: originalAmount,
+        splitType: splitType || 'EQUAL',
+        lenderCount: lenders.length,
+        splitCount: splits.length,
+        editedBy: session.user.name || session.user.email || 'Unknown',
+        changes: changes
       }
     })
 

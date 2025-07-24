@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { createPersonalTransactionsForGroupExpense } from '@/lib/groupTransactionSync'
 import { createGroupExpenseNotification } from '@/lib/notifications'
+import { logActivity } from '@/lib/activityLogger'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -239,6 +240,23 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         addedByName
       )
     }
+
+    // Log activity
+    await logActivity({
+      action: 'EXPENSE_ADDED',
+      description: `Added expense "${description}" for $${parseFloat(amount).toFixed(2)}`,
+      userId: session.user.id,
+      groupId,
+      entityType: 'expense',
+      entityId: groupExpense.id,
+      metadata: {
+        expenseName: description,
+        amount: parseFloat(amount),
+        splitType: splitType || 'EQUAL',
+        lenderCount: lenders.length,
+        splitCount: splits.length
+      }
+    })
 
     // Fetch the complete expense with splits and lenders
     const completeExpense = await prisma.groupExpense.findUnique({
