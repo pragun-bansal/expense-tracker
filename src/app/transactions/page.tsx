@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
-import { Filter, Search, ArrowUpCircle, ArrowDownCircle, Calendar, Download, Edit, Users, Plus } from 'lucide-react'
+import { Filter, Search, ArrowUpCircle, ArrowDownCircle, Calendar, Download, Edit, Users, PlusCircle } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
 
 interface Transaction {
@@ -223,16 +223,16 @@ export default function Transactions() {
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none flex gap-2">
           <Link
             href="/income/new"
-            className="inline-flex items-center justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 sm:w-auto"
+            className="inline-flex items-center justify-center rounded-md border border-transparent bg-button-success px-4 py-2 text-sm font-medium text-button-success shadow-sm bg-button-success:hover focus:outline-none focus:ring-2 ring-focus focus:ring-offset-2 sm:w-auto"
           >
-            <Plus className="h-4 w-4 mr-2" />
+            <PlusCircle className="h-4 w-4 mr-2" />
             Add Income
           </Link>
           <Link
             href="/expenses/new"
-            className="inline-flex items-center justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:w-auto"
+            className="inline-flex items-center justify-center rounded-md border border-transparent bg-button-primary px-4 py-2 text-sm font-medium text-button-primary shadow-sm bg-button-primary:hover focus:outline-none ring-focus focus:ring-2 focus:ring-offset-2 sm:w-auto"
           >
-            <Plus className="h-4 w-4 mr-2" />
+            <PlusCircle className="h-4 w-4 mr-2" />
             Add Expense
           </Link>
           <button
