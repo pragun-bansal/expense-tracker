@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { createGroupMemberNotification } from '@/lib/notifications'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -148,6 +149,15 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
                   role: 'MEMBER'
                 }
               })
+              
+              // Create notification for the added member
+              await createGroupMemberNotification(
+                user.id,
+                groupId,
+                group.name,
+                session.user.name || session.user.email || 'Someone',
+                true
+              )
             }
           }
         }
