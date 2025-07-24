@@ -32,7 +32,7 @@ const navigation = [
   { name: 'Recurring', href: '/recurring-expenses', icon: Repeat },
   { name: 'Accounts', href: '/accounts', icon: CreditCard },
   { name: 'Groups', href: '/groups', icon: Users },
-  { name: 'Debt Settlement', href: '/debt-settlement', icon: Calculator },
+  // { name: 'Debt Settlement', href: '/debt-settlement', icon: Calculator },
   { name: 'Analytics', href: '/analytics', icon: PieChart },
   { name: 'Budgets', href: '/budgets', icon: Target },
   { name: 'Reports', href: '/reports', icon: FileText },
