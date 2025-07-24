@@ -43,7 +43,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       where: {
         userId: fromUserId,
         settled: false,
-        expense: {
+        groupExpense: {
           groupId,
           lenders: {
             some: {
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         }
       },
       include: {
-        expense: {
+        groupExpense: {
           include: {
             lenders: {
               where: {
@@ -70,8 +70,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const splitsToSettle: string[] = []
 
     for (const split of unsettledSplits) {
-      const lenderShare = split.expense.lenders[0]?.amount || 0
-      const lenderPortion = lenderShare / split.expense.amount
+      const lenderShare = split.groupExpense.lenders[0]?.amount || 0
+      const lenderPortion = lenderShare / split.groupExpense.amount
       const amountOwedForThisSplit = split.amount * lenderPortion
       
       if (totalOwed + amountOwedForThisSplit <= amount + 0.01) { // Small tolerance for floating point
