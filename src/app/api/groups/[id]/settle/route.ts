@@ -108,22 +108,30 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       }
     }
 
-    // Create notifications for affected parties
-    for (const split of splits) {
-      const isUserBorrower = split.userId === session.user.id
-      const notificationUserId = isUserBorrower 
-        ? split.groupExpense.lenders[0]?.userId // Notify lender if borrower settled
-        : split.userId // Notify borrower if lender settled
-
-      if (notificationUserId && notificationUserId !== session.user.id) {
-        await createNotification({
-          userId: notificationUserId,
-          title: 'Expense Settled',
-          message: `${session.user.name || session.user.email} marked an expense split as settled`,
-          type: 'GROUP_EXPENSE_SETTLED',
-          relatedId: split.groupExpense.id
-        })
+    // Create notifications for all group members about settled expenses
+    const groupMembers = await prisma.groupMember.findMany({
+      where: {
+        groupId,
+        userId: { not: session.user.id }
+      },
+      include: {
+        user: true,
+        group: true
       }
+    })
+
+    const settlerName = session.user.name || session.user.email || 'Someone'
+    const settledExpenses = [...new Set(splits.map(split => split.groupExpense.description))]
+    const totalSettledAmount = splits.reduce((sum, split) => sum + split.amount, 0)
+
+    for (const member of groupMembers) {
+      await createNotification({
+        userId: member.userId,
+        title: 'Group Expenses Settled',
+        message: `${settlerName} settled ${splits.length} expense split${splits.length > 1 ? 's' : ''} totaling $${totalSettledAmount.toFixed(2)} in group "${member.group.name}".`,
+        type: 'GROUP_EXPENSE_SETTLED',
+        relatedId: groupId
+      })
     }
 
     return NextResponse.json({ message: 'Splits settled successfully' })

@@ -198,12 +198,12 @@ export async function createBudgetAlert(userId: string, categoryId: string, cate
   })
 }
 
-export async function createGroupExpenseNotification(memberUserId: string, groupId: string, expenseDescription: string, amount: number, addedBy: string): Promise<void> {
+export async function createGroupExpenseNotification(memberUserId: string, groupId: string, groupName: string, expenseDescription: string, amount: number, addedBy: string): Promise<void> {
   await createNotification({
     userId: memberUserId,
     type: 'GROUP_EXPENSE_ADDED',
     title: 'New Group Expense',
-    message: `${addedBy} added "${expenseDescription}" for $${amount.toFixed(2)} to your group.`,
+    message: `${addedBy} added "${expenseDescription}" for $${amount.toFixed(2)} to the group "${groupName}".`,
     relatedId: groupId
   })
 }
