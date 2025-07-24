@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Plus, DollarSign, Users, Receipt, Check, X, Trash2, Edit } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
+import { formatActivityDescription } from '@/lib/activityLogger'
 
 interface Account {
   id: string
@@ -125,23 +126,28 @@ interface GroupStats {
   }
 }
 
-export default function GroupDetail({ params }: { params: { id: string } }) {
+export default function GroupDetail({ params }: { params: Promise<{ id: string }> }) {
   const { data: session } = useSession()
   const router = useRouter()
+  const { id } = React.use(params)
   const [group, setGroup] = useState<Group | null>(null)
   const [expenses, setExpenses] = useState<GroupExpense[]>([])
   const [balances, setBalances] = useState<Balance[]>([])
-  const [settlements, setSettlements] = useState<Settlement[]>([])
+  const [suggestedSettlements, setSuggestedSettlements] = useState<any[]>([]) // For Outstanding Balances tab
+  const [recordedSettlements, setRecordedSettlements] = useState<any[]>([]) // For Settlement History tab
   const [stats, setStats] = useState<GroupStats | null>(null)
+  const [activities, setActivities] = useState<any[]>([])
   const [accounts, setAccounts] = useState<Account[]>([])
   const [loading, setLoading] = useState(true)
   const [showAddExpense, setShowAddExpense] = useState(false)
   const [showEditExpense, setShowEditExpense] = useState(false)
   const [editingExpense, setEditingExpense] = useState<GroupExpense | null>(null)
   const [showSettleModal, setShowSettleModal] = useState(false)
-  const [settleData, setSettleData] = useState<{fromUserId?: string, toUserId?: string, amount?: number}>({ })
+  const [settleData, setSettleData] = useState<{fromUserId?: string, toUserId?: string, amount?: number, isLender?: boolean}>({ })
   const [settlementAccountId, setSettlementAccountId] = useState('')
-  const [activeTab, setActiveTab] = useState<'expenses' | 'balances' | 'stats'>('expenses')
+  const [activeTab, setActiveTab] = useState<'expenses' | 'balances' | 'stats' | 'settlements' | 'activity'>('expenses')
+  const [showEditSettlement, setShowEditSettlement] = useState(false)
+  const [editingSettlement, setEditingSettlement] = useState<any>(null)
 
   const [newExpense, setNewExpense] = useState({
     description: '',
@@ -159,12 +165,14 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
       fetchBalances()
       fetchStats()
       fetchAccounts()
+      fetchSettlements()
+      fetchActivities()
     }
   }, [session])
 
   const fetchGroup = async () => {
     try {
-      const response = await fetch(`/api/groups/${params.id}`)
+      const response = await fetch(`/api/groups/${id}`)
       if (response.ok) {
         const data = await response.json()
         setGroup(data)
@@ -176,7 +184,7 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
 
   const fetchExpenses = async () => {
     try {
-      const response = await fetch(`/api/groups/${params.id}/expenses`)
+      const response = await fetch(`/api/groups/${id}/expenses`)
       if (response.ok) {
         const data = await response.json()
         setExpenses(data)
@@ -190,11 +198,11 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
 
   const fetchBalances = async () => {
     try {
-      const response = await fetch(`/api/groups/${params.id}/balances`)
+      const response = await fetch(`/api/groups/${id}/balances`)
       if (response.ok) {
         const data = await response.json()
         setBalances(data.balances)
-        setSettlements(data.settlements)
+        setSuggestedSettlements(data.settlements) // Settlement suggestions
       }
     } catch (error) {
       console.error('Error fetching balances:', error)
@@ -203,7 +211,7 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch(`/api/groups/${params.id}/stats`)
+      const response = await fetch(`/api/groups/${id}/stats`)
       if (response.ok) {
         const data = await response.json()
         setStats(data)
@@ -287,7 +295,7 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
         splits = selectedSplits
       }
 
-      const response = await fetch(`/api/groups/${params.id}/expenses`, {
+      const response = await fetch(`/api/groups/${id}/expenses`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -320,6 +328,7 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
         fetchExpenses()
         fetchBalances()
         fetchStats()
+        fetchActivities()
       }
     } catch (error) {
       console.error('Error adding expense:', error)
@@ -330,7 +339,7 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
     if (!confirm('Are you sure you want to delete this expense?')) return
 
     try {
-      const response = await fetch(`/api/groups/${params.id}/expenses/${expenseId}`, {
+      const response = await fetch(`/api/groups/${id}/expenses/${expenseId}`, {
         method: 'DELETE'
       })
 
@@ -338,6 +347,7 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
         fetchExpenses()
         fetchBalances()
         fetchStats()
+        fetchActivities()
       } else {
         const error = await response.json()
         alert(error.error || 'Failed to delete expense')
@@ -417,14 +427,39 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
   }
 
   const initiateBalanceSettle = (fromUserId: string, toUserId: string, amount: number) => {
-    setSettleData({ fromUserId, toUserId, amount })
+    const isLender = session?.user?.id === toUserId
+    setSettleData({ fromUserId, toUserId, amount, isLender })
     setSettlementAccountId('')
     setShowSettleModal(true)
   }
 
+  const fetchSettlements = async () => {
+    try {
+      const response = await fetch(`/api/groups/${id}/settlements`)
+      if (response.ok) {
+        const data = await response.json()
+        setRecordedSettlements(data.settlements)
+      }
+    } catch (error) {
+      console.error('Error fetching settlements:', error)
+    }
+  }
+
+  const fetchActivities = async () => {
+    try {
+      const response = await fetch(`/api/groups/${id}/activities`)
+      if (response.ok) {
+        const data = await response.json()
+        setActivities(data.activities)
+      }
+    } catch (error) {
+      console.error('Error fetching activities:', error)
+    }
+  }
+
   const handleSettleDebt = async () => {
     try {
-      const response = await fetch(`/api/groups/${params.id}/settle-balance`, {
+      const response = await fetch(`/api/groups/${id}/settle-balance`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -440,10 +475,64 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
         fetchExpenses()
         fetchBalances()
         fetchStats()
-        fetchStats()
+        fetchActivities()
+        fetchSettlements()
       }
     } catch (error) {
       console.error('Error settling balance:', error)
+    }
+  }
+
+  const handleUpdateSettlement = async (settlementId: string, accountId: string, accountType: 'borrower' | 'lender') => {
+    try {
+      const updateData = accountType === 'borrower' 
+        ? { borrowerAccountId: accountId || null }
+        : { lenderAccountId: accountId || null }
+
+      const response = await fetch(`/api/settlements/${settlementId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updateData)
+      })
+
+      if (response.ok) {
+        setShowEditSettlement(false)
+        setEditingSettlement(null)
+        fetchSettlements()
+        // Refresh transactions by refetching balances which includes settlement data
+        fetchBalances()
+      } else {
+        const error = await response.json()
+        alert(error.error || 'Failed to update settlement')
+      }
+    } catch (error) {
+      console.error('Error updating settlement:', error)
+      alert('Failed to update settlement')
+    }
+  }
+
+  const handleDeleteSettlement = async (settlementId: string) => {
+    if (!confirm('Are you sure you want to delete this settlement? This will unsettle the related expenses.')) return
+
+    try {
+      const response = await fetch(`/api/settlements/${settlementId}`, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        fetchExpenses()
+        fetchBalances()
+        fetchStats()
+        fetchActivities()
+        fetchSettlements()
+        alert('Settlement deleted successfully')
+      } else {
+        const error = await response.json()
+        alert(error.error || 'Failed to delete settlement')
+      }
+    } catch (error) {
+      console.error('Error deleting settlement:', error)
+      alert('Failed to delete settlement')
     }
   }
 
@@ -541,7 +630,7 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
                 : 'border-transparent text-muted hover:text-body'
             }`}
           >
-            Balances
+            Outstanding Balances
           </button>
           <button
             onClick={() => setActiveTab('stats')}
@@ -552,6 +641,26 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
             }`}
           >
             Statistics
+          </button>
+          <button
+            onClick={() => setActiveTab('settlements')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'settlements'
+                ? 'border-blue-500 text-status-info'
+                : 'border-transparent text-muted hover:text-body'
+            }`}
+          >
+            Settlement History
+          </button>
+          <button
+            onClick={() => setActiveTab('activity')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'activity'
+                ? 'border-blue-500 text-status-info'
+                : 'border-transparent text-muted hover:text-body'
+            }`}
+          >
+            Activity Log
           </button>
         </nav>
       </div>
@@ -707,11 +816,11 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
           </div>
 
           {/* Suggested Settlements */}
-          {settlements.length > 0 && (
+          {suggestedSettlements.length > 0 && (
             <div>
               <h3 className="text-lg font-medium text-heading mb-4">Suggested Settlements</h3>
               <div className="space-y-3">
-                {settlements.map((settlement, index) => (
+                {suggestedSettlements.map((settlement, index) => (
                   <div key={index} className="bg-status-info border border-blue-200 rounded-lg p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
@@ -890,6 +999,122 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
                 )}
               </div>
             </div>
+          )}
+        </div>
+      )}
+
+      {/* Settlements Tab */}
+      {activeTab === 'settlements' && (
+        <div className="space-y-4">
+          {recordedSettlements.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted">No settlements recorded yet.</p>
+            </div>
+          ) : (
+            recordedSettlements.map((settlement) => (
+              <div key={settlement.id} className="bg-card rounded-lg shadow-card p-6">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center">
+                      <DollarSign className="h-5 w-5 text-green-500 mr-2" />
+                      <h3 className="text-lg font-medium text-heading">
+                        Settlement: ${settlement.amount.toFixed(2)}
+                      </h3>
+                    </div>
+                    <div className="mt-2 space-y-1">
+                      <p className="text-sm text-muted">
+                        <span className="font-medium">{settlement.borrower.name || settlement.borrower.email}</span>
+                        {' paid '}
+                        <span className="font-medium">{settlement.lender.name || settlement.lender.email}</span>
+                      </p>
+                      <p className="text-xs text-muted">
+                        Settled on {new Date(settlement.settledAt).toLocaleDateString()}
+                      </p>
+                      <div className="mt-3 grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <span className="font-medium text-muted">Paid from:</span>
+                          <div className="flex items-center justify-between">
+                            <span className="text-heading">
+                              {settlement.borrowerAccount?.name || 'Others'}
+                            </span>
+                            {session?.user?.id === settlement.borrowerUserId && (
+                              <button
+                                onClick={() => {
+                                  setEditingSettlement({...settlement, type: 'borrower'})
+                                  setShowEditSettlement(true)
+                                }}
+                                className="text-link hover:text-link-hover"
+                              >
+                                <Edit className="h-3 w-3" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                        <div>
+                          <span className="font-medium text-muted">Received in:</span>
+                          <div className="flex items-center justify-between">
+                            <span className="text-heading">
+                              {settlement.lenderAccount?.name || 'Others'}
+                            </span>
+                            {session?.user?.id === settlement.lenderUserId && (
+                              <button
+                                onClick={() => {
+                                  setEditingSettlement({...settlement, type: 'lender'})
+                                  setShowEditSettlement(true)
+                                }}
+                                className="text-link hover:text-link-hover"
+                              >
+                                <Edit className="h-3 w-3" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-4 border-t border-card-border pt-4 flex items-center justify-end">
+                    {(session?.user?.id === settlement.borrowerUserId || session?.user?.id === settlement.lenderUserId) && (
+                      <button
+                        onClick={() => handleDeleteSettlement(settlement.id)}
+                        className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete Settlement
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
+      {/* Activity Log Tab */}
+      {activeTab === 'activity' && (
+        <div className="space-y-4">
+          {activities.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted">No activities recorded yet.</p>
+            </div>
+          ) : (
+            activities.map((activity) => (
+              <div key={activity.id} className="bg-card rounded-lg shadow-card p-4">
+                <div className="flex items-start space-x-3">
+                  <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-medium">
+                    {activity.user.name?.[0]?.toUpperCase() || 'U'}
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-sm text-heading">
+                      {formatActivityDescription(activity)}
+                    </div>
+                    <div className="text-xs text-muted mt-1">
+                      {new Date(activity.createdAt).toLocaleString()}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
           )}
         </div>
       )}
@@ -1214,6 +1439,65 @@ export default function GroupDetail({ params }: { params: { id: string } }) {
                 >
                   <Check className="h-4 w-4 mr-2 inline" />
                   Mark as Settled
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Settlement Modal */}
+      {showEditSettlement && editingSettlement && (
+        <div className="fixed inset-0 bg-modal-overlay overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-card">
+            <div className="mt-3">
+              <h3 className="text-lg font-medium text-heading mb-4">
+                Update {editingSettlement.type === 'borrower' ? 'Payment' : 'Receipt'} Account
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-input-label mb-1">
+                    {editingSettlement.type === 'borrower' ? 'Account used for payment' : 'Account that received the payment'}
+                  </label>
+                  <select
+                    value={editingSettlement.type === 'borrower' 
+                      ? editingSettlement.borrowerAccountId || '' 
+                      : editingSettlement.lenderAccountId || ''}
+                    onChange={(e) => {
+                      const accountId = e.target.value
+                      handleUpdateSettlement(editingSettlement.id, accountId, editingSettlement.type)
+                    }}
+                    className="w-full border border-input rounded-md px-3 py-2 bg-input text-heading"
+                  >
+                    <option value="">Others</option>
+                    <optgroup label="Accounts">
+                      {accounts.map((account) => (
+                        <option key={account.id} value={account.id}>
+                          {account.name} ({account.type})
+                        </option>
+                      ))}
+                    </optgroup>
+                  </select>
+                </div>
+                
+                <div className="text-sm text-muted">
+                  Settlement: ${editingSettlement.amount.toFixed(2)} between{' '}
+                  <span className="font-medium">{editingSettlement.borrower.name || editingSettlement.borrower.email}</span>
+                  {' and '}
+                  <span className="font-medium">{editingSettlement.lender.name || editingSettlement.lender.email}</span>
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowEditSettlement(false)
+                    setEditingSettlement(null)
+                  }}
+                  className="px-4 py-2 text-input-label border border-input rounded-md hover:bg-button-secondary-hover"
+                >
+                  Cancel
                 </button>
               </div>
             </div>
