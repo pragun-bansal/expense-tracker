@@ -33,46 +33,57 @@ export async function POST(request: NextRequest) {
     const processedExpenses = []
 
     for (const recurringExpense of dueRecurringExpenses) {
-      // Create the actual expense
-      const expense = await prisma.expense.create({
-        data: {
-          amount: recurringExpense.amount,
-          description: recurringExpense.description,
-          date: recurringExpense.nextDueDate,
-          isRecurring: true,
-          recurringExpenseId: recurringExpense.id,
-          userId: session.user.id,
-          accountId: recurringExpense.accountId,
-          categoryId: recurringExpense.categoryId
-        },
-        include: {
-          category: true,
-          account: true
-        }
-      })
+      // Calculate how many times this expense should be processed
+      const dueDates = calculateMissedDueDates(
+        recurringExpense.nextDueDate,
+        recurringExpense.frequency,
+        now,
+        recurringExpense.endDate
+      )
 
-      // Update account balance
-      await prisma.account.update({
-        where: { id: recurringExpense.accountId },
-        data: {
-          balance: {
-            decrement: recurringExpense.amount
+      // Process each missed due date
+      for (const dueDate of dueDates) {
+        const expense = await prisma.expense.create({
+          data: {
+            amount: recurringExpense.amount,
+            description: recurringExpense.description,
+            date: dueDate,
+            isRecurring: true,
+            recurringExpenseId: recurringExpense.id,
+            userId: session.user.id,
+            accountId: recurringExpense.accountId,
+            categoryId: recurringExpense.categoryId
+          },
+          include: {
+            category: true,
+            account: true
           }
-        }
-      })
+        })
 
-      // Calculate next due date
-      const nextDueDate = calculateNextDueDate(recurringExpense.nextDueDate, recurringExpense.frequency)
+        // Update account balance
+        await prisma.account.update({
+          where: { id: recurringExpense.accountId },
+          data: {
+            balance: {
+              decrement: recurringExpense.amount
+            }
+          }
+        })
 
-      // Update the recurring expense with the next due date
+        processedExpenses.push(expense)
+      }
+
+      // Update with the next future due date
+      const nextDueDate = dueDates.length > 0 
+        ? calculateNextDueDate(dueDates[dueDates.length - 1], recurringExpense.frequency)
+        : recurringExpense.nextDueDate
+
       await prisma.recurringExpense.update({
         where: { id: recurringExpense.id },
         data: {
           nextDueDate: nextDueDate
         }
       })
-
-      processedExpenses.push(expense)
     }
 
     return NextResponse.json({
@@ -86,6 +97,29 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     )
   }
+}
+
+function calculateMissedDueDates(
+  nextDueDate: Date,
+  frequency: string,
+  currentDate: Date,
+  endDate: Date | null
+): Date[] {
+  const dueDates: Date[] = []
+  let currentDue = new Date(nextDueDate)
+  
+  // Only process dates that are due (on or before current date)
+  while (currentDue <= currentDate) {
+    // Check if end date has passed
+    if (endDate && currentDue > endDate) {
+      break
+    }
+    
+    dueDates.push(new Date(currentDue))
+    currentDue = calculateNextDueDate(currentDue, frequency)
+  }
+  
+  return dueDates
 }
 
 function calculateNextDueDate(currentDate: Date, frequency: string): Date {

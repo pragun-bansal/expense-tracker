@@ -264,3 +264,65 @@ export async function PUT(request: NextRequest) {
     )
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Expense ID is required' },
+        { status: 400 }
+      )
+    }
+
+    // Get the expense to check ownership and get account info for balance update
+    const expense = await prisma.expense.findUnique({
+      where: { 
+        id,
+        userId: session.user.id // Ensure user owns this expense
+      }
+    })
+
+    if (!expense) {
+      return NextResponse.json({ error: 'Expense not found' }, { status: 404 })
+    }
+
+    // Check if it's a group transaction (cannot delete)
+    if (expense.groupExpenseId) {
+      return NextResponse.json(
+        { error: 'Cannot delete group transactions. Please delete from the group page.' },
+        { status: 400 }
+      )
+    }
+
+    // Delete the expense
+    await prisma.expense.delete({
+      where: { id }
+    })
+
+    // Restore account balance (add back the expense amount)
+    await prisma.account.update({
+      where: { id: expense.accountId },
+      data: {
+        balance: {
+          increment: expense.amount
+        }
+      }
+    })
+
+    return NextResponse.json({ message: 'Expense deleted successfully' })
+  } catch (error) {
+    console.error('Error deleting expense:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}

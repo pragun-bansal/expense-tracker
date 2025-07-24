@@ -58,8 +58,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Calculate next due date based on frequency
-    const nextDueDate = calculateNextDueDate(new Date(startDate), frequency)
+    // Initial due date should be the start date itself
+    const nextDueDate = new Date(startDate)
 
     const recurringExpense = await prisma.recurringExpense.create({
       data: {

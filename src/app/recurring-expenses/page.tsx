@@ -53,6 +53,8 @@ export default function RecurringExpenses() {
   const [accounts, setAccounts] = useState<Account[]>([])
   const [loading, setLoading] = useState(true)
   const [showAddForm, setShowAddForm] = useState(false)
+  const [showEditForm, setShowEditForm] = useState(false)
+  const [editingExpense, setEditingExpense] = useState<RecurringExpense | null>(null)
   const [processing, setProcessing] = useState(false)
   const [processingIndividual, setProcessingIndividual] = useState<string | null>(null)
   const [formData, setFormData] = useState({
@@ -78,7 +80,14 @@ export default function RecurringExpenses() {
       const response = await fetch('/api/recurring-expenses')
       if (response.ok) {
         const data = await response.json()
-        setRecurringExpenses(data)
+        // Sort by start date (earliest first) and ensure expenses array exists
+        const sortedData = data.map((expense: RecurringExpense) => ({
+          ...expense,
+          expenses: expense.expenses || [] // Ensure expenses array exists
+        })).sort((a: RecurringExpense, b: RecurringExpense) => 
+          new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+        )
+        setRecurringExpenses(sortedData)
       }
     } catch (error) {
       console.error('Error fetching recurring expenses:', error)
@@ -122,17 +131,9 @@ export default function RecurringExpenses() {
 
       if (response.ok) {
         const newRecurringExpense = await response.json()
-        setRecurringExpenses([...recurringExpenses, newRecurringExpense])
+        fetchRecurringExpenses() // Refetch to maintain sorting
         setShowAddForm(false)
-        setFormData({
-          amount: '',
-          description: '',
-          frequency: 'MONTHLY',
-          startDate: new Date().toISOString().split('T')[0],
-          endDate: '',
-          categoryId: '',
-          accountId: ''
-        })
+        resetForm()
       } else {
         const error = await response.json()
         alert(error.error || 'Failed to create recurring expense')
@@ -141,6 +142,58 @@ export default function RecurringExpenses() {
       console.error('Error creating recurring expense:', error)
       alert('Something went wrong')
     }
+  }
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingExpense) return
+
+    try {
+      const response = await fetch(`/api/recurring-expenses/${editingExpense.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      })
+
+      if (response.ok) {
+        fetchRecurringExpenses() // Refetch to maintain sorting
+        setShowEditForm(false)
+        setEditingExpense(null)
+        resetForm()
+      } else {
+        const error = await response.json()
+        alert(error.error || 'Failed to update recurring expense')
+      }
+    } catch (error) {
+      console.error('Error updating recurring expense:', error)
+      alert('Something went wrong')
+    }
+  }
+
+  const resetForm = () => {
+    setFormData({
+      amount: '',
+      description: '',
+      frequency: 'MONTHLY',
+      startDate: new Date().toISOString().split('T')[0],
+      endDate: '',
+      categoryId: '',
+      accountId: ''
+    })
+  }
+
+  const handleEdit = (expense: RecurringExpense) => {
+    setEditingExpense(expense)
+    setFormData({
+      amount: expense.amount.toString(),
+      description: expense.description || '',
+      frequency: expense.frequency,
+      startDate: expense.startDate.split('T')[0],
+      endDate: expense.endDate ? expense.endDate.split('T')[0] : '',
+      categoryId: expense.category.id,
+      accountId: expense.account.id
+    })
+    setShowEditForm(true)
   }
 
   const handleToggleActive = async (id: string, currentStatus: boolean) => {
@@ -277,14 +330,14 @@ export default function RecurringExpenses() {
         </div>
       </div>
 
-      {/* Add Form */}
-      {showAddForm && (
+      {/* Add/Edit Form */}
+      {(showAddForm || showEditForm) && (
         <div className="bg-card shadow-card rounded-lg mb-8">
           <div className="px-4 py-5 sm:p-6">
             <h3 className="text-lg font-medium leading-6 text-heading mb-4">
-              Add Recurring Expense
+              {showEditForm ? 'Edit Recurring Expense' : 'Add Recurring Expense'}
             </h3>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={showEditForm ? handleEditSubmit : handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="amount" className="block text-sm font-medium text-input-label">
@@ -399,7 +452,12 @@ export default function RecurringExpenses() {
               <div className="flex justify-end space-x-3">
                 <button
                   type="button"
-                  onClick={() => setShowAddForm(false)}
+                  onClick={() => {
+                    setShowAddForm(false)
+                    setShowEditForm(false)
+                    setEditingExpense(null)
+                    resetForm()
+                  }}
                   className="bg-input py-2 px-4 border border-input rounded-md shadow-sm text-sm font-medium text-input-label hover:bg-button-secondary-hover"
                 >
                   Cancel
@@ -408,7 +466,7 @@ export default function RecurringExpenses() {
                   type="submit"
                   className="bg-blue-600 border border-transparent rounded-md shadow-sm py-2 px-4 text-sm font-medium text-white hover:bg-blue-700"
                 >
-                  Add Recurring Expense
+                  {showEditForm ? 'Update Recurring Expense' : 'Add Recurring Expense'}
                 </button>
               </div>
             </form>
@@ -451,14 +509,23 @@ export default function RecurringExpenses() {
                     <RefreshCw className={`h-4 w-4 ${processingIndividual === expense.id ? 'animate-spin' : ''}`} />
                   </button>
                   <button
+                    onClick={() => handleEdit(expense)}
+                    className="p-2 text-blue-600 hover:bg-blue-100 rounded-full"
+                    title="Edit recurring expense"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </button>
+                  <button
                     onClick={() => handleToggleActive(expense.id, expense.isActive)}
                     className={`p-2 rounded-full ${expense.isActive ? 'text-green-600 hover:bg-status-success' : 'text-gray-400 hover:bg-button-secondary-hover'}`}
+                    title={expense.isActive ? 'Pause recurring expense' : 'Resume recurring expense'}
                   >
                     {!expense.isActive ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
                   </button>
                   <button
                     onClick={() => handleDelete(expense.id)}
                     className="p-2 text-red-600 hover:bg-status-error rounded-full"
+                    title="Delete recurring expense"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -487,7 +554,7 @@ export default function RecurringExpenses() {
                     </span>
                   )}
                 </div>
-                {expense.expenses.length > 0 && (
+                {expense.expenses && expense.expenses.length > 0 && (
                   <div className="mt-2 text-sm text-muted">
                     Last processed: {formatDate(expense.expenses[0].date)}
                   </div>
