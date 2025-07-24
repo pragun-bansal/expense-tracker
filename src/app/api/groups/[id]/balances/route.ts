@@ -85,13 +85,22 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       }
     }
 
-    // Calculate from expenses - same as stats API
+    // Calculate from expenses - only unsettled amounts affect balances
     for (const expense of expenses) {
-      // Lenders get positive balance (money they lent out)
-      for (const lender of expense.lenders) {
-        const lenderId = lender.userId
-        if (userBalances[lenderId] !== undefined) {
-          userBalances[lenderId] += lender.amount
+      // Get total unsettled amount for this expense
+      const unsettledSplits = expense.splits.filter(split => !split.settled)
+      const totalUnsettledAmount = unsettledSplits.reduce((sum, split) => sum + split.amount, 0)
+      
+      // If there are unsettled splits, lenders are owed their proportional share
+      if (totalUnsettledAmount > 0) {
+        for (const lender of expense.lenders) {
+          const lenderId = lender.userId
+          if (userBalances[lenderId] !== undefined) {
+            // Lender gets positive balance proportional to unsettled amount
+            const lenderProportion = lender.amount / expense.amount
+            const lenderUnsettledAmount = lenderProportion * totalUnsettledAmount
+            userBalances[lenderId] += lenderUnsettledAmount
+          }
         }
       }
 

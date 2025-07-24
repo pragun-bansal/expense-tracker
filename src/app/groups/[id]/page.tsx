@@ -714,28 +714,43 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
                 <div className="mt-4 border-t border-card-border pt-4">
                   <h4 className="text-sm font-medium text-heading mb-2">Split Details</h4>
                   <div className="space-y-2">
-                    {expense.splits.map((split) => (
-                      <div key={split.id} className="flex items-center justify-between">
-                        <div className="flex items-center">
-                          <div className="h-6 w-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-medium mr-3">
-                            {split.user.name?.[0]?.toUpperCase() || 'U'}
+                    {expense.splits.map((split) => {
+                      const isLender = expense.lenders.some(lender => lender.user.id === split.user.id)
+                      const lenderAmount = expense.lenders.find(lender => lender.user.id === split.user.id)?.amount || 0
+                      
+                      // Show status if:
+                      // 1. Not a lender at all (pure borrower), OR
+                      // 2. Is a lender but their split amount > their lender amount (they owe more than they lent)
+                      const shouldShowStatus = !isLender || (isLender && split.amount > lenderAmount)
+                      
+                      return (
+                        <div key={split.id} className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <div className="h-6 w-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-medium mr-3">
+                              {split.user.name?.[0]?.toUpperCase() || 'U'}
+                            </div>
+                            <span className="text-sm text-heading">
+                              {split.user.name}
+                            </span>
                           </div>
-                          <span className="text-sm text-heading">
-                            {split.user.name}
-                          </span>
+                          <div className="flex items-center space-x-2">
+                            {/*{shouldShowStatus && (*/}
+                            {/*    <span className={`text-xs px-2 py-1 rounded-full ${*/}
+                            {/*        split.settled*/}
+                            {/*            ? 'bg-status-success text-status-success'*/}
+                            {/*            : 'bg-status-error text-status-error'*/}
+                            {/*    }`}>*/}
+                            {/*    {split.settled ? 'Settled' : 'Pending'}*/}
+                            {/*  </span>*/}
+                            {/*)}*/}
+                            <span className="text-sm text-heading">
+                              ${split.amount.toFixed(2)}
+                            </span>
+
+                          </div>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <span className="text-sm text-heading">
-                            ${split.amount.toFixed(2)}
-                          </span>
-                          {split.settled ? (
-                            <Check className="h-4 w-4 text-status-success" />
-                          ) : (
-                            <X className="h-4 w-4 text-status-error" />
-                          )}
-                        </div>
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 </div>
 
