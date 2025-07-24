@@ -165,15 +165,31 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       })
     }
 
-    // Create notification for the other user
-    const otherUserId = session.user.id === fromUserId ? toUserId : fromUserId
-    await createNotification({
-      userId: otherUserId,
-      title: 'Settlement Recorded',
-      message: `${session.user.name || session.user.email} recorded a settlement of $${totalOwed.toFixed(2)}`,
-      type: 'GROUP_PAYMENT_RECEIVED',
-      relatedId: groupId
+    // Create notifications for all group members except the one who recorded the settlement
+    const groupMembers = await prisma.groupMember.findMany({
+      where: {
+        groupId,
+        userId: { not: session.user.id }
+      },
+      include: {
+        user: true,
+        group: true
+      }
     })
+
+    const fromUserName = await getUserName(fromUserId)
+    const toUserName = await getUserName(toUserId)
+    const settlerName = session.user.name || session.user.email || 'Someone'
+
+    for (const member of groupMembers) {
+      await createNotification({
+        userId: member.userId,
+        title: 'Group Balance Settled',
+        message: `${settlerName} recorded a settlement of $${totalOwed.toFixed(2)} from ${fromUserName} to ${toUserName} in group "${member.group.name}".`,
+        type: 'GROUP_PAYMENT_RECEIVED',
+        relatedId: groupId
+      })
+    }
 
     return NextResponse.json({ 
       message: 'Settlement recorded successfully',

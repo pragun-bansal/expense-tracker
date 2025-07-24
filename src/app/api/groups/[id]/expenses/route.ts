@@ -221,12 +221,19 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       }
     })
 
+    // Get group name for notifications
+    const group = await prisma.group.findUnique({
+      where: { id: groupId },
+      select: { name: true }
+    })
+
     const addedByName = session.user.name || session.user.email || 'Someone'
     
     for (const member of groupMembers) {
       await createGroupExpenseNotification(
         member.userId,
         groupId,
+        group?.name || 'Unknown Group',
         description,
         parseFloat(amount),
         addedByName
