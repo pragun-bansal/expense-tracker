@@ -28,11 +28,8 @@ import { ThemeToggle } from './ThemeToggle'
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Notifications', href: '/notifications', icon: Bell },
-  { name: 'Expenses', href: '/expenses', icon: Receipt },
-  { name: 'Income', href: '/income', icon: DollarSign },
-  { name: 'Recurring', href: '/recurring-expenses', icon: Repeat },
   { name: 'Transactions', href: '/transactions', icon: TrendingUp },
-  { name: 'All Transactions', href: '/unified-transactions', icon: TrendingUp },
+  { name: 'Recurring', href: '/recurring-expenses', icon: Repeat },
   { name: 'Accounts', href: '/accounts', icon: CreditCard },
   { name: 'Groups', href: '/groups', icon: Users },
   { name: 'Debt Settlement', href: '/debt-settlement', icon: Calculator },
