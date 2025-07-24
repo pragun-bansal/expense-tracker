@@ -22,10 +22,7 @@ export async function GET(request: NextRequest) {
 
     const skip = (page - 1) * limit
 
-    const where: any = { 
-      userId: session.user.id,
-      groupType: null // Exclude all group-related transactions
-    }
+    const where: any = { userId: session.user.id }
 
     if (category) where.categoryId = category
     if (account) where.accountId = account

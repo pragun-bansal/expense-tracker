@@ -65,7 +65,6 @@ async function generateSummaryReport(userId: string, dateFilter: any) {
     prisma.expense.findMany({
       where: {
         userId,
-        groupType: null, // Exclude group transactions
         ...(Object.keys(dateFilter).length > 0 && { date: dateFilter })
       },
       include: {
@@ -156,7 +155,6 @@ async function generateDetailedReport(userId: string, dateFilter: any) {
     prisma.expense.findMany({
       where: {
         userId,
-        groupType: null, // Exclude group transactions
         ...(Object.keys(dateFilter).length > 0 && { date: dateFilter })
       },
       include: {
@@ -205,7 +203,6 @@ async function generateCategoryReport(userId: string, dateFilter: any) {
     prisma.expense.findMany({
       where: {
         userId,
-        groupType: null, // Exclude group transactions
         ...(Object.keys(dateFilter).length > 0 && { date: dateFilter })
       },
       include: { category: true }
