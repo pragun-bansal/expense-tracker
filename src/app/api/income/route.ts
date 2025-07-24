@@ -232,3 +232,65 @@ export async function PUT(request: NextRequest) {
     )
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Income ID is required' },
+        { status: 400 }
+      )
+    }
+
+    // Get the income to check ownership and get account info for balance update
+    const income = await prisma.income.findUnique({
+      where: { 
+        id,
+        userId: session.user.id // Ensure user owns this income
+      }
+    })
+
+    if (!income) {
+      return NextResponse.json({ error: 'Income not found' }, { status: 404 })
+    }
+
+    // Check if it's a group transaction (cannot delete)
+    if (income.groupExpenseId) {
+      return NextResponse.json(
+        { error: 'Cannot delete group transactions. Please delete from the group page.' },
+        { status: 400 }
+      )
+    }
+
+    // Delete the income
+    await prisma.income.delete({
+      where: { id }
+    })
+
+    // Reduce account balance (subtract back the income amount)
+    await prisma.account.update({
+      where: { id: income.accountId },
+      data: {
+        balance: {
+          decrement: income.amount
+        }
+      }
+    })
+
+    return NextResponse.json({ message: 'Income deleted successfully' })
+  } catch (error) {
+    console.error('Error deleting income:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}

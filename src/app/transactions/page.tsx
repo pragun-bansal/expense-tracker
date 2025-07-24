@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
-import { Filter, Search, ArrowUpCircle, ArrowDownCircle, Calendar, Download, Edit, Users, PlusCircle } from 'lucide-react'
+import { Filter, Search, ArrowUpCircle, ArrowDownCircle, Calendar, Download, Edit, Users, PlusCircle, Trash2 } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
 
 interface Transaction {
@@ -235,6 +235,30 @@ export default function Transactions() {
     } catch (error) {
       console.error('Error updating transaction:', error)
       alert('Failed to update transaction')
+    }
+  }
+
+  const handleDeleteTransaction = async (transaction: Transaction) => {
+    if (!confirm(`Are you sure you want to delete this ${transaction.type}?`)) return
+
+    try {
+      const endpoint = transaction.type === 'income' ? `/api/income?id=${transaction.id}` : 
+                      transaction.type === 'expense' ? `/api/expenses?id=${transaction.id}` :
+                      transaction.type === 'lending' ? `/api/lending?id=${transaction.id}` : `/api/borrowing?id=${transaction.id}`
+      
+      const response = await fetch(endpoint, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        fetchTransactions() // Refresh the transactions list
+      } else {
+        const error = await response.json()
+        alert(error.error || 'Failed to delete transaction')
+      }
+    } catch (error) {
+      console.error('Error deleting transaction:', error)
+      alert('Failed to delete transaction')
     }
   }
 
@@ -569,16 +593,28 @@ export default function Transactions() {
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    {!transaction.groupExpense && (transaction.type === 'income' || transaction.type === 'expense') ? (
-                      <button
-                        onClick={() => {
-                          setEditingTransaction(transaction)
-                          setShowEditModal(true)
-                        }}
-                        className="text-link hover:text-link-hover"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </button>
+                    {!transaction.groupExpense ? (
+                      <div className="flex items-center space-x-2">
+                        {(transaction.type === 'income' || transaction.type === 'expense') && (
+                          <button
+                            onClick={() => {
+                              setEditingTransaction(transaction)
+                              setShowEditModal(true)
+                            }}
+                            className="text-link hover:text-link-hover"
+                            title="Edit transaction"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleDeleteTransaction(transaction)}
+                          className="text-red-600 hover:text-red-800"
+                          title="Delete transaction"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     ) : transaction.groupExpense ? (
                       <span className="text-gray-400 text-xs">Group transaction</span>
                     ) : (
