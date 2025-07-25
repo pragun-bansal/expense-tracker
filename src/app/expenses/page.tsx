@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { PlusCircle, Filter, Search, Edit, Trash2, Image } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
+import { useCurrency } from '@/hooks/useCurrency'
 
 interface Expense {
   id: string
@@ -27,6 +28,7 @@ interface Expense {
 
 export default function Expenses() {
   const { data: session } = useSession()
+  const { formatAmount } = useCurrency()
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -120,7 +122,7 @@ export default function Expenses() {
         <div className="mb-4 sm:mb-0">
           <h1 className="text-2xl sm:text-3xl font-bold text-heading">Expenses</h1>
           <p className="mt-2 text-sm text-body">
-            Total: ${totalAmount.toFixed(2)} ({filteredExpenses.length} expenses)
+            Total: {formatAmount(totalAmount)} ({filteredExpenses.length} expenses)
           </p>
         </div>
         <div className="w-full sm:w-auto">
@@ -266,7 +268,7 @@ export default function Expenses() {
                     {expense.account.name}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-heading">
-                    ${expense.amount.toFixed(2)}
+                    {formatAmount(expense.amount)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-muted">
                     {expense.receiptUrl ? (
@@ -319,7 +321,7 @@ export default function Expenses() {
                 </div>
               </div>
               <div className="text-lg font-semibold text-heading">
-                ${expense.amount.toFixed(2)}
+                {formatAmount(expense.amount)}
               </div>
             </div>
             

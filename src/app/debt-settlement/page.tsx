@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { Calculator, Users, ArrowRight, CheckCircle, AlertCircle } from 'lucide-react'
+import { useCurrency } from '@/hooks/useCurrency'
 
 interface Group {
   id: string
@@ -43,6 +44,7 @@ interface DebtSettlementResult {
 
 export default function DebtSettlement() {
   const { data: session } = useSession()
+  const { formatAmount } = useCurrency()
   const [groups, setGroups] = useState<Group[]>([])
   const [selectedGroup, setSelectedGroup] = useState<string>('')
   const [settlementResult, setSettlementResult] = useState<DebtSettlementResult | null>(null)
@@ -126,8 +128,8 @@ export default function DebtSettlement() {
   }
 
   const getBalanceText = (balance: number) => {
-    if (balance > 0) return `Gets back $${balance.toFixed(2)}`
-    if (balance < 0) return `Owes $${Math.abs(balance).toFixed(2)}`
+    if (balance > 0) return `Gets back ${formatAmount(balance)}`
+    if (balance < 0) return `Owes ${formatAmount(Math.abs(balance))}`
     return 'Even'
   }
 
@@ -233,8 +235,8 @@ export default function DebtSettlement() {
                       </span>
                     </div>
                     <div className="text-sm text-muted space-y-1">
-                      <div>Owed: ${debt.totalOwed.toFixed(2)}</div>
-                      <div>Owes: ${debt.totalOwes.toFixed(2)}</div>
+                      <div>Owed: {formatAmount(debt.totalOwed)}</div>
+                      <div>Owes: {formatAmount(debt.totalOwes)}</div>
                     </div>
                   </div>
                 ))}
@@ -277,7 +279,7 @@ export default function DebtSettlement() {
                         <ArrowRight className="h-4 w-4 text-gray-400" />
                       </div>
                       <div className="text-lg font-semibold text-status-success">
-                        ${settlement.amount.toFixed(2)}
+                        {formatAmount(settlement.amount)}
                       </div>
                     </div>
                   ))}

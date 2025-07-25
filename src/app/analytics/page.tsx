@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
+import { useCurrency } from '@/hooks/useCurrency'
 import { 
   PieChart, 
   Pie, 
@@ -54,6 +55,7 @@ interface AnalyticsData {
 
 export default function Analytics() {
   const { data: session } = useSession()
+  const { formatAmount } = useCurrency()
   const [data, setData] = useState<AnalyticsData | null>(null)
   const [loading, setLoading] = useState(true)
   const [period, setPeriod] = useState('month')
@@ -79,12 +81,6 @@ export default function Analytics() {
     }
   }
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(value)
-  }
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -93,7 +89,7 @@ export default function Analytics() {
           <p className="font-medium text-heading">{label}</p>
           {payload.map((item: any, index: number) => (
             <p key={index} style={{ color: item.color }} className="text-sm">
-              {item.name}: {formatCurrency(item.value)}
+              {item.name}: {formatAmount(item.value)}
             </p>
           ))}
         </div>
@@ -147,7 +143,7 @@ export default function Analytics() {
             <div className="ml-4">
               <p className="text-sm font-medium text-muted">Total Income</p>
               <p className="text-2xl font-semibold text-heading">
-                {formatCurrency(data.summary.totalIncome)}
+                {formatAmount(data.summary.totalIncome)}
               </p>
             </div>
           </div>
@@ -159,7 +155,7 @@ export default function Analytics() {
             <div className="ml-4">
               <p className="text-sm font-medium text-muted">Total Expenses</p>
               <p className="text-2xl font-semibold text-heading">
-                {formatCurrency(data.summary.totalExpenses)}
+                {formatAmount(data.summary.totalExpenses)}
               </p>
             </div>
           </div>
@@ -171,7 +167,7 @@ export default function Analytics() {
             <div className="ml-4">
               <p className="text-sm font-medium text-muted">Net Income</p>
               <p className={`text-2xl font-semibold ${data.summary.netIncome >= 0 ? 'text-status-success' : 'text-status-error'}`}>
-                {formatCurrency(data.summary.netIncome)}
+                {formatAmount(data.summary.netIncome)}
               </p>
             </div>
           </div>
@@ -183,7 +179,7 @@ export default function Analytics() {
             <div className="ml-4">
               <p className="text-sm font-medium text-muted">Net Worth</p>
               <p className="text-2xl font-semibold text-heading">
-                {formatCurrency(data.summary.netWorth)}
+                {formatAmount(data.summary.netWorth)}
               </p>
             </div>
           </div>
@@ -214,7 +210,7 @@ export default function Analytics() {
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value) => formatCurrency(value as number)} />
+                <Tooltip formatter={(value) => formatAmount(value as number)} />
               </PieChart>
             </ResponsiveContainer>
           ) : (
@@ -246,7 +242,7 @@ export default function Analytics() {
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value) => formatCurrency(value as number)} />
+                <Tooltip formatter={(value) => formatAmount(value as number)} />
               </PieChart>
             </ResponsiveContainer>
           ) : (

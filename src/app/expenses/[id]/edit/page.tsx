@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
 import { useBudgetAlerts } from '@/hooks/useBudgetAlerts'
+import { useCurrency } from '@/hooks/useCurrency'
 
 interface Category {
   id: string
@@ -37,6 +38,7 @@ export default function EditExpense({ params }: { params: { id: string } }) {
   const { data: session } = useSession()
   const router = useRouter()
   const { handleBudgetAlert } = useBudgetAlerts()
+  const { formatAmount } = useCurrency()
   
   const [formData, setFormData] = useState({
     amount: '',
@@ -259,7 +261,7 @@ export default function EditExpense({ params }: { params: { id: string } }) {
                       <option value="">Select an account</option>
                       {accounts.map((account) => (
                         <option key={account.id} value={account.id}>
-                          {account.name} (${account.balance.toFixed(2)})
+                          {account.name} ({formatAmount(account.balance)})
                         </option>
                       ))}
                     </select>

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { PlusCircle, CreditCard, Trash2 } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
+import { useCurrency } from '@/hooks/useCurrency'
 
 interface Account {
   id: string
@@ -15,6 +16,7 @@ interface Account {
 
 export default function Accounts() {
   const { data: session } = useSession()
+  const { formatAmount } = useCurrency()
   const [accounts, setAccounts] = useState<Account[]>([])
   const [loading, setLoading] = useState(true)
   const [showAddForm, setShowAddForm] = useState(false)
@@ -112,7 +114,7 @@ export default function Accounts() {
         <div>
           <h1 className="text-3xl font-bold text-heading">Accounts</h1>
           <p className="mt-2 text-sm text-body">
-            Total Balance: ${totalBalance.toFixed(2)}
+            Total Balance: {formatAmount(totalBalance)}
           </p>
         </div>
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
@@ -248,7 +250,7 @@ export default function Accounts() {
                           ? 'text-status-success' 
                           : 'text-status-error'
                       }`}>
-                        ${account.balance.toFixed(2)}
+                        {formatAmount(account.balance)}
                       </p>
                       <p className="text-xs text-muted">
                         {account.type === 'GROUP_LENDING' 
@@ -299,7 +301,7 @@ export default function Accounts() {
               </div>
               <div className="mt-4">
                 <div className="text-2xl font-bold text-heading">
-                  ${account.balance.toFixed(2)}
+                  {formatAmount(account.balance)}
                 </div>
                 <div className="text-sm text-muted">Current Balance</div>
               </div>

@@ -6,10 +6,12 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { PlusCircle, CreditCard, Users, TrendingUp, Calendar } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
+import { useCurrency } from '@/hooks/useCurrency'
 
 export default function Dashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const { formatAmount } = useCurrency()
   const [stats, setStats] = useState({
     totalExpenses: 0,
     monthlyExpenses: 0,
@@ -85,7 +87,7 @@ export default function Dashboard() {
             <div>
               <p className="text-muted text-sm font-medium">Total Expenses</p>
               <p className="text-3xl font-bold text-card-header mt-1">
-                ${stats.totalExpenses.toFixed(2)}
+                {formatAmount(stats.totalExpenses)}
               </p>
             </div>
             <div className="bg-status-info p-3 rounded-full">
@@ -99,7 +101,7 @@ export default function Dashboard() {
             <div>
               <p className="text-muted text-sm font-medium">This Month</p>
               <p className="text-3xl font-bold text-card-header mt-1">
-                ${stats.monthlyExpenses.toFixed(2)}
+                {formatAmount(stats.monthlyExpenses)}
               </p>
             </div>
             <div className="bg-status-success p-3 rounded-full">

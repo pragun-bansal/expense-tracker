@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { PlusCircle, Filter, Search, Edit, Trash2 } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
+import { useCurrency } from '@/hooks/useCurrency'
 
 interface Income {
   id: string
@@ -26,6 +27,7 @@ interface Income {
 
 export default function Income() {
   const { data: session } = useSession()
+  const { formatAmount } = useCurrency()
   const [incomes, setIncomes] = useState<Income[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -120,7 +122,7 @@ export default function Income() {
         <div>
           <h1 className="text-3xl font-bold text-heading">Income</h1>
           <p className="mt-2 text-sm text-body">
-            Total: ${totalAmount.toFixed(2)} ({filteredIncomes.length} entries)
+            Total: {formatAmount(totalAmount)} ({filteredIncomes.length} entries)
           </p>
         </div>
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
@@ -264,7 +266,7 @@ export default function Income() {
                     {income.source || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-icon-success">
-                    +${income.amount.toFixed(2)}
+                    +{formatAmount(income.amount)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">

@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import { PlusCircle, Calendar, Play, Pause, Edit, Trash2, RefreshCw } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
 import { useBudgetAlerts } from '@/hooks/useBudgetAlerts'
+import { useCurrency } from '@/hooks/useCurrency'
 
 interface RecurringExpense {
   id: string
@@ -48,6 +49,7 @@ interface Account {
 export default function RecurringExpenses() {
   const { data: session } = useSession()
   const { handleBudgetAlert } = useBudgetAlerts()
+  const { formatAmount } = useCurrency()
   const [recurringExpenses, setRecurringExpenses] = useState<RecurringExpense[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [accounts, setAccounts] = useState<Account[]>([])
@@ -492,7 +494,7 @@ export default function RecurringExpenses() {
                   </div>
                   <div className="ml-3">
                     <h3 className="text-lg font-medium text-heading">
-                      ${expense.amount.toFixed(2)}
+                      {formatAmount(expense.amount)}
                     </h3>
                     <p className="text-sm text-muted">
                       {formatFrequency(expense.frequency)}

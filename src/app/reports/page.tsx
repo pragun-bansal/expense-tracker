@@ -4,9 +4,11 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { Download, FileText, Calendar, Filter, TrendingUp, DollarSign, PieChart } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
+import { useCurrency } from '@/hooks/useCurrency'
 
 export default function Reports() {
   const { data: session } = useSession()
+  const { formatAmount } = useCurrency()
   const [loading, setLoading] = useState(true)
   const [generating, setGenerating] = useState(false)
   const [dateRange, setDateRange] = useState({
@@ -264,7 +266,7 @@ export default function Reports() {
                       <div className="ml-4">
                         <p className="text-sm font-medium text-status-info">Total Income</p>
                         <p className="text-2xl font-semibold text-status-info">
-                          ${reportData.summary.totalIncome.toFixed(2)}
+                          {formatAmount(reportData.summary.totalIncome)}
                         </p>
                       </div>
                     </div>
@@ -276,7 +278,7 @@ export default function Reports() {
                       <div className="ml-4">
                         <p className="text-sm font-medium text-status-error">Total Expenses</p>
                         <p className="text-2xl font-semibold text-status-error">
-                          ${reportData.summary.totalExpenses.toFixed(2)}
+                          {formatAmount(reportData.summary.totalExpenses)}
                         </p>
                       </div>
                     </div>
@@ -288,7 +290,7 @@ export default function Reports() {
                       <div className="ml-4">
                         <p className={`text-sm font-medium ${reportData.summary.netAmount >= 0 ? 'text-status-success' : 'text-status-error'}`}>Net Amount</p>
                         <p className={`text-2xl font-semibold ${reportData.summary.netAmount >= 0 ? 'text-status-success' : 'text-status-error'}`}>
-                          ${reportData.summary.netAmount.toFixed(2)}
+                          {formatAmount(reportData.summary.netAmount)}
                         </p>
                       </div>
                     </div>
@@ -316,7 +318,7 @@ export default function Reports() {
                           <div>
                             <span className="font-medium text-heading">{budget.category}</span>
                             <span className="text-sm text-muted ml-2">
-                              ${budget.spent.toFixed(2)} / ${budget.budgetAmount.toFixed(2)}
+                              {formatAmount(budget.spent)} / {formatAmount(budget.budgetAmount)}
                             </span>
                           </div>
                           <div className="text-right">
@@ -363,7 +365,7 @@ export default function Reports() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <span className={transaction.amount >= 0 ? 'text-status-success' : 'text-status-error'}>
-                            ${Math.abs(transaction.amount).toFixed(2)}
+                            {formatAmount(Math.abs(transaction.amount))}
                           </span>
                         </td>
                       </tr>
@@ -391,16 +393,16 @@ export default function Reports() {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                       <div>
                         <span className="text-muted">Expenses: </span>
-                        <span className="font-medium text-status-error">${category.totalExpenses.toFixed(2)}</span>
+                        <span className="font-medium text-status-error">{formatAmount(category.totalExpenses)}</span>
                       </div>
                       <div>
                         <span className="text-muted">Income: </span>
-                        <span className="font-medium text-status-success">${category.totalIncome.toFixed(2)}</span>
+                        <span className="font-medium text-status-success">{formatAmount(category.totalIncome)}</span>
                       </div>
                       <div>
                         <span className="text-muted">Net: </span>
                         <span className={`font-medium ${category.netAmount >= 0 ? 'text-status-success' : 'text-status-error'}`}>
-                          ${category.netAmount.toFixed(2)}
+                          {formatAmount(category.netAmount)}
                         </span>
                       </div>
                       <div>
@@ -426,16 +428,16 @@ export default function Reports() {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                       <div>
                         <span className="text-muted">Budget: </span>
-                        <span className="font-medium text-heading">${budget.budgetAmount.toFixed(2)}</span>
+                        <span className="font-medium text-heading">{formatAmount(budget.budgetAmount)}</span>
                       </div>
                       <div>
                         <span className="text-muted">Spent: </span>
-                        <span className="font-medium text-status-error">${budget.spent.toFixed(2)}</span>
+                        <span className="font-medium text-status-error">{formatAmount(budget.spent)}</span>
                       </div>
                       <div>
                         <span className="text-muted">Remaining: </span>
                         <span className={`font-medium ${budget.remaining >= 0 ? 'text-status-success' : 'text-status-error'}`}>
-                          ${budget.remaining.toFixed(2)}
+                          {formatAmount(budget.remaining)}
                         </span>
                       </div>
                       <div>

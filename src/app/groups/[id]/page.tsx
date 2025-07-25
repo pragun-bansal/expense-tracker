@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { ArrowLeft, Plus, DollarSign, Users, Receipt, Check, X, Trash2, Edit } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
 import { formatActivityDescription } from '@/lib/activityLogger'
+import { useCurrency } from '@/hooks/useCurrency'
 
 interface Account {
   id: string
@@ -128,6 +129,7 @@ interface GroupStats {
 
 export default function GroupDetail({ params }: { params: Promise<{ id: string }> }) {
   const { data: session } = useSession()
+  const { formatAmount } = useCurrency()
   const router = useRouter()
   const { id } = React.use(params)
   const [group, setGroup] = useState<Group | null>(null)
@@ -699,11 +701,11 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
                   </div>
                   <div className="text-right">
                     <div className="text-2xl font-bold text-heading">
-                      ${expense.amount.toFixed(2)}
+                      {formatAmount(expense.amount)}
                     </div>
                     {myShare && (
                       <div className={`text-sm ${myShare.settled ? 'text-status-success' : 'text-status-error'}`}>
-                        Your share: ${myShare.amount.toFixed(2)}
+                        Your share: {formatAmount(myShare.amount)}
                         {myShare.settled ? ' (settled)' : ' (unsettled)'}
                       </div>
                     )}
@@ -744,7 +746,7 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
                             {/*  </span>*/}
                             {/*)}*/}
                             <span className="text-sm text-heading">
-                              ${split.amount.toFixed(2)}
+                              {formatAmount(split.amount)}
                             </span>
 
                           </div>
@@ -822,7 +824,7 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
                         ? 'text-status-error' 
                         : 'text-heading'
                     }`}>
-                      {balance.balance > 0 ? '+' : ''}${balance.balance.toFixed(2)}
+                      {balance.balance > 0 ? '+' : ''}{formatAmount(Math.abs(balance.balance))}
                     </div>
                   </div>
                 ))}
@@ -855,7 +857,7 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
                       </div>
                       <div className="flex items-center space-x-3">
                         <div className="text-lg font-semibold text-status-info">
-                          ${settlement.amount.toFixed(2)}
+                          {formatAmount(settlement.amount)}
                         </div>
                         {(settlement.from.id === session?.user?.id || settlement.to.id === session?.user?.id) && (
                           <button
@@ -885,7 +887,7 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="bg-card p-6 rounded-lg shadow-card">
                 <div className="text-sm font-medium text-muted">Total Expenses</div>
-                <div className="text-2xl font-semibold text-heading">${stats.totalAmount.toFixed(2)}</div>
+                <div className="text-2xl font-semibold text-heading">{formatAmount(stats.totalAmount)}</div>
               </div>
               
               <div className="bg-card p-6 rounded-lg shadow-card">
@@ -895,7 +897,7 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
               
               <div className="bg-card p-6 rounded-lg shadow-card">
                 <div className="text-sm font-medium text-muted">Average Expense</div>
-                <div className="text-2xl font-semibold text-heading">${stats.averageExpense.toFixed(2)}</div>
+                <div className="text-2xl font-semibold text-heading">{formatAmount(stats.averageExpense)}</div>
               </div>
               
               <div className="bg-card p-6 rounded-lg shadow-card">
@@ -933,18 +935,18 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
                           ? 'text-status-error' 
                           : 'text-heading'
                       }`}>
-                        {member.netBalance > 0 ? '+' : ''}${member.netBalance.toFixed(2)}
+                        {member.netBalance > 0 ? '+' : ''}{formatAmount(Math.abs(member.netBalance))}
                       </div>
                     </div>
                     
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                       <div>
                         <div className="text-muted">Total Lent</div>
-                        <div className="font-medium text-status-success">${member.totalLent.toFixed(2)}</div>
+                        <div className="font-medium text-status-success">{formatAmount(member.totalLent)}</div>
                       </div>
                       <div>
                         <div className="text-muted">Total Borrowed</div>
-                        <div className="font-medium text-status-error">${member.totalBorrowed.toFixed(2)}</div>
+                        <div className="font-medium text-status-error">{formatAmount(member.totalBorrowed)}</div>
                       </div>
                       <div>
                         <div className="text-muted">Expenses Created</div>
@@ -960,7 +962,7 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
                             : 'text-heading'
                         }`}>
                           {member.netBalance > 0 ? 'Owed ' : member.netBalance < 0 ? 'Owes ' : 'Even'}
-                          {member.netBalance !== 0 && `$${Math.abs(member.netBalance).toFixed(2)}`}
+                          {member.netBalance !== 0 && formatAmount(Math.abs(member.netBalance))}
                         </div>
                       </div>
                     </div>
@@ -987,7 +989,7 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
                           {stats.topLender.user.name}
                         </div>
                         <div className="text-sm text-status-success">
-                          Lent ${stats.topLender.totalLent.toFixed(2)}
+                          Lent {formatAmount(stats.topLender.totalLent)}
                         </div>
                       </div>
                     </div>
@@ -1033,7 +1035,7 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
                     <div className="flex items-center">
                       <DollarSign className="h-5 w-5 text-green-500 mr-2" />
                       <h3 className="text-lg font-medium text-heading">
-                        Settlement: ${settlement.amount.toFixed(2)}
+                        Settlement: {formatAmount(settlement.amount)}
                       </h3>
                     </div>
                     <div className="mt-2 space-y-1">
@@ -1283,8 +1285,8 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
                     </div>
                     {newExpense.lenders.filter(l => l.selected).length > 1 && (
                       <div className="mt-2 text-sm text-muted">
-                        Total: ${newExpense.lenders.reduce((sum, lender) => sum + (lender.selected ? lender.amount : 0), 0).toFixed(2)} 
-                        / ${newExpense.amount || '0.00'}
+                        Total: {formatAmount(newExpense.lenders.reduce((sum, lender) => sum + (lender.selected ? lender.amount : 0), 0))} 
+                        / {formatAmount(parseFloat(newExpense.amount) || 0)}
                       </div>
                     )}
                   </div>
@@ -1336,7 +1338,7 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
                             )}
                             {newExpense.splitType === 'EQUAL' && split.selected && (
                               <div className="text-sm text-muted">
-                                ${newExpense.amount ? (parseFloat(newExpense.amount) / newExpense.splits.filter(s => s.selected).length).toFixed(2) : '0.00'}
+                                {newExpense.amount ? formatAmount(parseFloat(newExpense.amount) / newExpense.splits.filter(s => s.selected).length) : formatAmount(0)}
                               </div>
                             )}
                           </div>
@@ -1346,8 +1348,8 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
                     
                     {newExpense.splitType === 'CUSTOM' && (
                       <div className="mt-2 text-sm text-muted">
-                        Total: ${newExpense.splits.reduce((sum, split) => sum + (split.selected ? split.amount : 0), 0).toFixed(2)} 
-                        / ${newExpense.amount || '0.00'}
+                        Total: {formatAmount(newExpense.splits.reduce((sum, split) => sum + (split.selected ? split.amount : 0), 0))} 
+                        / {formatAmount(parseFloat(newExpense.amount) || 0)}
                       </div>
                     )}
                   </div>
@@ -1496,7 +1498,7 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
                 </div>
                 
                 <div className="text-sm text-muted">
-                  Settlement: ${editingSettlement.amount.toFixed(2)} between{' '}
+                  Settlement: {formatAmount(editingSettlement.amount)} between{' '}
                   <span className="font-medium">{editingSettlement.borrower.name || editingSettlement.borrower.email}</span>
                   {' and '}
                   <span className="font-medium">{editingSettlement.lender.name || editingSettlement.lender.email}</span>
