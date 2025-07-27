@@ -24,8 +24,8 @@ Add these environment variables in Vercel dashboard:
 
 ```
 NEXTAUTH_URL=https://your-app-name.vercel.app
-NEXTAUTH_SECRET=your-secret-key-here
-DATABASE_URL=mongodb+srv://username:password@cluster0.eux7l8g.mongodb.net/expense-tracker?retryWrites=true&w=majority&appName=Cluster0
+NEXTAUTH_SECRET=your-nextauth-secret-here
+DATABASE_URL=mongodb+srv://username:password@cluster.mongodb.net/database-name?retryWrites=true&w=majority
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=your-email@gmail.com
