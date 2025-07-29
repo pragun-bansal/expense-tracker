@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
+import { useCurrency } from '@/hooks/useCurrency'
 
 interface Category {
   id: string
@@ -33,6 +34,7 @@ interface Income {
 
 export default function EditIncome({ params }: { params: { id: string } }) {
   const { data: session } = useSession()
+  const { formatAmount } = useCurrency()
   const router = useRouter()
   
   const [formData, setFormData] = useState({
@@ -247,7 +249,7 @@ export default function EditIncome({ params }: { params: { id: string } }) {
                       <option value="">Select an account</option>
                       {accounts.map((account) => (
                         <option key={account.id} value={account.id}>
-                          {account.name} (${account.balance.toFixed(2)})
+                          {account.name} ({formatAmount(account.balance)})
                         </option>
                       ))}
                     </select>

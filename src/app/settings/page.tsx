@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
-import { Bell, Mail, Shield, User, Save, RefreshCw } from 'lucide-react'
+import { Bell, Mail, Shield, User, Save, RefreshCw, DollarSign } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
+import { currencies } from '@/lib/currency'
+import { useCurrency } from '@/hooks/useCurrency'
 
 interface BudgetAlert {
   budgetId: string
@@ -23,6 +25,7 @@ interface BudgetAlertsData {
 
 export default function Settings() {
   const { data: session } = useSession()
+  const { formatAmount } = useCurrency()
   const [budgetAlerts, setBudgetAlerts] = useState<BudgetAlertsData | null>(null)
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState(false)
@@ -30,14 +33,35 @@ export default function Settings() {
     emailNotifications: true,
     budgetAlerts: true,
     weeklyReports: false,
-    monthlyReports: true
+    monthlyReports: true,
+    currency: 'INR'
   })
 
   useEffect(() => {
     if (session) {
       fetchBudgetAlerts()
+      loadSettings()
     }
   }, [session])
+
+  const loadSettings = async () => {
+    try {
+      const response = await fetch('/api/user/settings')
+      if (response.ok) {
+        const data = await response.json()
+        const savedCurrency = data.preferredCurrency || 'INR'
+        console.log('Loading saved currency from backend:', savedCurrency) // Debug log
+        setSettings(prev => ({ ...prev, currency: savedCurrency }))
+      } else {
+        // Fallback to default
+        setSettings(prev => ({ ...prev, currency: 'INR' }))
+      }
+    } catch (error) {
+      console.error('Error loading settings:', error)
+      // Fallback to default
+      setSettings(prev => ({ ...prev, currency: 'INR' }))
+    }
+  }
 
   const fetchBudgetAlerts = async () => {
     try {
@@ -77,8 +101,30 @@ export default function Settings() {
   }
 
   const handleSaveSettings = async () => {
-    // In a real app, you would save these settings to the database
-    alert('Settings saved successfully! (Note: This is a demo - settings are not actually persisted)')
+    try {
+      // Save currency preference to backend
+      const response = await fetch('/api/user/settings', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          preferredCurrency: settings.currency
+        })
+      })
+
+      if (response.ok) {
+        // Trigger currency update throughout the app
+        window.dispatchEvent(new CustomEvent('currencyChanged', { detail: settings.currency }))
+        alert('Settings saved successfully!')
+      } else {
+        const error = await response.json()
+        alert(error.error || 'Failed to save settings')
+      }
+    } catch (error) {
+      console.error('Error saving settings:', error)
+      alert('Failed to save settings. Please try again.')
+    }
   }
 
   const getAlertColor = (level: string) => {
@@ -143,6 +189,43 @@ export default function Settings() {
                   disabled
                   className="mt-1 block w-full border-input rounded-md shadow-sm bg-input text-heading sm:text-sm"
                 />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Currency Settings */}
+        <div className="bg-card shadow-card rounded-lg">
+          <div className="px-4 py-5 sm:p-6">
+            <div className="flex items-center mb-4">
+              <DollarSign className="h-5 w-5 text-muted mr-2" />
+              <h3 className="text-lg font-medium leading-6 text-heading">
+                Currency Settings
+              </h3>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-input-label mb-2">
+                Preferred Currency
+              </label>
+              <p className="text-sm text-muted mb-4">
+                Choose the currency symbol to display throughout the application
+              </p>
+              <select
+                value={settings.currency}
+                onChange={(e) => setSettings({...settings, currency: e.target.value})}
+                className="block w-full max-w-xs border-input rounded-md shadow-sm bg-input text-heading sm:text-sm focus:ring-blue-500 focus:border-blue-500"
+              >
+                {currencies.map((currency) => (
+                  <option key={currency.code} value={currency.code}>
+                    {currency.symbol} - {currency.name} ({currency.code})
+                  </option>
+                ))}
+              </select>
+              <div className="mt-3 flex items-center text-sm text-muted">
+                <span className="mr-2">Preview:</span>
+                <span className="font-medium text-heading">
+                  {currencies.find(c => c.code === settings.currency)?.symbol}100.00
+                </span>
               </div>
             </div>
           </div>
@@ -302,7 +385,7 @@ export default function Settings() {
                             {alert.categoryName}
                           </div>
                           <div className="text-xs text-muted">
-                            ${alert.currentSpending.toFixed(2)} of ${alert.amount.toFixed(2)} ({alert.period})
+                            {formatAmount(alert.currentSpending)} of {formatAmount(alert.amount)} ({alert.period})
                           </div>
                         </div>
                       </div>

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { PlusCircle, Target, AlertTriangle, CheckCircle, Edit, Trash2, X } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
+import { useCurrency } from '@/hooks/useCurrency'
 
 interface Budget {
   id: string
@@ -29,6 +30,7 @@ interface Category {
 
 export default function Budgets() {
   const { data: session } = useSession()
+  const { formatAmount } = useCurrency()
   const [budgets, setBudgets] = useState<Budget[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
@@ -325,7 +327,7 @@ export default function Budgets() {
                 <div className="mt-4">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm font-medium text-input-label">
-                      ${(budget.currentSpending ?? 0).toFixed(2)} of ${(budget.amount ?? 0).toFixed(2)}
+                      {formatAmount(budget.currentSpending ?? 0)} of {formatAmount(budget.amount ?? 0)}
                     </span>
                     <span className={`text-sm font-medium ${status.textColor}`}>
                       {(budget.percentUsed ?? 0).toFixed(1)}%
@@ -341,7 +343,7 @@ export default function Budgets() {
                   
                   <div className="mt-2 flex justify-between text-sm">
                     <span className="text-muted">
-                      Remaining: ${(budget.remainingAmount ?? 0).toFixed(2)}
+                      Remaining: {formatAmount(budget.remainingAmount ?? 0)}
                     </span>
                     <span className="text-muted">
                       {budget.startDate && budget.endDate ? formatDateRange(budget.startDate, budget.endDate) : 'No dates set'}

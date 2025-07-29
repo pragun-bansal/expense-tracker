@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
+import { useCurrency } from '@/hooks/useCurrency'
 
 interface Category {
   id: string
@@ -22,6 +23,7 @@ interface Account {
 
 export default function NewIncome() {
   const { data: session } = useSession()
+  const { formatAmount } = useCurrency()
   const router = useRouter()
   
   const [formData, setFormData] = useState({
@@ -214,7 +216,7 @@ export default function NewIncome() {
                           .filter(account => !['OTHERS_FIXED', 'GROUP_LENDING'].includes(account.type))
                           .map((account) => (
                             <option key={account.id} value={account.id}>
-                              {account.name} (${account.balance.toFixed(2)})
+                              {account.name} ({formatAmount(account.balance)})
                             </option>
                           ))}
                       </optgroup>

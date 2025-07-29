@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { ArrowLeft, Upload, X, Scan, Loader } from 'lucide-react'
 import { useBudgetAlerts } from '@/hooks/useBudgetAlerts'
 import { analyzeReceiptImage, compressImage, type ReceiptData } from '@/lib/receiptAnalysis'
+import { useCurrency } from '@/hooks/useCurrency'
 
 interface Category {
   id: string
@@ -26,6 +27,7 @@ export default function NewExpense() {
   const { data: session } = useSession()
   const router = useRouter()
   const { handleBudgetAlert } = useBudgetAlerts()
+  const { formatAmount } = useCurrency()
   
   const [formData, setFormData] = useState({
     amount: '',
@@ -362,7 +364,7 @@ export default function NewExpense() {
                           .filter(account => !['OTHERS_FIXED', 'GROUP_LENDING'].includes(account.type))
                           .map((account) => (
                             <option key={account.id} value={account.id}>
-                              {account.name} (${account.balance.toFixed(2)})
+                              {account.name} ({formatAmount(account.balance)})
                             </option>
                           ))}
                       </optgroup>
@@ -524,7 +526,7 @@ export default function NewExpense() {
                 {receiptData.amount && (
                   <div>
                     <label className="text-sm font-medium text-input-label">Amount:</label>
-                    <p className="text-sm text-heading">${receiptData.amount.toFixed(2)}</p>
+                    <p className="text-sm text-heading">{formatAmount(receiptData.amount)}</p>
                   </div>
                 )}
                 {receiptData.date && (

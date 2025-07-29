@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { Filter, Search, ArrowUpCircle, ArrowDownCircle, Calendar, Download, Edit, Users, PlusCircle, Trash2 } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
+import { useCurrency } from '@/hooks/useCurrency'
 
 interface Transaction {
   id: string
@@ -37,6 +38,7 @@ interface Transaction {
 
 export default function Transactions() {
   const { data: session } = useSession()
+  const { formatAmount } = useCurrency()
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -189,6 +191,8 @@ export default function Transactions() {
     .filter(t => t.type === 'borrowing')
     .reduce((sum, t) => sum + t.amount, 0)
   
+  const totalLendingBorrowing = totalLending - totalBorrowing
+  
 
   const exportTransactions = () => {
     const csvContent = [
@@ -199,7 +203,7 @@ export default function Transactions() {
         t.description,
         t.category.name,
         t.account.name,
-        t.amount.toFixed(2),
+        formatAmount(t.amount),
         t.source || t.receiptUrl || ''
       ])
     ].map(row => row.join(',')).join('\n')
@@ -302,62 +306,50 @@ export default function Transactions() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-        <div className="bg-card p-6 rounded-lg shadow-card">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+        <div className="bg-card p-4 sm:p-6 rounded-lg shadow-card">
           <div className="flex items-center">
-            <ArrowUpCircle className="h-8 w-8 text-status-success" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-body">Total Income</p>
-              <p className="text-2xl font-semibold text-status-success">
-                ${totalIncome.toFixed(2)}
+            <ArrowUpCircle className="h-6 w-6 sm:h-8 sm:w-8 text-status-success flex-shrink-0" />
+            <div className="ml-3 sm:ml-4 min-w-0">
+              <p className="text-xs sm:text-sm font-medium text-body truncate">Total Income</p>
+              <p className="text-lg sm:text-2xl font-semibold text-status-success">
+                {formatAmount(totalIncome)}
               </p>
             </div>
           </div>
         </div>
         
-        <div className="bg-card p-6 rounded-lg shadow-card">
+        <div className="bg-card p-4 sm:p-6 rounded-lg shadow-card">
           <div className="flex items-center">
-            <ArrowDownCircle className="h-8 w-8 text-status-error" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-body">Total Expenses</p>
-              <p className="text-2xl font-semibold text-status-error">
-                ${totalExpenses.toFixed(2)}
+            <ArrowDownCircle className="h-6 w-6 sm:h-8 sm:w-8 text-status-error flex-shrink-0" />
+            <div className="ml-3 sm:ml-4 min-w-0">
+              <p className="text-xs sm:text-sm font-medium text-body truncate">Total Expenses</p>
+              <p className="text-lg sm:text-2xl font-semibold text-status-error">
+                {formatAmount(totalExpenses)}
               </p>
             </div>
           </div>
         </div>
         
-        <div className="bg-card p-6 rounded-lg shadow-card">
+        <div className="bg-card p-4 sm:p-6 rounded-lg shadow-card">
           <div className="flex items-center">
-            <Users className="h-8 w-8 text-green-600" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-body">Total Lending</p>
-              <p className="text-2xl font-semibold text-green-600">
-                ${totalLending.toFixed(2)}
+            <Users className={`h-6 w-6 sm:h-8 sm:w-8 flex-shrink-0 ${totalLendingBorrowing >= 0 ? 'text-status-success' : 'text-status-error'}`} />
+            <div className="ml-3 sm:ml-4 min-w-0">
+              <p className="text-xs sm:text-sm font-medium text-body truncate">Total Lending/Borrowing</p>
+              <p className={`text-lg sm:text-2xl font-semibold ${totalLendingBorrowing >= 0 ? 'text-status-success' : 'text-status-error'}`}>
+                {totalLendingBorrowing >= 0 ? '+' : ''}{formatAmount(Math.abs(totalLendingBorrowing))}
               </p>
             </div>
           </div>
         </div>
         
-        <div className="bg-card p-6 rounded-lg shadow-card">
+        <div className="bg-card p-4 sm:p-6 rounded-lg shadow-card">
           <div className="flex items-center">
-            <Users className="h-8 w-8 text-orange-600" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-body">Total Borrowing</p>
-              <p className="text-2xl font-semibold text-orange-600">
-                ${totalBorrowing.toFixed(2)}
-              </p>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-card p-6 rounded-lg shadow-card">
-          <div className="flex items-center">
-            <Calendar className="h-8 w-8 text-status-info" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-body">Net Amount</p>
-              <p className={`text-2xl font-semibold ${totalIncome - totalExpenses >= 0 ? 'text-status-success' : 'text-status-error'}`}>
-                ${(totalIncome - totalExpenses).toFixed(2)}
+            <Calendar className="h-6 w-6 sm:h-8 sm:w-8 text-heading flex-shrink-0" />
+            <div className="ml-3 sm:ml-4 min-w-0">
+              <p className="text-xs sm:text-sm font-medium text-body truncate">Net Amount</p>
+              <p className={`text-lg sm:text-2xl font-semibold ${totalIncome + totalLending - totalExpenses - totalBorrowing >= 0 ? 'text-status-success' : 'text-status-error'}`}>
+                {formatAmount(totalIncome + totalLending - totalExpenses - totalBorrowing)}
               </p>
             </div>
           </div>
@@ -573,7 +565,7 @@ export default function Transactions() {
                       transaction.type === 'expense' ? 'text-status-error' :
                       transaction.type === 'lending' ? 'text-green-600' : 'text-orange-600'
                     }>
-                      {transaction.type === 'income' || transaction.type === 'lending' ? '+' : '-'}${transaction.amount.toFixed(2)}
+                      {transaction.type === 'income' || transaction.type === 'lending' ? '+' : '-'}{formatAmount(transaction.amount)}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-heading">

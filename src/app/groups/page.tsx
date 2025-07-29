@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { Plus, Users, DollarSign, UserPlus, Settings } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
+import { useCurrency } from '@/hooks/useCurrency'
 
 interface Group {
   id: string
@@ -41,6 +42,7 @@ interface Group {
 
 export default function Groups() {
   const { data: session } = useSession()
+  const { formatAmount } = useCurrency()
   const [groups, setGroups] = useState<Group[]>([])
   const [loading, setLoading] = useState(true)
   const [showCreateModal, setShowCreateModal] = useState(false)
@@ -289,7 +291,7 @@ export default function Groups() {
                       </span>
                     </div>
                     <span className="text-sm font-medium text-heading">
-                      ${totalExpenses.toFixed(2)}
+                      {formatAmount(totalExpenses)}
                     </span>
                   </div>
 
@@ -300,7 +302,7 @@ export default function Groups() {
                           You owe
                         </span>
                         <span className="text-sm font-medium text-status-error">
-                          ${myOwedAmount.toFixed(2)}
+                          {formatAmount(myOwedAmount)}
                         </span>
                       </div>
                     </div>
