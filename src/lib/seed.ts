@@ -60,7 +60,7 @@ export async function seedUserData(userId: string) {
 
   await Promise.all(
     defaultAccounts.map(account =>
-      prisma.account.create({
+      prisma.userAccount.create({
         data: {
           ...account,
           userId

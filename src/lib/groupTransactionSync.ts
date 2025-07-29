@@ -19,7 +19,14 @@ export async function createPersonalTransactionsForGroupExpense(
     userId: string
     amount: number
   }>
-) {
+): Promise<{
+  paidByExpenseId?: string
+  paidByLendingId?: string
+  memberIncomeIds: string[]
+  memberExpenseIds: string[]
+  memberLendingIds: string[]
+  memberBorrowingIds: string[]
+}> {
   console.log(`\n=== CREATING GROUP TRANSACTIONS ===`)
   console.log(`Group Expense: ${groupExpense.description}`)
   console.log(`Lenders:`, lenders)
@@ -27,6 +34,16 @@ export async function createPersonalTransactionsForGroupExpense(
   
   // Get or create default categories
   const defaultGroupCategory = await getOrCreateGroupCategory()
+
+  // Track all transaction IDs for reliable deletion/updates
+  const transactionIds = {
+    paidByExpenseId: undefined as string | undefined,
+    paidByLendingId: undefined as string | undefined,
+    memberIncomeIds: [] as string[],
+    memberExpenseIds: [] as string[],
+    memberLendingIds: [] as string[],
+    memberBorrowingIds: [] as string[]
+  }
 
   // Process each user only once, handling both their lending and borrowing
   const processedUsers = new Set<string>()
@@ -48,7 +65,7 @@ export async function createPersonalTransactionsForGroupExpense(
     
     if (netAmount > 0) {
       // User is a net lender
-      await prisma.expense.create({
+      const expense = await prisma.expense.create({
         data: {
           amount: lender.amount,
           description: `[Group] ${groupExpense.description}`,
@@ -60,6 +77,14 @@ export async function createPersonalTransactionsForGroupExpense(
           groupType: 'LENDER'
         }
       })
+      
+      // Store expense ID - if this is the primary payer, mark as paidByExpenseId
+      if (lender.amount === Math.max(...lenders.map(l => l.amount))) {
+        transactionIds.paidByExpenseId = expense.id
+      } else {
+        transactionIds.memberExpenseIds.push(expense.id)
+      }
+      
       await updateAccountBalance(accountId, -lender.amount)
       
       // Check for budget alerts after creating group expense
@@ -72,7 +97,7 @@ export async function createPersonalTransactionsForGroupExpense(
       // Track net lending in Group Lending/Borrowing account
       const groupLendingAccount = await getOrCreateGroupLendingAccount(lender.userId)
       console.log(`  Creating net lending for ${lender.userId}: $${netAmount}`)
-      await prisma.lending.create({
+      const lending = await prisma.lending.create({
         data: {
           amount: netAmount,
           description: `[Group Net] ${groupExpense.description}`,
@@ -84,13 +109,21 @@ export async function createPersonalTransactionsForGroupExpense(
           groupType: 'LENDER'
         }
       })
+      
+      // Store lending ID - if this is the primary payer, mark as paidByLendingId
+      if (lender.amount === Math.max(...lenders.map(l => l.amount))) {
+        transactionIds.paidByLendingId = lending.id
+      } else {
+        transactionIds.memberLendingIds.push(lending.id)
+      }
+      
       await updateAccountBalance(groupLendingAccount.id, netAmount)
       console.log(`  Updated Group Lending account balance: ${groupLendingAccount.id} by +${netAmount}`)
     } else if (netAmount < 0) {
       // User is a net borrower (borrowed more than they lent)
       
       // Create expense for amount they lent in their selected account
-      await prisma.expense.create({
+      const expense = await prisma.expense.create({
         data: {
           amount: lender.amount,
           description: `[Group] ${groupExpense.description}`,
@@ -102,6 +135,9 @@ export async function createPersonalTransactionsForGroupExpense(
           groupType: 'LENDER'
         }
       })
+      
+      // Store expense ID
+      transactionIds.memberExpenseIds.push(expense.id)
       await updateAccountBalance(accountId, -lender.amount)
       
       // Check for budget alerts after creating group expense
@@ -113,7 +149,7 @@ export async function createPersonalTransactionsForGroupExpense(
       
       // Track net borrowing in Group Lending/Borrowing account only
       const groupLendingAccount = await getOrCreateGroupLendingAccount(lender.userId)
-      await prisma.borrowing.create({
+      const borrowing = await prisma.borrowing.create({
         data: {
           amount: Math.abs(netAmount),
           description: `[Group] ${groupExpense.description}`,
@@ -125,10 +161,13 @@ export async function createPersonalTransactionsForGroupExpense(
           groupType: 'BORROWER'
         }
       })
+      
+      // Store borrowing ID
+      transactionIds.memberBorrowingIds.push(borrowing.id)
       await updateAccountBalance(groupLendingAccount.id, netAmount)
     } else {
       // Net amount is 0 (lent exactly what they borrowed)
-      await prisma.expense.create({
+      const expense = await prisma.expense.create({
         data: {
           amount: lender.amount,
           description: `[Group] ${groupExpense.description}`,
@@ -140,6 +179,9 @@ export async function createPersonalTransactionsForGroupExpense(
           groupType: 'LENDER'
         }
       })
+      
+      // Store expense ID
+      transactionIds.memberExpenseIds.push(expense.id)
       await updateAccountBalance(accountId, -lender.amount)
       
       // Check for budget alerts after creating group expense
@@ -165,7 +207,7 @@ export async function createPersonalTransactionsForGroupExpense(
 
     // Track borrowing in Group Lending/Borrowing account only (negative = money borrowed)
     const groupLendingAccount = await getOrCreateGroupLendingAccount(split.userId)
-    await prisma.borrowing.create({
+    const borrowing = await prisma.borrowing.create({
       data: {
         amount: split.amount,
         description: `[Group] ${groupExpense.description}`,
@@ -177,8 +219,13 @@ export async function createPersonalTransactionsForGroupExpense(
         groupType: 'BORROWER'
       }
     })
+    
+    // Store borrowing ID
+    transactionIds.memberBorrowingIds.push(borrowing.id)
     await updateAccountBalance(groupLendingAccount.id, -split.amount)
   }
+  
+  return transactionIds
 }
 
 export async function createPersonalTransactionsForSettlement(
@@ -363,7 +410,7 @@ async function getOrCreateMiscellaneousAccount(userId: string) {
 }
 
 async function updateAccountBalance(accountId: string, amount: number) {
-  await prisma.account.update({
+  await prisma.userAccount.update({
     where: { id: accountId },
     data: {
       balance: {

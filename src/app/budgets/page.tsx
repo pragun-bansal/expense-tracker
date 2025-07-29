@@ -5,6 +5,10 @@ import { useSession } from 'next-auth/react'
 import { PlusCircle, Target, AlertTriangle, CheckCircle, Edit, Trash2, X } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
 import { useCurrency } from '@/hooks/useCurrency'
+import AlertModal from '@/components/AlertModal'
+import ConfirmModal from '@/components/ConfirmModal'
+import LoadingSpinner from '@/components/LoadingSpinner'
+import { useModal } from '@/hooks/useModal'
 
 interface Budget {
   id: string
@@ -31,11 +35,15 @@ interface Category {
 export default function Budgets() {
   const { data: session } = useSession()
   const { formatAmount } = useCurrency()
+  const { alertModal, confirmModal, showAlert, showConfirm, closeAlert, closeConfirm } = useModal()
   const [budgets, setBudgets] = useState<Budget[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [showAddForm, setShowAddForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [createLoading, setCreateLoading] = useState(false)
+  const [updateLoading, setUpdateLoading] = useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false)
   const [formData, setFormData] = useState({
     amount: '',
     period: 'MONTHLY',
@@ -77,6 +85,12 @@ export default function Budgets() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    const isEditing = !!editingId
+    if (isEditing) {
+      setUpdateLoading(true)
+    } else {
+      setCreateLoading(true)
+    }
     try {
       const url = editingId ? `/api/budgets/${editingId}` : '/api/budgets'
       const method = editingId ? 'PUT' : 'POST'
@@ -100,13 +114,32 @@ export default function Budgets() {
         setEditingId(null)
         setFormData({ amount: '', period: 'MONTHLY', categoryId: '' })
         fetchBudgets() // Refresh to get updated spending data
+        showAlert({
+          title: 'Success',
+          message: `Budget ${editingId ? 'updated' : 'created'} successfully.`,
+          type: 'success'
+        })
       } else {
         const error = await response.json()
-        alert(error.error || `Failed to ${editingId ? 'update' : 'create'} budget`)
+        showAlert({
+          title: 'Error',
+          message: error.error || `Failed to ${editingId ? 'update' : 'create'} budget`,
+          type: 'error'
+        })
       }
     } catch (error) {
       console.error(`Error ${editingId ? 'updating' : 'creating'} budget:`, error)
-      alert('Something went wrong')
+      showAlert({
+        title: 'Error',
+        message: 'Something went wrong while processing the budget.',
+        type: 'error'
+      })
+    } finally {
+      if (isEditing) {
+        setUpdateLoading(false)
+      } else {
+        setCreateLoading(false)
+      }
     }
   }
 
@@ -121,8 +154,19 @@ export default function Budgets() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this budget?')) return
+    const confirmed = await showConfirm({
+      title: 'Delete Budget',
+      message: 'Are you sure you want to delete this budget? This action cannot be undone.',
+      confirmText: 'Delete',
+      type: 'danger'
+    })
 
+    if (!confirmed) {
+      closeConfirm()
+      return
+    }
+
+    setDeleteLoading(true)
     try {
       const response = await fetch(`/api/budgets/${id}`, {
         method: 'DELETE'
@@ -130,13 +174,29 @@ export default function Budgets() {
 
       if (response.ok) {
         setBudgets(budgets.filter(budget => budget.id !== id))
+        showAlert({
+          title: 'Success',
+          message: 'Budget deleted successfully.',
+          type: 'success'
+        })
       } else {
         const error = await response.json()
-        alert(error.error || 'Failed to delete budget')
+        showAlert({
+          title: 'Error',
+          message: error.error || 'Failed to delete budget',
+          type: 'error'
+        })
       }
     } catch (error) {
       console.error('Error deleting budget:', error)
-      alert('Something went wrong')
+      showAlert({
+        title: 'Error',
+        message: 'Something went wrong while deleting the budget.',
+        type: 'error'
+      })
+    } finally {
+      setDeleteLoading(false)
+      closeConfirm()
     }
   }
 
@@ -266,9 +326,14 @@ export default function Budgets() {
                 </button>
                 <button
                   type="submit"
-                  className="bg-blue-600 border border-transparent rounded-md shadow-sm py-2 px-4 text-sm font-medium text-white hover:bg-blue-700"
+                  disabled={createLoading || updateLoading}
+                  className="bg-blue-600 border border-transparent rounded-md shadow-sm py-2 px-4 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
                 >
-                  {editingId ? 'Update Budget' : 'Add Budget'}
+                  {(editingId ? updateLoading : createLoading) ? (
+                    <LoadingSpinner size="sm" />
+                  ) : (
+                    editingId ? 'Update Budget' : 'Add Budget'
+                  )}
                 </button>
               </div>
             </form>
@@ -316,10 +381,11 @@ export default function Budgets() {
                     </button>
                     <button
                       onClick={() => handleDelete(budget.id)}
-                      className="p-2 text-red-600 hover:bg-red-100 rounded-full"
+                      disabled={deleteLoading}
+                      className="p-2 text-red-600 hover:bg-red-100 rounded-full disabled:opacity-50"
                       title="Delete budget"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      {deleteLoading ? <LoadingSpinner size="sm" /> : <Trash2 className="h-4 w-4" />}
                     </button>
                   </div>
                 </div>
@@ -373,6 +439,33 @@ export default function Budgets() {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Alert Modal */}
+      {alertModal && (
+        <AlertModal
+          isOpen={alertModal.isOpen}
+          onClose={closeAlert}
+          title={alertModal.title}
+          message={alertModal.message}
+          type={alertModal.type}
+          confirmText={alertModal.confirmText}
+        />
+      )}
+
+      {/* Confirm Modal */}
+      {confirmModal && (
+        <ConfirmModal
+          isOpen={confirmModal.isOpen}
+          onClose={closeConfirm}
+          onConfirm={confirmModal.onConfirm}
+          title={confirmModal.title}
+          message={confirmModal.message}
+          confirmText={confirmModal.confirmText}
+          cancelText={confirmModal.cancelText}
+          type={confirmModal.type}
+          loading={confirmModal.loading}
+        />
       )}
     </div>
   )

@@ -71,23 +71,31 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const othersAccountLender = await getOrCreateOthersAccount(settlement.lenderUserId)
 
     if (updateData.borrowerAccountId !== undefined) {
-      // Update borrower's expense transaction
+      // Update borrower's expense transaction using the stored transaction ID
       const newAccountId = borrowerAccountId || othersAccountBorrower.id
       const oldAccountId = settlement.borrowerAccountId || othersAccountBorrower.id
 
-      // Find and update the borrower's expense transaction
-      const expenseTransaction = await prisma.expense.findFirst({
-        where: {
-          userId: settlement.borrowerUserId,
-          amount: settlement.amount,
-          description: { contains: `Payment to ${settlement.lender.name || settlement.lender.email}` },
-          groupType: 'SETTLEMENT_PAID',
-          date: {
-            gte: new Date(settlement.settledAt.getTime() - 60000), // 1 minute before
-            lte: new Date(settlement.settledAt.getTime() + 60000)  // 1 minute after
+      // Try to find transaction by ID first (preferred), fallback to search method
+      let expenseTransaction = null
+      if (settlement.borrowerExpenseId) {
+        expenseTransaction = await prisma.expense.findUnique({
+          where: { id: settlement.borrowerExpenseId }
+        })
+      } else {
+        // Fallback for old settlements
+        expenseTransaction = await prisma.expense.findFirst({
+          where: {
+            userId: settlement.borrowerUserId,
+            amount: settlement.amount,
+            description: { contains: `Payment to ${settlement.lender.name || settlement.lender.email}` },
+            groupType: 'SETTLEMENT_PAID',
+            date: {
+              gte: new Date(settlement.settledAt.getTime() - 60000), // 1 minute before
+              lte: new Date(settlement.settledAt.getTime() + 60000)  // 1 minute after
+            }
           }
-        }
-      })
+        })
+      }
 
       if (expenseTransaction && expenseTransaction.accountId !== newAccountId) {
         // Revert balance change from old account
@@ -105,23 +113,31 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     if (updateData.lenderAccountId !== undefined) {
-      // Update lender's income transaction
+      // Update lender's income transaction using the stored transaction ID
       const newAccountId = lenderAccountId || othersAccountLender.id
       const oldAccountId = settlement.lenderAccountId || othersAccountLender.id
 
-      // Find and update the lender's income transaction
-      const incomeTransaction = await prisma.income.findFirst({
-        where: {
-          userId: settlement.lenderUserId,
-          amount: settlement.amount,
-          description: { contains: `Payment from ${settlement.borrower.name || settlement.borrower.email}` },
-          groupType: 'SETTLEMENT_RECEIVED',
-          date: {
-            gte: new Date(settlement.settledAt.getTime() - 60000), // 1 minute before
-            lte: new Date(settlement.settledAt.getTime() + 60000)  // 1 minute after
+      // Try to find transaction by ID first (preferred), fallback to search method
+      let incomeTransaction = null
+      if (settlement.lenderIncomeId) {
+        incomeTransaction = await prisma.income.findUnique({
+          where: { id: settlement.lenderIncomeId }
+        })
+      } else {
+        // Fallback for old settlements
+        incomeTransaction = await prisma.income.findFirst({
+          where: {
+            userId: settlement.lenderUserId,
+            amount: settlement.amount,
+            description: { contains: `Payment from ${settlement.borrower.name || settlement.borrower.email}` },
+            groupType: 'SETTLEMENT_RECEIVED',
+            date: {
+              gte: new Date(settlement.settledAt.getTime() - 60000), // 1 minute before
+              lte: new Date(settlement.settledAt.getTime() + 60000)  // 1 minute after
+            }
           }
-        }
-      })
+        })
+      }
 
       if (incomeTransaction && incomeTransaction.accountId !== newAccountId) {
         // Revert balance change from old account
@@ -180,7 +196,7 @@ async function getOrCreateGroupCategory() {
 }
 
 async function getOrCreateOthersAccount(userId: string) {
-  let account = await prisma.account.findFirst({
+  let account = await prisma.userAccount.findFirst({
     where: {
       userId,
       type: 'OTHERS_FIXED'
@@ -188,7 +204,7 @@ async function getOrCreateOthersAccount(userId: string) {
   })
 
   if (!account) {
-    account = await prisma.account.create({
+    account = await prisma.userAccount.create({
       data: {
         name: 'Others',
         type: 'OTHERS_FIXED',
@@ -264,86 +280,144 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     
     console.log(`Will unsettle ${splitsToUnsettle.length} splits:`, splitsToUnsettle)
 
-    // Find and reverse all transactions created by this settlement
-    const borrowerGroupLendingAccount = await getOrCreateGroupLendingAccount(settlement.borrowerUserId)
-    const lenderGroupLendingAccount = await getOrCreateGroupLendingAccount(settlement.lenderUserId)
+    // Find transactions by ID (much more reliable than searching by description/date)
+    // This fixes the issue where account changes prevent proper deletion
+    const transactionsToDelete = {
+      expenses: [] as any[],
+      incomes: [] as any[],
+      lendings: [] as any[],
+      borrowings: [] as any[]
+    }
 
-    // Find the transactions to reverse
-    const expensesToReverse = await prisma.expense.findMany({
-      where: {
-        OR: [
-          {
-            userId: settlement.borrowerUserId,
-            description: { contains: `Payment to ${settlement.lender.name || settlement.lender.email}` },
-            groupType: 'SETTLEMENT_PAID',
-            date: {
-              gte: new Date(settlement.settledAt.getTime() - 60000),
-              lte: new Date(settlement.settledAt.getTime() + 60000)
-            }
-          },
-          {
-            userId: settlement.lenderUserId,
-            description: { contains: `Payment to ${settlement.borrower.name || settlement.borrower.email}` },
-            groupType: 'SETTLEMENT_PAID',
-            date: {
-              gte: new Date(settlement.settledAt.getTime() - 60000),
-              lte: new Date(settlement.settledAt.getTime() + 60000)
-            }
-          }
-        ]
+    // Find expense transactions by ID
+    if (settlement.borrowerExpenseId) {
+      const expense = await prisma.expense.findUnique({
+        where: { id: settlement.borrowerExpenseId }
+      })
+      if (expense) {
+        transactionsToDelete.expenses.push(expense)
       }
-    })
+    }
 
-    const incomesToReverse = await prisma.income.findMany({
-      where: {
-        OR: [
-          {
-            userId: settlement.lenderUserId,
-            description: { contains: `Payment from ${settlement.borrower.name || settlement.borrower.email}` },
-            groupType: 'SETTLEMENT_RECEIVED',
-            date: {
-              gte: new Date(settlement.settledAt.getTime() - 60000),
-              lte: new Date(settlement.settledAt.getTime() + 60000)
-            }
-          }
-        ]
+    // Find income transactions by ID
+    if (settlement.lenderIncomeId) {
+      const income = await prisma.income.findUnique({
+        where: { id: settlement.lenderIncomeId }
+      })
+      if (income) {
+        transactionsToDelete.incomes.push(income)
       }
-    })
+    }
 
-    // Find lending/borrowing transactions to reverse
-    const lendingsToReverse = await prisma.lending.findMany({
-      where: {
-        OR: [
-          {
-            userId: settlement.borrowerUserId,
-            description: { contains: `Debt reduction to ${settlement.lender.name || settlement.lender.email}` },
-            groupType: 'SETTLEMENT_PAID',
-            accountId: borrowerGroupLendingAccount.id,
-            date: {
-              gte: new Date(settlement.settledAt.getTime() - 60000),
-              lte: new Date(settlement.settledAt.getTime() + 60000)
-            }
-          }
-        ]
+    // Find lending transactions by ID
+    if (settlement.borrowerLendingId) {
+      const lending = await prisma.lending.findUnique({
+        where: { id: settlement.borrowerLendingId }
+      })
+      if (lending) {
+        transactionsToDelete.lendings.push(lending)
       }
-    })
+    }
 
-    const borrowingsToReverse = await prisma.borrowing.findMany({
-      where: {
-        OR: [
-          {
-            userId: settlement.lenderUserId,
-            description: { contains: `Credit reduction from ${settlement.borrower.name || settlement.borrower.email}` },
-            groupType: 'SETTLEMENT_RECEIVED',
-            accountId: lenderGroupLendingAccount.id,
-            date: {
-              gte: new Date(settlement.settledAt.getTime() - 60000),
-              lte: new Date(settlement.settledAt.getTime() + 60000)
-            }
-          }
-        ]
+    // Find borrowing transactions by ID
+    if (settlement.lenderBorrowingId) {
+      const borrowing = await prisma.borrowing.findUnique({
+        where: { id: settlement.lenderBorrowingId }
+      })
+      if (borrowing) {
+        transactionsToDelete.borrowings.push(borrowing)
       }
-    })
+    }
+
+    // For backward compatibility with old settlements that don't have transaction IDs,
+    // fall back to the old search method
+    if (!settlement.borrowerExpenseId && !settlement.lenderIncomeId && 
+        !settlement.borrowerLendingId && !settlement.lenderBorrowingId) {
+      
+      const borrowerGroupLendingAccount = await getOrCreateGroupLendingAccount(settlement.borrowerUserId)
+      const lenderGroupLendingAccount = await getOrCreateGroupLendingAccount(settlement.lenderUserId)
+
+      const expensesToReverse = await prisma.expense.findMany({
+        where: {
+          OR: [
+            {
+              userId: settlement.borrowerUserId,
+              description: { contains: `Payment to ${settlement.lender.name || settlement.lender.email}` },
+              groupType: 'SETTLEMENT_PAID',
+              date: {
+                gte: new Date(settlement.settledAt.getTime() - 60000),
+                lte: new Date(settlement.settledAt.getTime() + 60000)
+              }
+            },
+            {
+              userId: settlement.lenderUserId,
+              description: { contains: `Payment to ${settlement.borrower.name || settlement.borrower.email}` },
+              groupType: 'SETTLEMENT_PAID',
+              date: {
+                gte: new Date(settlement.settledAt.getTime() - 60000),
+                lte: new Date(settlement.settledAt.getTime() + 60000)
+              }
+            }
+          ]
+        }
+      })
+
+      const incomesToReverse = await prisma.income.findMany({
+        where: {
+          OR: [
+            {
+              userId: settlement.lenderUserId,
+              description: { contains: `Payment from ${settlement.borrower.name || settlement.borrower.email}` },
+              groupType: 'SETTLEMENT_RECEIVED',
+              date: {
+                gte: new Date(settlement.settledAt.getTime() - 60000),
+                lte: new Date(settlement.settledAt.getTime() + 60000)
+              }
+            }
+          ]
+        }
+      })
+
+      const lendingsToReverse = await prisma.lending.findMany({
+        where: {
+          OR: [
+            {
+              userId: settlement.borrowerUserId,
+              description: { contains: `Debt reduction to ${settlement.lender.name || settlement.lender.email}` },
+              groupType: 'SETTLEMENT_PAID',
+              accountId: borrowerGroupLendingAccount.id,
+              date: {
+                gte: new Date(settlement.settledAt.getTime() - 60000),
+                lte: new Date(settlement.settledAt.getTime() + 60000)
+              }
+            }
+          ]
+        }
+      })
+
+      const borrowingsToReverse = await prisma.borrowing.findMany({
+        where: {
+          OR: [
+            {
+              userId: settlement.lenderUserId,
+              description: { contains: `Credit reduction from ${settlement.borrower.name || settlement.borrower.email}` },
+              groupType: 'SETTLEMENT_RECEIVED',
+              accountId: lenderGroupLendingAccount.id,
+              date: {
+                gte: new Date(settlement.settledAt.getTime() - 60000),
+                lte: new Date(settlement.settledAt.getTime() + 60000)
+              }
+            }
+          ]
+        }
+      })
+
+      // Add found transactions to the delete list
+      transactionsToDelete.expenses.push(...expensesToReverse)
+      transactionsToDelete.incomes.push(...incomesToReverse)
+      transactionsToDelete.lendings.push(...lendingsToReverse)
+      transactionsToDelete.borrowings.push(...borrowingsToReverse)
+    }
 
     // Start transaction to ensure data consistency
     await prisma.$transaction(async (tx) => {
@@ -362,8 +436,8 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       }
 
       // Reverse all the transactions by updating account balances
-      for (const expense of expensesToReverse) {
-        await tx.account.update({
+      for (const expense of transactionsToDelete.expenses) {
+        await tx.userAccount.update({
           where: { id: expense.accountId },
           data: {
             balance: {
@@ -376,8 +450,8 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
         })
       }
 
-      for (const income of incomesToReverse) {
-        await tx.account.update({
+      for (const income of transactionsToDelete.incomes) {
+        await tx.userAccount.update({
           where: { id: income.accountId },
           data: {
             balance: {
@@ -391,8 +465,8 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       }
 
       // Reverse lending transactions (these add positive balance, so subtract to reverse)
-      for (const lending of lendingsToReverse) {
-        await tx.account.update({
+      for (const lending of transactionsToDelete.lendings) {
+        await tx.userAccount.update({
           where: { id: lending.accountId },
           data: {
             balance: {
@@ -406,8 +480,8 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       }
 
       // Reverse borrowing transactions (these subtract balance, so add to reverse)
-      for (const borrowing of borrowingsToReverse) {
-        await tx.account.update({
+      for (const borrowing of transactionsToDelete.borrowings) {
+        await tx.userAccount.update({
           where: { id: borrowing.accountId },
           data: {
             balance: {
@@ -480,7 +554,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
 }
 
 async function getOrCreateGroupLendingAccount(userId: string) {
-  let account = await prisma.account.findFirst({
+  let account = await prisma.userAccount.findFirst({
     where: {
       userId,
       type: 'GROUP_LENDING'
@@ -488,7 +562,7 @@ async function getOrCreateGroupLendingAccount(userId: string) {
   })
 
   if (!account) {
-    account = await prisma.account.create({
+    account = await prisma.userAccount.create({
       data: {
         name: 'Group Lending/Borrowing',
         type: 'GROUP_LENDING',
@@ -503,7 +577,7 @@ async function getOrCreateGroupLendingAccount(userId: string) {
 }
 
 async function updateAccountBalance(accountId: string, amount: number) {
-  await prisma.account.update({
+  await prisma.userAccount.update({
     where: { id: accountId },
     data: {
       balance: {

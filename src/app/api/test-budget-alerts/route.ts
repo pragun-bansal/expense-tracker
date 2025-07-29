@@ -97,7 +97,7 @@ export async function POST() {
     // Send a test email
     const testEmail = {
       to: process.env.SMTP_USER || 'test@example.com',
-      subject: 'Test Email from ExpenseTracker',
+      subject: 'Test Email from Fina',
       html: '<h1>Test Email</h1><p>This is a test email to verify email configuration.</p>',
       text: 'Test Email - This is a test email to verify email configuration.'
     }

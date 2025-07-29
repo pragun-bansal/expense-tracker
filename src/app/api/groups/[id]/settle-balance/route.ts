@@ -92,18 +92,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       )
     }
 
-    // Create settlement record
-    const settlement = await prisma.settlement.create({
-      data: {
-        amount: totalOwed,
-        groupId,
-        borrowerUserId: fromUserId,
-        lenderUserId: toUserId,
-        borrowerAccountId: isBorrowerSettling ? settlementAccountId : null,
-        lenderAccountId: isLenderSettling ? lenderAccountId || settlementAccountId : null,
-        settledByUserId: session.user.id
-      }
-    })
+    // We'll create the settlement record after creating transactions to store their IDs
+    let borrowerExpenseId: string | null = null
+    let lenderIncomeId: string | null = null
+    let borrowerLendingId: string | null = null
+    let lenderBorrowingId: string | null = null
 
     // Mark the splits as settled
     await prisma.expenseSplit.updateMany({
@@ -128,7 +121,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       const paymentAccountId = settlementAccountId || othersAccountBorrower.id
       
       // Create expense for borrower (money going out)
-      await prisma.expense.create({
+      const borrowerExpense = await prisma.expense.create({
         data: {
           amount: totalOwed,
           description: `[Group Settlement] Payment to ${await getUserName(toUserId)}`,
@@ -139,10 +132,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           groupType: 'SETTLEMENT_PAID'
         }
       })
+      borrowerExpenseId = borrowerExpense.id
       await updateAccountBalance(paymentAccountId, -totalOwed)
 
       // Reduce borrower's debt in Group Lending/Borrowing account (add lending to offset the debt)
-      await prisma.lending.create({
+      const borrowerLending = await prisma.lending.create({
         data: {
           amount: totalOwed,
           description: `[Group Settlement] Debt reduction to ${await getUserName(toUserId)}`,
@@ -153,10 +147,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           groupType: 'SETTLEMENT_PAID'
         }
       })
+      borrowerLendingId = borrowerLending.id
       await updateAccountBalance(borrowerGroupLendingAccount.id, totalOwed)
 
       // Create income for lender in Others account (default)
-      await prisma.income.create({
+      const lenderIncome = await prisma.income.create({
         data: {
           amount: totalOwed,
           description: `[Group Settlement] Payment from ${await getUserName(fromUserId)}`,
@@ -167,10 +162,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           groupType: 'SETTLEMENT_RECEIVED'
         }
       })
+      lenderIncomeId = lenderIncome.id
       await updateAccountBalance(othersAccountLender.id, totalOwed)
 
       // Reduce lender's credit in Group Lending/Borrowing account (add borrowing to offset the credit)
-      await prisma.borrowing.create({
+      const lenderBorrowing = await prisma.borrowing.create({
         data: {
           amount: totalOwed,
           description: `[Group Settlement] Credit reduction from ${await getUserName(fromUserId)}`,
@@ -181,6 +177,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           groupType: 'SETTLEMENT_RECEIVED'
         }
       })
+      lenderBorrowingId = lenderBorrowing.id
       await updateAccountBalance(lenderGroupLendingAccount.id, -totalOwed)
 
     } else if (isLenderSettling) {
@@ -188,7 +185,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       const receiptAccountId = lenderAccountId || settlementAccountId || othersAccountLender.id
       
       // Create income for lender (money coming in)
-      await prisma.income.create({
+      const lenderIncome = await prisma.income.create({
         data: {
           amount: totalOwed,
           description: `[Group Settlement] Payment from ${await getUserName(fromUserId)}`,
@@ -199,10 +196,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           groupType: 'SETTLEMENT_RECEIVED'
         }
       })
+      lenderIncomeId = lenderIncome.id
       await updateAccountBalance(receiptAccountId, totalOwed)
 
       // Reduce lender's credit in Group Lending/Borrowing account
-      await prisma.borrowing.create({
+      const lenderBorrowing = await prisma.borrowing.create({
         data: {
           amount: totalOwed,
           description: `[Group Settlement] Credit reduction from ${await getUserName(fromUserId)}`,
@@ -213,10 +211,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           groupType: 'SETTLEMENT_RECEIVED'
         }
       })
+      lenderBorrowingId = lenderBorrowing.id
       await updateAccountBalance(lenderGroupLendingAccount.id, -totalOwed)
 
       // Create expense for borrower in Others account (default)
-      await prisma.expense.create({
+      const borrowerExpense = await prisma.expense.create({
         data: {
           amount: totalOwed,
           description: `[Group Settlement] Payment to ${await getUserName(toUserId)}`,
@@ -227,10 +226,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           groupType: 'SETTLEMENT_PAID'
         }
       })
+      borrowerExpenseId = borrowerExpense.id
       await updateAccountBalance(othersAccountBorrower.id, -totalOwed)
 
       // Reduce borrower's debt in Group Lending/Borrowing account
-      await prisma.lending.create({
+      const borrowerLending = await prisma.lending.create({
         data: {
           amount: totalOwed,
           description: `[Group Settlement] Debt reduction to ${await getUserName(toUserId)}`,
@@ -241,8 +241,26 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           groupType: 'SETTLEMENT_PAID'
         }
       })
+      borrowerLendingId = borrowerLending.id
       await updateAccountBalance(borrowerGroupLendingAccount.id, totalOwed)
     }
+
+    // Create settlement record with transaction IDs
+    const settlement = await prisma.settlement.create({
+      data: {
+        amount: totalOwed,
+        groupId,
+        borrowerUserId: fromUserId,
+        lenderUserId: toUserId,
+        borrowerAccountId: isBorrowerSettling ? settlementAccountId : null,
+        lenderAccountId: isLenderSettling ? lenderAccountId || settlementAccountId : null,
+        settledByUserId: session.user.id,
+        borrowerExpenseId,
+        lenderIncomeId,
+        borrowerLendingId,
+        lenderBorrowingId
+      }
+    })
 
     // Create notifications for all group members except the one who recorded the settlement
     const groupMembers = await prisma.groupMember.findMany({
@@ -330,7 +348,7 @@ async function getOrCreateGroupCategory() {
 }
 
 async function getOrCreateOthersAccount(userId: string) {
-  let account = await prisma.account.findFirst({
+  let account = await prisma.userAccount.findFirst({
     where: {
       userId,
       type: 'OTHERS_FIXED'
@@ -338,7 +356,7 @@ async function getOrCreateOthersAccount(userId: string) {
   })
 
   if (!account) {
-    account = await prisma.account.create({
+    account = await prisma.userAccount.create({
       data: {
         name: 'Others',
         type: 'OTHERS_FIXED',
@@ -353,7 +371,7 @@ async function getOrCreateOthersAccount(userId: string) {
 }
 
 async function getOrCreateGroupLendingAccount(userId: string) {
-  let account = await prisma.account.findFirst({
+  let account = await prisma.userAccount.findFirst({
     where: {
       userId,
       type: 'GROUP_LENDING'
@@ -361,7 +379,7 @@ async function getOrCreateGroupLendingAccount(userId: string) {
   })
 
   if (!account) {
-    account = await prisma.account.create({
+    account = await prisma.userAccount.create({
       data: {
         name: 'Group Lending/Borrowing',
         type: 'GROUP_LENDING',
@@ -376,7 +394,7 @@ async function getOrCreateGroupLendingAccount(userId: string) {
 }
 
 async function updateAccountBalance(accountId: string, amount: number) {
-  await prisma.account.update({
+  await prisma.userAccount.update({
     where: { id: accountId },
     data: {
       balance: {

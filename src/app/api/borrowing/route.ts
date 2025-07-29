@@ -81,7 +81,7 @@ export async function DELETE(request: NextRequest) {
     })
 
     // Increase account balance (add back the borrowing amount)
-    await prisma.account.update({
+    await prisma.userAccount.update({
       where: { id: borrowing.accountId },
       data: {
         balance: {

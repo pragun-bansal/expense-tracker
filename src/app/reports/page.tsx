@@ -5,10 +5,14 @@ import { useSession } from 'next-auth/react'
 import { Download, FileText, Calendar, Filter, TrendingUp, DollarSign, PieChart } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
 import { useCurrency } from '@/hooks/useCurrency'
+import { useModal } from '@/hooks/useModal'
+import AlertModal from '@/components/AlertModal'
+import ConfirmModal from '@/components/ConfirmModal'
 
 export default function Reports() {
   const { data: session } = useSession()
   const { formatAmount } = useCurrency()
+  const { alertModal, confirmModal, showAlert, showConfirm, closeAlert, closeConfirm } = useModal()
   const [loading, setLoading] = useState(true)
   const [generating, setGenerating] = useState(false)
   const [dateRange, setDateRange] = useState({
@@ -53,7 +57,11 @@ export default function Reports() {
       }
     } catch (error) {
       console.error('Error generating report:', error)
-      alert('Error generating report. Please try again.')
+      showAlert({
+        title: 'Report Error',
+        message: 'Error generating report. Please try again.',
+        type: 'error'
+      })
     } finally {
       setGenerating(false)
     }
@@ -96,7 +104,11 @@ export default function Reports() {
       window.URL.revokeObjectURL(url)
     } catch (error) {
       console.error('Error downloading report:', error)
-      alert('Error downloading report. Please try again.')
+      showAlert({
+        title: 'Download Error',
+        message: 'Error downloading report. Please try again.',
+        type: 'error'
+      })
     } finally {
       setGenerating(false)
     }
@@ -451,6 +463,33 @@ export default function Reports() {
             )}
           </div>
         </div>
+      )}
+
+      {/* Alert Modal */}
+      {alertModal && (
+        <AlertModal
+          isOpen={alertModal.isOpen}
+          onClose={closeAlert}
+          title={alertModal.title}
+          message={alertModal.message}
+          type={alertModal.type}
+          confirmText={alertModal.confirmText}
+        />
+      )}
+
+      {/* Confirm Modal */}
+      {confirmModal && (
+        <ConfirmModal
+          isOpen={confirmModal.isOpen}
+          onClose={closeConfirm}
+          onConfirm={confirmModal.onConfirm}
+          title={confirmModal.title}
+          message={confirmModal.message}
+          confirmText={confirmModal.confirmText}
+          cancelText={confirmModal.cancelText}
+          type={confirmModal.type}
+          loading={confirmModal.loading}
+        />
       )}
     </div>
   )

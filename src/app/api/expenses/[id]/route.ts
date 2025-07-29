@@ -98,31 +98,31 @@ export async function PUT(
       // If account changed, adjust both accounts
       if (originalExpense.accountId !== accountId) {
         // Add back to original account
-        await prisma.account.update({
+        await prisma.userAccount.update({
           where: { id: originalExpense.accountId },
           data: { balance: { increment: originalExpense.amount } }
         })
         
         // Subtract from new account
-        await prisma.account.update({
+        await prisma.userAccount.update({
           where: { id: accountId },
           data: { balance: { decrement: newAmount } }
         })
       } else {
         // Same account, just adjust the difference
-        await prisma.account.update({
+        await prisma.userAccount.update({
           where: { id: accountId },
           data: { balance: { decrement: amountDifference } }
         })
       }
     } else if (originalExpense.accountId !== accountId) {
       // Amount same but account changed
-      await prisma.account.update({
+      await prisma.userAccount.update({
         where: { id: originalExpense.accountId },
         data: { balance: { increment: originalExpense.amount } }
       })
       
-      await prisma.account.update({
+      await prisma.userAccount.update({
         where: { id: accountId },
         data: { balance: { decrement: newAmount } }
       })
@@ -168,7 +168,7 @@ export async function DELETE(
     })
 
     // Restore account balance
-    await prisma.account.update({
+    await prisma.userAccount.update({
       where: { id: expense.accountId },
       data: {
         balance: { increment: expense.amount }

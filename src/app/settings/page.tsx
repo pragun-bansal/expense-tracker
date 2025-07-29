@@ -6,6 +6,10 @@ import { Bell, Mail, Shield, User, Save, RefreshCw, DollarSign } from 'lucide-re
 import { CurrencyLoader } from '@/components/CurrencyLoader'
 import { currencies } from '@/lib/currency'
 import { useCurrency } from '@/hooks/useCurrency'
+import AlertModal from '@/components/AlertModal'
+import ConfirmModal from '@/components/ConfirmModal'
+import LoadingSpinner from '@/components/LoadingSpinner'
+import { useModal } from '@/hooks/useModal'
 
 interface BudgetAlert {
   budgetId: string
@@ -26,9 +30,11 @@ interface BudgetAlertsData {
 export default function Settings() {
   const { data: session } = useSession()
   const { formatAmount } = useCurrency()
+  const { alertModal, confirmModal, showAlert, showConfirm, closeAlert, closeConfirm } = useModal()
   const [budgetAlerts, setBudgetAlerts] = useState<BudgetAlertsData | null>(null)
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState(false)
+  const [saveSettingsLoading, setSaveSettingsLoading] = useState(false)
   const [settings, setSettings] = useState({
     emailNotifications: true,
     budgetAlerts: true,
@@ -86,21 +92,34 @@ export default function Settings() {
 
       if (response.ok) {
         const result = await response.json()
-        alert(`${result.message}\nNotifications sent: ${result.notificationsSent}`)
+        showAlert({
+          title: 'Budget Alerts Processed',
+          message: `${result.message}\nNotifications sent: ${result.notificationsSent}`,
+          type: 'success'
+        })
         fetchBudgetAlerts()
       } else {
         const error = await response.json()
-        alert(error.error || 'Failed to process budget alerts')
+        showAlert({
+          title: 'Error',
+          message: error.error || 'Failed to process budget alerts',
+          type: 'error'
+        })
       }
     } catch (error) {
       console.error('Error processing budget alerts:', error)
-      alert('Something went wrong')
+      showAlert({
+        title: 'Error',
+        message: 'Something went wrong while processing budget alerts.',
+        type: 'error'
+      })
     } finally {
       setProcessing(false)
     }
   }
 
   const handleSaveSettings = async () => {
+    setSaveSettingsLoading(true)
     try {
       // Save currency preference to backend
       const response = await fetch('/api/user/settings', {
@@ -116,14 +135,28 @@ export default function Settings() {
       if (response.ok) {
         // Trigger currency update throughout the app
         window.dispatchEvent(new CustomEvent('currencyChanged', { detail: settings.currency }))
-        alert('Settings saved successfully!')
+        showAlert({
+          title: 'Success',
+          message: 'Settings saved successfully!',
+          type: 'success'
+        })
       } else {
         const error = await response.json()
-        alert(error.error || 'Failed to save settings')
+        showAlert({
+          title: 'Error',
+          message: error.error || 'Failed to save settings',
+          type: 'error'
+        })
       }
     } catch (error) {
       console.error('Error saving settings:', error)
-      alert('Failed to save settings. Please try again.')
+      showAlert({
+        title: 'Error',
+        message: 'Failed to save settings. Please try again.',
+        type: 'error'
+      })
+    } finally {
+      setSaveSettingsLoading(false)
     }
   }
 
@@ -324,10 +357,11 @@ export default function Settings() {
             <div className="mt-6">
               <button
                 onClick={handleSaveSettings}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                disabled={saveSettingsLoading}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
               >
-                <Save className="h-4 w-4 mr-2" />
-                Save Settings
+                {saveSettingsLoading ? <LoadingSpinner size="sm" /> : <Save className="h-4 w-4 mr-2" />}
+                {saveSettingsLoading ? 'Saving...' : 'Save Settings'}
               </button>
             </div>
           </div>
@@ -437,6 +471,33 @@ export default function Settings() {
           </div>
         </div>
       </div>
+
+      {/* Alert Modal */}
+      {alertModal && (
+        <AlertModal
+          isOpen={alertModal.isOpen}
+          onClose={closeAlert}
+          title={alertModal.title}
+          message={alertModal.message}
+          type={alertModal.type}
+          confirmText={alertModal.confirmText}
+        />
+      )}
+
+      {/* Confirm Modal */}
+      {confirmModal && (
+        <ConfirmModal
+          isOpen={confirmModal.isOpen}
+          onClose={closeConfirm}
+          onConfirm={confirmModal.onConfirm}
+          title={confirmModal.title}
+          message={confirmModal.message}
+          confirmText={confirmModal.confirmText}
+          cancelText={confirmModal.cancelText}
+          type={confirmModal.type}
+          loading={confirmModal.loading}
+        />
+      )}
     </div>
   )
 }

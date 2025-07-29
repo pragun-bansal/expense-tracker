@@ -195,7 +195,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     // Create personal transactions for account balances and transaction history
     try {
-      await createPersonalTransactionsForGroupExpense(
+      const transactionIds = await createPersonalTransactionsForGroupExpense(
         groupExpense.id,
         {
           description,
@@ -206,6 +206,19 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         lenders,
         splits
       )
+      
+      // Update the group expense with transaction IDs for reliable deletion/updates
+      await prisma.groupExpense.update({
+        where: { id: groupExpense.id },
+        data: {
+          paidByExpenseId: transactionIds.paidByExpenseId,
+          paidByLendingId: transactionIds.paidByLendingId,
+          memberIncomeIds: transactionIds.memberIncomeIds,
+          memberExpenseIds: transactionIds.memberExpenseIds,
+          memberLendingIds: transactionIds.memberLendingIds,
+          memberBorrowingIds: transactionIds.memberBorrowingIds
+        }
+      })
     } catch (error) {
       console.error('Error creating personal transactions:', error)
       // Continue without failing the main operation

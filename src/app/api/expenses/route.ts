@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Update account balance
-    await prisma.account.update({
+    await prisma.userAccount.update({
       where: { id: finalAccountId },
       data: {
         balance: {
@@ -211,7 +211,7 @@ export async function PUT(request: NextRequest) {
     if (oldAccountId === accountId) {
       // Same account - adjust balance by difference
       const difference = newAmount - oldAmount
-      await prisma.account.update({
+      await prisma.userAccount.update({
         where: { id: accountId },
         data: {
           balance: {
@@ -221,7 +221,7 @@ export async function PUT(request: NextRequest) {
       })
     } else {
       // Different accounts - revert old account and deduct from new account
-      await prisma.account.update({
+      await prisma.userAccount.update({
         where: { id: oldAccountId },
         data: {
           balance: {
@@ -230,7 +230,7 @@ export async function PUT(request: NextRequest) {
         }
       })
 
-      await prisma.account.update({
+      await prisma.userAccount.update({
         where: { id: accountId },
         data: {
           balance: {
@@ -308,7 +308,7 @@ export async function DELETE(request: NextRequest) {
     })
 
     // Restore account balance (add back the expense amount)
-    await prisma.account.update({
+    await prisma.userAccount.update({
       where: { id: expense.accountId },
       data: {
         balance: {

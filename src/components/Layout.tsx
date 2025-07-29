@@ -8,12 +8,27 @@ import {ThemeToggle} from "@/components/ThemeToggle2";
 const publicRoutes = ['/auth/signin', '/auth/signup', '/']
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const pathname = usePathname()
 
   const isPublicRoute = publicRoutes.includes(pathname)
 
-  if (isPublicRoute || !session) {
+  // Show children without layout for public routes or while loading
+  if (isPublicRoute) {
+    return <>{children}</>
+  }
+
+  // For protected routes, wait for session to load
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-lg">Loading...</div>
+      </div>
+    )
+  }
+
+  // If not authenticated, let the page handle redirect
+  if (!session) {
     return <>{children}</>
   }
 

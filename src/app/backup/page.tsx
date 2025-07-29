@@ -3,6 +3,9 @@
 import { useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { Download, Upload, Shield, AlertTriangle, CheckCircle, FileText, Database } from 'lucide-react'
+import { useModal } from '@/hooks/useModal'
+import AlertModal from '@/components/AlertModal'
+import ConfirmModal from '@/components/ConfirmModal'
 
 interface RestoreResult {
   message: string
@@ -20,6 +23,7 @@ interface RestoreResult {
 
 export default function BackupRestore() {
   const { data: session } = useSession()
+  const { alertModal, confirmModal, showAlert, showConfirm, closeAlert, closeConfirm } = useModal()
   const [loading, setLoading] = useState(false)
   const [restoreResult, setRestoreResult] = useState<RestoreResult | null>(null)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -33,18 +37,26 @@ export default function BackupRestore() {
         const url = window.URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
-        a.download = `expense-tracker-backup-${new Date().toISOString().split('T')[0]}.${format}`
+        a.download = `fina-backup-${new Date().toISOString().split('T')[0]}.${format}`
         document.body.appendChild(a)
         a.click()
         window.URL.revokeObjectURL(url)
         document.body.removeChild(a)
       } else {
         const error = await response.json()
-        alert(error.error || 'Failed to export backup')
+        showAlert({
+          title: 'Export Failed',
+          message: error.error || 'Failed to export backup',
+          type: 'error'
+        })
       }
     } catch (error) {
       console.error('Error exporting backup:', error)
-      alert('Something went wrong during export')
+      showAlert({
+        title: 'Export Failed',
+        message: 'Something went wrong during export',
+        type: 'error'
+      })
     } finally {
       setLoading(false)
     }
@@ -78,11 +90,19 @@ export default function BackupRestore() {
         setRestoreResult(result)
       } else {
         const error = await response.json()
-        alert(error.error || 'Failed to restore backup')
+        showAlert({
+          title: 'Restore Failed',
+          message: error.error || 'Failed to restore backup',
+          type: 'error'
+        })
       }
     } catch (error) {
       console.error('Error restoring backup:', error)
-      alert('Invalid backup file or restore failed')
+      showAlert({
+        title: 'Restore Failed',
+        message: 'Invalid backup file or restore failed',
+        type: 'error'
+      })
     } finally {
       setLoading(false)
     }
@@ -342,6 +362,33 @@ export default function BackupRestore() {
           </div>
         </div>
       </div>
+
+      {/* Alert Modal */}
+      {alertModal && (
+        <AlertModal
+          isOpen={alertModal.isOpen}
+          onClose={closeAlert}
+          title={alertModal.title}
+          message={alertModal.message}
+          type={alertModal.type}
+          confirmText={alertModal.confirmText}
+        />
+      )}
+
+      {/* Confirm Modal */}
+      {confirmModal && (
+        <ConfirmModal
+          isOpen={confirmModal.isOpen}
+          onClose={closeConfirm}
+          onConfirm={confirmModal.onConfirm}
+          title={confirmModal.title}
+          message={confirmModal.message}
+          confirmText={confirmModal.confirmText}
+          cancelText={confirmModal.cancelText}
+          type={confirmModal.type}
+          loading={confirmModal.loading}
+        />
+      )}
     </div>
   )
 }

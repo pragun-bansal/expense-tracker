@@ -6,6 +6,9 @@ import { PlusCircle, Calendar, Play, Pause, Edit, Trash2, RefreshCw } from 'luci
 import { CurrencyLoader } from '@/components/CurrencyLoader'
 import { useBudgetAlerts } from '@/hooks/useBudgetAlerts'
 import { useCurrency } from '@/hooks/useCurrency'
+import { useModal } from '@/hooks/useModal'
+import AlertModal from '@/components/AlertModal'
+import ConfirmModal from '@/components/ConfirmModal'
 
 interface RecurringExpense {
   id: string
@@ -50,6 +53,7 @@ export default function RecurringExpenses() {
   const { data: session } = useSession()
   const { handleBudgetAlert } = useBudgetAlerts()
   const { formatAmount } = useCurrency()
+  const { alertModal, confirmModal, showAlert, showConfirm, closeAlert, closeConfirm } = useModal()
   const [recurringExpenses, setRecurringExpenses] = useState<RecurringExpense[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [accounts, setAccounts] = useState<Account[]>([])
@@ -138,11 +142,21 @@ export default function RecurringExpenses() {
         resetForm()
       } else {
         const error = await response.json()
-        alert(error.error || 'Failed to create recurring expense')
+        showAlert({
+          title: 'Creation Failed',
+          message: error.error || 'Failed to create recurring expense',
+          type: 'error'
+        })
       }
     } catch (error) {
       console.error('Error creating recurring expense:', error)
-      alert('Something went wrong')
+      showAlert({
+        title: 'Creation Failed',
+        message: 'Something went wrong',
+        type: 'error'
+      })
+    } finally {
+      setCreateLoading(false)
     }
   }
 
@@ -164,11 +178,21 @@ export default function RecurringExpenses() {
         resetForm()
       } else {
         const error = await response.json()
-        alert(error.error || 'Failed to update recurring expense')
+        showAlert({
+          title: 'Update Failed',
+          message: error.error || 'Failed to update recurring expense',
+          type: 'error'
+        })
       }
     } catch (error) {
       console.error('Error updating recurring expense:', error)
-      alert('Something went wrong')
+      showAlert({
+        title: 'Update Failed',
+        message: 'Something went wrong',
+        type: 'error'
+      })
+    } finally {
+      setUpdateLoading(false)
     }
   }
 
@@ -217,7 +241,15 @@ export default function RecurringExpenses() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this recurring expense?')) return
+    const confirmed = await showConfirm({
+      title: 'Delete Recurring Expense',
+      message: 'Are you sure you want to delete this recurring expense?',
+      type: 'danger'
+    })
+    if (!confirmed) {
+      closeConfirm()
+      return
+    }
 
     try {
       const response = await fetch(`/api/recurring-expenses/${id}`, {
@@ -225,10 +257,26 @@ export default function RecurringExpenses() {
       })
 
       if (response.ok) {
+        closeConfirm()
         setRecurringExpenses(recurringExpenses.filter(expense => expense.id !== id))
+      } else {
+        closeConfirm()
+        showAlert({
+          title: 'Delete Failed',
+          message: 'Failed to delete recurring expense',
+          type: 'error'
+        })
       }
     } catch (error) {
       console.error('Error deleting recurring expense:', error)
+      closeConfirm()
+      showAlert({
+        title: 'Delete Failed',
+        message: 'Failed to delete recurring expense',
+        type: 'error'
+      })
+    } finally {
+      setDeleteLoading(false)
     }
   }
 
@@ -241,12 +289,26 @@ export default function RecurringExpenses() {
 
       if (response.ok) {
         const result = await response.json()
-        alert(result.message)
+        showAlert({
+          title: 'Processing Complete',
+          message: result.message,
+          type: 'success'
+        })
         fetchRecurringExpenses()
+      } else {
+        showAlert({
+          title: 'Processing Failed',
+          message: 'Failed to process recurring expenses',
+          type: 'error'
+        })
       }
     } catch (error) {
       console.error('Error processing recurring expenses:', error)
-      alert('Failed to process recurring expenses')
+      showAlert({
+        title: 'Processing Failed',
+        message: 'Failed to process recurring expenses',
+        type: 'error'
+      })
     } finally {
       setProcessing(false)
     }
@@ -267,15 +329,27 @@ export default function RecurringExpenses() {
           handleBudgetAlert(result.budgetAlert)
         }
         
-        alert(result.message)
+        showAlert({
+          title: 'Processing Complete',
+          message: result.message,
+          type: 'success'
+        })
         fetchRecurringExpenses()
       } else {
         const error = await response.json()
-        alert(error.error || 'Failed to process recurring expense')
+        showAlert({
+          title: 'Processing Failed',
+          message: error.error || 'Failed to process recurring expense',
+          type: 'error'
+        })
       }
     } catch (error) {
       console.error('Error processing recurring expense:', error)
-      alert('Failed to process recurring expense')
+      showAlert({
+        title: 'Processing Failed',
+        message: 'Failed to process recurring expense',
+        type: 'error'
+      })
     } finally {
       setProcessingIndividual(null)
     }
@@ -584,6 +658,33 @@ export default function RecurringExpenses() {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Alert Modal */}
+      {alertModal && (
+        <AlertModal
+          isOpen={alertModal.isOpen}
+          onClose={closeAlert}
+          title={alertModal.title}
+          message={alertModal.message}
+          type={alertModal.type}
+          confirmText={alertModal.confirmText}
+        />
+      )}
+
+      {/* Confirm Modal */}
+      {confirmModal && (
+        <ConfirmModal
+          isOpen={confirmModal.isOpen}
+          onClose={closeConfirm}
+          onConfirm={confirmModal.onConfirm}
+          title={confirmModal.title}
+          message={confirmModal.message}
+          confirmText={confirmModal.confirmText}
+          cancelText={confirmModal.cancelText}
+          type={confirmModal.type}
+          loading={confirmModal.loading}
+        />
       )}
     </div>
   )

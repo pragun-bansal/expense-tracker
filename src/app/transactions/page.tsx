@@ -6,6 +6,9 @@ import Link from 'next/link'
 import { Filter, Search, ArrowUpCircle, ArrowDownCircle, Calendar, Download, Edit, Users, PlusCircle, Trash2 } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
 import { useCurrency } from '@/hooks/useCurrency'
+import { useModal } from '@/hooks/useModal'
+import AlertModal from '@/components/AlertModal'
+import ConfirmModal from '@/components/ConfirmModal'
 
 interface Transaction {
   id: string
@@ -39,6 +42,7 @@ interface Transaction {
 export default function Transactions() {
   const { data: session } = useSession()
   const { formatAmount } = useCurrency()
+  const { alertModal, confirmModal, showAlert, showConfirm, closeAlert, closeConfirm } = useModal()
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -234,16 +238,44 @@ export default function Transactions() {
         fetchTransactions() // Refresh the transactions list
       } else {
         const error = await response.json()
-        alert(error.error || 'Failed to update transaction')
+        showAlert({
+          title: 'Update Failed',
+          message: error.error || 'Failed to update transaction',
+          type: 'error'
+        })
       }
     } catch (error) {
       console.error('Error updating transaction:', error)
-      alert('Failed to update transaction')
+      showAlert({
+        title: 'Update Failed',
+        message: 'Failed to update transaction',
+        type: 'error'
+      })
+    } finally {
+      setUpdateLoading(false)
     }
   }
 
   const handleDeleteTransaction = async (transaction: Transaction) => {
-    if (!confirm(`Are you sure you want to delete this ${transaction.type}?`)) return
+    // Prevent deletion of group-related transactions
+    if (transaction.groupExpense || transaction.groupType) {
+      showAlert({
+        title: 'Cannot Delete',
+        message: 'Group transactions cannot be deleted individually. Please delete them from the group expense page.',
+        type: 'warning'
+      })
+      return
+    }
+
+    const confirmed = await showConfirm({
+      title: 'Delete Transaction',
+      message: `Are you sure you want to delete this ${transaction.type}?`,
+      type: 'danger'
+    })
+    if (!confirmed) {
+      closeConfirm()
+      return
+    }
 
     try {
       const endpoint = transaction.type === 'income' ? `/api/income?id=${transaction.id}` : 
@@ -255,14 +287,27 @@ export default function Transactions() {
       })
 
       if (response.ok) {
+        closeConfirm()
         fetchTransactions() // Refresh the transactions list
       } else {
         const error = await response.json()
-        alert(error.error || 'Failed to delete transaction')
+        closeConfirm()
+        showAlert({
+          title: 'Delete Failed',
+          message: error.error || 'Failed to delete transaction',
+          type: 'error'
+        })
       }
     } catch (error) {
       console.error('Error deleting transaction:', error)
-      alert('Failed to delete transaction')
+      closeConfirm()
+      showAlert({
+        title: 'Delete Failed',
+        message: 'Failed to delete transaction',
+        type: 'error'
+      })
+    } finally {
+      setDeleteLoading(false)
     }
   }
 
@@ -337,7 +382,7 @@ export default function Transactions() {
             <div className="ml-3 sm:ml-4 min-w-0">
               <p className="text-xs sm:text-sm font-medium text-body truncate">Total Lending/Borrowing</p>
               <p className={`text-lg sm:text-2xl font-semibold ${totalLendingBorrowing >= 0 ? 'text-status-success' : 'text-status-error'}`}>
-                {totalLendingBorrowing >= 0 ? '+' : ''}{formatAmount(Math.abs(totalLendingBorrowing))}
+                {totalLendingBorrowing >= 0 ? '' : '-'}{formatAmount(Math.abs(totalLendingBorrowing))}
               </p>
             </div>
           </div>
@@ -585,7 +630,7 @@ export default function Transactions() {
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    {!transaction.groupExpense ? (
+                    {!transaction.groupExpense && !transaction.groupType ? (
                       <div className="flex items-center space-x-2">
                         {(transaction.type === 'income' || transaction.type === 'expense') && (
                           <button
@@ -607,10 +652,10 @@ export default function Transactions() {
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
-                    ) : transaction.groupExpense ? (
-                      <span className="text-gray-400 text-xs">Group transaction</span>
                     ) : (
-                      <span className="text-gray-400 text-xs">Group lending/borrowing</span>
+                      <span className="text-gray-400 text-xs">
+                        {transaction.groupExpense ? 'Group transaction' : 'Group lending/borrowing'}
+                      </span>
                     )}
                   </td>
                 </tr>
@@ -646,6 +691,33 @@ export default function Transactions() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Alert Modal */}
+      {alertModal && (
+        <AlertModal
+          isOpen={alertModal.isOpen}
+          onClose={closeAlert}
+          title={alertModal.title}
+          message={alertModal.message}
+          type={alertModal.type}
+          confirmText={alertModal.confirmText}
+        />
+      )}
+
+      {/* Confirm Modal */}
+      {confirmModal && (
+        <ConfirmModal
+          isOpen={confirmModal.isOpen}
+          onClose={closeConfirm}
+          onConfirm={confirmModal.onConfirm}
+          title={confirmModal.title}
+          message={confirmModal.message}
+          confirmText={confirmModal.confirmText}
+          cancelText={confirmModal.cancelText}
+          type={confirmModal.type}
+          loading={confirmModal.loading}
+        />
       )}
     </div>
   )

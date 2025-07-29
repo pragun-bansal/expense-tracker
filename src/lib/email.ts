@@ -23,7 +23,7 @@ export interface EmailTemplate {
 export async function sendEmail(template: EmailTemplate): Promise<boolean> {
   try {
     const info = await transporter.sendMail({
-      from: process.env.FROM_EMAIL || 'ExpenseTracker <noreply@expensetracker.com>',
+      from: process.env.FROM_EMAIL || 'Fina <noreply@fina.com>',
       to: template.to,
       subject: template.subject,
       html: template.html,
@@ -230,7 +230,7 @@ export function generateBudgetAlertEmail(
         </div>
         
         <div class="footer">
-          <p>ExpenseTracker • Budget Monitoring</p>
+          <p>Fina • Budget Monitoring</p>
           <p>You can manage your notification preferences in your account settings</p>
         </div>
       </div>

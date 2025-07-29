@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { Bell, Check, X, Users, Receipt, DollarSign, Trash2 } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
+import AlertModal from '@/components/AlertModal'
+import ConfirmModal from '@/components/ConfirmModal'
+import { useModal } from '@/hooks/useModal'
 
 interface Notification {
   id: string
@@ -21,6 +24,7 @@ interface Notification {
 
 export default function Notifications() {
   const { data: session } = useSession()
+  const { alertModal, confirmModal, showAlert, showConfirm, closeAlert, closeConfirm } = useModal()
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -101,7 +105,15 @@ export default function Notifications() {
   }
 
   const deleteAllNotifications = async () => {
-    if (!confirm('Are you sure you want to delete all notifications? This action cannot be undone.')) {
+    const confirmed = await showConfirm({
+      title: 'Delete All Notifications',
+      message: 'Are you sure you want to delete all notifications? This action cannot be undone.',
+      confirmText: 'Delete All',
+      type: 'danger'
+    })
+    
+    if (!confirmed) {
+      closeConfirm()
       return
     }
 
@@ -113,10 +125,24 @@ export default function Notifications() {
       })
 
       if (response.ok) {
+        closeConfirm()
         setNotifications([])
+      } else {
+        closeConfirm()
+        showAlert({
+          title: 'Delete Failed',
+          message: 'Failed to delete all notifications',
+          type: 'error'
+        })
       }
     } catch (error) {
       console.error('Error deleting all notifications:', error)
+      closeConfirm()
+      showAlert({
+        title: 'Delete Failed',
+        message: 'Failed to delete all notifications',
+        type: 'error'
+      })
     }
   }
 
@@ -260,6 +286,34 @@ export default function Notifications() {
           </div>
         )}
       </div>
+
+      {/* Alert Modal */}
+      {/* Alert Modal */}
+      {alertModal && (
+        <AlertModal
+          isOpen={alertModal.isOpen}
+          onClose={closeAlert}
+          title={alertModal.title}
+          message={alertModal.message}
+          type={alertModal.type}
+          confirmText={alertModal.confirmText}
+        />
+      )}
+
+      {/* Confirm Modal */}
+      {confirmModal && (
+        <ConfirmModal
+          isOpen={confirmModal.isOpen}
+          onClose={closeConfirm}
+          onConfirm={confirmModal.onConfirm}
+          title={confirmModal.title}
+          message={confirmModal.message}
+          confirmText={confirmModal.confirmText}
+          cancelText={confirmModal.cancelText}
+          type={confirmModal.type}
+          loading={confirmModal.loading}
+        />
+      )}
     </div>
   )
 }

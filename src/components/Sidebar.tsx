@@ -21,7 +21,8 @@ import {
   Repeat,
   Calculator,
   Shield,
-  Bell
+  Bell,
+  Palette
 } from 'lucide-react'
 import { ThemeToggle } from './ThemeToggle'
 
@@ -35,6 +36,7 @@ const navigation = [
   // { name: 'Debt Settlement', href: '/debt-settlement', icon: Calculator },
   { name: 'Analytics', href: '/analytics', icon: PieChart },
   { name: 'Budgets', href: '/budgets', icon: Target },
+  { name: 'Budgets & Categories', href: '/budgets-categories', icon: Palette },
   { name: 'Reports', href: '/reports', icon: FileText },
   { name: 'Settings', href: '/settings', icon: Settings },
   { name: 'Backup', href: '/backup', icon: Shield },
@@ -58,7 +60,7 @@ export default function Sidebar() {
         <div className="fixed inset-y-0 left-0 flex w-full max-w-xs flex-col bg-sidebar shadow-xl">
           <div className="flex h-16 items-center justify-between px-4">
             <h1 className="text-xl font-bold text-sidebar-brand-text">
-              ExpenseTracker
+              Fina
             </h1>
             <button
               onClick={() => setSidebarOpen(false)}
@@ -126,7 +128,7 @@ export default function Sidebar() {
           <div className="flex items-center flex-shrink-0 px-4 py-4">
             <TrendingUp className="h-8 w-8 text-sidebar-brand-icon" />
             <h1 className="ml-2 text-xl font-bold text-sidebar-brand-text">
-              ExpenseTracker
+              Fina
             </h1>
           </div>
           
@@ -191,7 +193,7 @@ export default function Sidebar() {
             <Menu className="h-6 w-6" />
           </button>
           <h1 className="text-lg font-semibold text-sidebar-brand-text">
-            ExpenseTracker
+            Fina
           </h1>
           <div className="flex items-center space-x-2">
             <ThemeToggle />

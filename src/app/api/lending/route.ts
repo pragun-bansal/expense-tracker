@@ -81,7 +81,7 @@ export async function DELETE(request: NextRequest) {
     })
 
     // Reduce account balance (subtract back the lending amount)
-    await prisma.account.update({
+    await prisma.userAccount.update({
       where: { id: lending.accountId },
       data: {
         balance: {

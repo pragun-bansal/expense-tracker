@@ -3,7 +3,7 @@ import { prisma } from './prisma'
 export async function migrateOldOthersAccounts() {
   try {
     // Find all old "Others" accounts with type "OTHER"
-    const oldOthersAccounts = await prisma.account.findMany({
+    const oldOthersAccounts = await prisma.userAccount.findMany({
       where: {
         name: 'Others',
         type: 'OTHER'
@@ -12,7 +12,7 @@ export async function migrateOldOthersAccounts() {
 
     for (const oldAccount of oldOthersAccounts) {
       // Check if user already has a new OTHERS_FIXED account
-      const newOthersAccount = await prisma.account.findFirst({
+      const newOthersAccount = await prisma.userAccount.findFirst({
         where: {
           userId: oldAccount.userId,
           type: 'OTHERS_FIXED'
@@ -32,7 +32,7 @@ export async function migrateOldOthersAccounts() {
         })
 
         // Update new account balance to include old account balance
-        await prisma.account.update({
+        await prisma.userAccount.update({
           where: { id: newOthersAccount.id },
           data: {
             balance: {
@@ -42,14 +42,14 @@ export async function migrateOldOthersAccounts() {
         })
 
         // Delete the old account
-        await prisma.account.delete({
+        await prisma.userAccount.delete({
           where: { id: oldAccount.id }
         })
 
         console.log(`Migrated and removed old Others account for user ${oldAccount.userId}`)
       } else {
         // Convert old account to new type
-        await prisma.account.update({
+        await prisma.userAccount.update({
           where: { id: oldAccount.id },
           data: { type: 'OTHERS_FIXED' }
         })

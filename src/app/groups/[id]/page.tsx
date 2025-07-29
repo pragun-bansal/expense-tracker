@@ -8,6 +8,10 @@ import { ArrowLeft, Plus, DollarSign, Users, Receipt, Check, X, Trash2, Edit } f
 import { CurrencyLoader } from '@/components/CurrencyLoader'
 import { formatActivityDescription } from '@/lib/activityLogger'
 import { useCurrency } from '@/hooks/useCurrency'
+import LoadingSpinner from '@/components/LoadingSpinner'
+import { useModal } from '@/hooks/useModal'
+import AlertModal from '@/components/AlertModal'
+import ConfirmModal from '@/components/ConfirmModal'
 
 interface Account {
   id: string
@@ -130,6 +134,7 @@ interface GroupStats {
 export default function GroupDetail({ params }: { params: Promise<{ id: string }> }) {
   const { data: session } = useSession()
   const { formatAmount } = useCurrency()
+  const { alertModal, confirmModal, showAlert, showConfirm, closeAlert, closeConfirm } = useModal()
   const router = useRouter()
   const { id } = React.use(params)
   const [group, setGroup] = useState<Group | null>(null)
@@ -147,6 +152,7 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
   const [showSettleModal, setShowSettleModal] = useState(false)
   const [settleData, setSettleData] = useState<{fromUserId?: string, toUserId?: string, amount?: number, isLender?: boolean}>({ })
   const [settlementAccountId, setSettlementAccountId] = useState('')
+  const [settleDebtLoading, setSettleDebtLoading] = useState(false)
   const [activeTab, setActiveTab] = useState<'expenses' | 'balances' | 'stats' | 'settlements' | 'activity'>('expenses')
   const [showEditSettlement, setShowEditSettlement] = useState(false)
   const [editingSettlement, setEditingSettlement] = useState<any>(null)
@@ -246,7 +252,11 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
       // Validate lenders
       const selectedLenders = newExpense.lenders.filter(lender => lender.selected)
       if (selectedLenders.length === 0) {
-        alert('Please select at least one lender for the expense')
+        showAlert({
+          title: 'Validation Error',
+          message: 'Please select at least one lender for the expense',
+          type: 'warning'
+        })
         return
       }
 
@@ -261,7 +271,11 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
         // Multiple lenders - check if amounts are specified
         const totalLenderAmount = selectedLenders.reduce((sum, lender) => sum + lender.amount, 0)
         if (Math.abs(totalLenderAmount - parseFloat(newExpense.amount)) > 0.01) {
-          alert('Lender amounts must equal the total expense amount')
+          showAlert({
+            title: 'Validation Error',
+            message: 'Lender amounts must equal the total expense amount',
+            type: 'warning'
+          })
           return
         }
         lenders = selectedLenders
@@ -271,7 +285,11 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
         // Equal split among selected members
         const selectedMembers = newExpense.splits.filter(split => split.selected)
         if (selectedMembers.length === 0) {
-          alert('Please select at least one member for the split')
+          showAlert({
+            title: 'Validation Error',
+            message: 'Please select at least one member for the split',
+            type: 'warning'
+          })
           return
         }
         const splitAmount = parseFloat(newExpense.amount) / selectedMembers.length
@@ -284,13 +302,21 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
         // Custom split amounts
         const selectedSplits = newExpense.splits.filter(split => split.selected && split.amount > 0)
         if (selectedSplits.length === 0) {
-          alert('Please select members and specify amounts for custom split')
+          showAlert({
+            title: 'Validation Error',
+            message: 'Please select members and specify amounts for custom split',
+            type: 'warning'
+          })
           return
         }
         
         const totalSplitAmount = selectedSplits.reduce((sum, split) => sum + split.amount, 0)
         if (Math.abs(totalSplitAmount - parseFloat(newExpense.amount)) > 0.01) {
-          alert('Split amounts must equal the total expense amount')
+          showAlert({
+            title: 'Validation Error',
+            message: 'Split amounts must equal the total expense amount',
+            type: 'warning'
+          })
           return
         }
         
@@ -338,7 +364,15 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
   }
 
   const handleDeleteExpense = async (expenseId: string) => {
-    if (!confirm('Are you sure you want to delete this expense?')) return
+    const confirmed = await showConfirm({
+      title: 'Delete Expense',
+      message: 'Are you sure you want to delete this expense?',
+      type: 'danger'
+    })
+    if (!confirmed) {
+      closeConfirm()
+      return
+    }
 
     try {
       const response = await fetch(`/api/groups/${id}/expenses/${expenseId}`, {
@@ -346,16 +380,30 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
       })
 
       if (response.ok) {
+        closeConfirm()
         fetchExpenses()
         fetchBalances()
         fetchStats()
         fetchActivities()
       } else {
         const error = await response.json()
-        alert(error.error || 'Failed to delete expense')
+        closeConfirm()
+        showAlert({
+          title: 'Delete Failed',
+          message: error.error || 'Failed to delete expense',
+          type: 'error'
+        })
       }
     } catch (error) {
       console.error('Error deleting expense:', error)
+      closeConfirm()
+      showAlert({
+        title: 'Delete Failed',
+        message: 'Failed to delete expense',
+        type: 'error'
+      })
+    } finally {
+      setDeleteExpenseLoading(false)
     }
   }
 
@@ -440,10 +488,14 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
       const response = await fetch(`/api/groups/${id}/settlements`)
       if (response.ok) {
         const data = await response.json()
-        setRecordedSettlements(data.settlements)
+        setRecordedSettlements(data.settlements || [])
+      } else {
+        console.error('Failed to fetch settlements:', response.status)
+        setRecordedSettlements([])
       }
     } catch (error) {
       console.error('Error fetching settlements:', error)
+      setRecordedSettlements([])
     }
   }
 
@@ -452,14 +504,19 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
       const response = await fetch(`/api/groups/${id}/activities`)
       if (response.ok) {
         const data = await response.json()
-        setActivities(data.activities)
+        setActivities(data.activities || [])
+      } else {
+        console.error('Failed to fetch activities:', response.status)
+        setActivities([])
       }
     } catch (error) {
       console.error('Error fetching activities:', error)
+      setActivities([])
     }
   }
 
   const handleSettleDebt = async () => {
+    setSettleDebtLoading(true)
     try {
       const response = await fetch(`/api/groups/${id}/settle-balance`, {
         method: 'POST',
@@ -473,15 +530,45 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
       })
 
       if (response.ok) {
+        const result = await response.json()
+        
+        // Close modal and reset state immediately
         setShowSettleModal(false)
-        fetchExpenses()
-        fetchBalances()
-        fetchStats()
-        fetchActivities()
-        fetchSettlements()
+        setSettleData({})
+        setSettlementAccountId('')
+        
+        // Refresh all data after closing modal
+        await Promise.all([
+          fetchExpenses(),
+          fetchBalances(), 
+          fetchStats(),
+          fetchActivities(),
+          fetchSettlements()
+        ])
+        
+        // Show success message
+        showAlert({
+          title: 'Settlement Recorded',
+          message: `Settlement recorded successfully! Amount: ${formatAmount(result.settledAmount || settleData.amount)}`,
+          type: 'success'
+        })
+      } else {
+        const error = await response.json()
+        showAlert({
+          title: 'Settlement Failed',
+          message: error.error || 'Failed to record settlement',
+          type: 'error'
+        })
       }
     } catch (error) {
       console.error('Error settling balance:', error)
+      showAlert({
+        title: 'Settlement Failed',
+        message: 'Failed to record settlement due to network error',
+        type: 'error'
+      })
+    } finally {
+      setSettleDebtLoading(false)
     }
   }
 
@@ -505,16 +592,34 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
         fetchBalances()
       } else {
         const error = await response.json()
-        alert(error.error || 'Failed to update settlement')
+        showAlert({
+          title: 'Update Failed',
+          message: error.error || 'Failed to update settlement',
+          type: 'error'
+        })
       }
     } catch (error) {
       console.error('Error updating settlement:', error)
-      alert('Failed to update settlement')
+      showAlert({
+        title: 'Update Failed',
+        message: 'Failed to update settlement',
+        type: 'error'
+      })
+    } finally {
+      setUpdateSettlementLoading(false)
     }
   }
 
   const handleDeleteSettlement = async (settlementId: string) => {
-    if (!confirm('Are you sure you want to delete this settlement? This will unsettle the related expenses.')) return
+    const confirmed = await showConfirm({
+      title: 'Delete Settlement',
+      message: 'Are you sure you want to delete this settlement? This will unsettle the related expenses.',
+      type: 'danger'
+    })
+    if (!confirmed) {
+      closeConfirm()
+      return
+    }
 
     try {
       const response = await fetch(`/api/settlements/${settlementId}`, {
@@ -522,19 +627,36 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
       })
 
       if (response.ok) {
+        closeConfirm()
         fetchExpenses()
         fetchBalances()
         fetchStats()
         fetchActivities()
         fetchSettlements()
-        alert('Settlement deleted successfully')
+        showAlert({
+          title: 'Settlement Deleted',
+          message: 'Settlement deleted successfully',
+          type: 'success'
+        })
       } else {
         const error = await response.json()
-        alert(error.error || 'Failed to delete settlement')
+        closeConfirm()
+        showAlert({
+          title: 'Delete Failed',
+          message: error.error || 'Failed to delete settlement',
+          type: 'error'
+        })
       }
     } catch (error) {
       console.error('Error deleting settlement:', error)
-      alert('Failed to delete settlement')
+      closeConfirm()
+      showAlert({
+        title: 'Delete Failed',
+        message: 'Failed to delete settlement',
+        type: 'error'
+      })
+    } finally {
+      setDeleteSettlementLoading(false)
     }
   }
 
@@ -1452,10 +1574,17 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
                 </button>
                 <button
                   onClick={handleSettleDebt}
-                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                  disabled={settleDebtLoading}
+                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Check className="h-4 w-4 mr-2 inline" />
-                  Mark as Settled
+                  {settleDebtLoading ? (
+                    <LoadingSpinner size="sm" />
+                  ) : (
+                    <>
+                      <Check className="h-4 w-4 mr-2 inline" />
+                      Mark as Settled
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -1521,6 +1650,33 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
           </div>
         </div>
       )}
+
+      {/* Alert Modal */}
+      {alertModal && (
+        <AlertModal
+          isOpen={alertModal.isOpen}
+          onClose={closeAlert}
+          title={alertModal.title}
+          message={alertModal.message}
+          type={alertModal.type}
+          confirmText={alertModal.confirmText}
+        />
+      )}
+
+      {/* Confirm Modal */}
+      {confirmModal && (
+        <ConfirmModal
+          isOpen={confirmModal.isOpen}
+          onClose={closeConfirm}
+          onConfirm={confirmModal.onConfirm}
+          title={confirmModal.title}
+          message={confirmModal.message}
+          confirmText={confirmModal.confirmText}
+          cancelText={confirmModal.cancelText}
+          type={confirmModal.type}
+          loading={confirmModal.loading}
+        />
+      )}
     </div>
   )
 }
@@ -1571,11 +1727,19 @@ function EditExpenseForm({
         onSave()
       } else {
         const error = await response.json()
-        alert(error.error || 'Failed to update expense')
+        showAlert({
+          title: 'Update Failed',
+          message: error.error || 'Failed to update expense',
+          type: 'error'
+        })
       }
     } catch (error) {
       console.error('Error updating expense:', error)
-      alert('Failed to update expense')
+      showAlert({
+        title: 'Update Failed',
+        message: 'Failed to update expense',
+        type: 'error'
+      })
     }
   }
 

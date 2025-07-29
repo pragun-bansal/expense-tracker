@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
         },
         _sum: { amount: true }
       }),
-      prisma.account.count({
+      prisma.userAccount.count({
         where: { userId }
       }),
       prisma.groupMember.count({

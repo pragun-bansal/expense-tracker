@@ -6,6 +6,9 @@ import Link from 'next/link'
 import { PlusCircle, Filter, Search, Edit, Trash2 } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
 import { useCurrency } from '@/hooks/useCurrency'
+import { ConfirmModal } from '@/components/ConfirmModal'
+import LoadingSpinner from '@/components/LoadingSpinner'
+import { useModal } from '@/hooks/useModal'
 
 interface Income {
   id: string
@@ -28,8 +31,11 @@ interface Income {
 export default function Income() {
   const { data: session } = useSession()
   const { formatAmount } = useCurrency()
+  const { confirmModal, showConfirm, closeConfirm } = useModal()
   const [incomes, setIncomes] = useState<Income[]>([])
   const [loading, setLoading] = useState(true)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [filterLoading, setFilterLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterCategory, setFilterCategory] = useState('')
   const [filterAccount, setFilterAccount] = useState('')
@@ -88,19 +94,30 @@ export default function Income() {
   }
 
   const handleDeleteIncome = async (incomeId: string) => {
-    if (!confirm('Are you sure you want to delete this income?')) return
-
-    try {
-      const response = await fetch(`/api/income/${incomeId}`, {
-        method: 'DELETE'
-      })
-      
-      if (response.ok) {
-        setIncomes(incomes.filter(income => income.id !== incomeId))
+    showConfirm({
+      title: 'Delete Income',
+      message: 'Are you sure you want to delete this income?',
+      type: 'danger',
+      confirmText: 'Delete',
+      onConfirm: async () => {
+        setDeleteLoading(true)
+        try {
+          const response = await fetch(`/api/income/${incomeId}`, {
+            method: 'DELETE'
+          })
+          
+          if (response.ok) {
+            setIncomes(incomes.filter(income => income.id !== incomeId))
+          }
+          closeConfirm()
+        } catch (error) {
+          console.error('Error deleting income:', error)
+          closeConfirm()
+        } finally {
+          setDeleteLoading(false)
+        }
       }
-    } catch (error) {
-      console.error('Error deleting income:', error)
-    }
+    })
   }
 
   const filteredIncomes = incomes.filter(income =>
@@ -199,11 +216,15 @@ export default function Income() {
 
             <div className="flex items-end">
               <button
-                onClick={fetchIncomes}
-                className="inline-flex items-center px-4 py-2 border border-input rounded-md shadow-sm text-sm font-medium text-button-secondary bg-button-secondary bg-button-secondary:hover focus:outline-none focus:ring-2 focus:ring-offset-2 ring-focus"
+                onClick={() => {
+                  setFilterLoading(true)
+                  fetchIncomes().finally(() => setFilterLoading(false))
+                }}
+                disabled={filterLoading}
+                className="inline-flex items-center px-4 py-2 border border-input rounded-md shadow-sm text-sm font-medium text-button-secondary bg-button-secondary bg-button-secondary:hover focus:outline-none focus:ring-2 focus:ring-offset-2 ring-focus disabled:opacity-50"
               >
-                <Filter className="h-4 w-4 mr-2" />
-                Apply Filters
+                {filterLoading ? <LoadingSpinner size="sm" /> : <Filter className="h-4 w-4 mr-2" />}
+                {filterLoading ? 'Applying...' : 'Apply Filters'}
               </button>
             </div>
           </div>
@@ -278,9 +299,10 @@ export default function Income() {
                       </Link>
                       <button
                         onClick={() => handleDeleteIncome(income.id)}
-                        className="text-icon-error hover:text-status-error"
+                        disabled={deleteLoading}
+                        className="text-icon-error hover:text-status-error disabled:opacity-50"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        {deleteLoading ? <LoadingSpinner size="sm" /> : <Trash2 className="h-4 w-4" />}
                       </button>
                     </div>
                   </td>
@@ -296,6 +318,8 @@ export default function Income() {
           <p className="text-muted">No income found. Start by adding your first income!</p>
         </div>
       )}
+
+      <ConfirmModal {...confirmModal} />
     </div>
   )
 }

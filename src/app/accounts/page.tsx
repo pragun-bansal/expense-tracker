@@ -5,6 +5,10 @@ import { useSession } from 'next-auth/react'
 import { PlusCircle, CreditCard, Trash2 } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
 import { useCurrency } from '@/hooks/useCurrency'
+import AlertModal from '@/components/AlertModal'
+import ConfirmModal from '@/components/ConfirmModal'
+import LoadingSpinner from '@/components/LoadingSpinner'
+import { useModal } from '@/hooks/useModal'
 
 interface Account {
   id: string
@@ -17,8 +21,11 @@ interface Account {
 export default function Accounts() {
   const { data: session } = useSession()
   const { formatAmount } = useCurrency()
+  const { alertModal, confirmModal, showAlert, showConfirm, closeAlert, closeConfirm } = useModal()
   const [accounts, setAccounts] = useState<Account[]>([])
   const [loading, setLoading] = useState(true)
+  const [createLoading, setCreateLoading] = useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false)
   const [showAddForm, setShowAddForm] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
@@ -58,6 +65,7 @@ export default function Accounts() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setCreateLoading(true)
     try {
       const response = await fetch('/api/accounts', {
         method: 'POST',
@@ -73,12 +81,25 @@ export default function Accounts() {
       }
     } catch (error) {
       console.error('Error creating account:', error)
+    } finally {
+      setCreateLoading(false)
     }
   }
 
   const handleDelete = async (accountId: string) => {
-    if (!confirm('Are you sure you want to delete this account?')) return
+    const confirmed = await showConfirm({
+      title: 'Delete Account',
+      message: 'Are you sure you want to delete this account? This action cannot be undone.',
+      confirmText: 'Delete',
+      type: 'danger'
+    })
 
+    if (!confirmed) {
+      closeConfirm()
+      return
+    }
+
+    setDeleteLoading(true)
     try {
       const response = await fetch(`/api/accounts/${accountId}`, {
         method: 'DELETE'
@@ -86,9 +107,28 @@ export default function Accounts() {
       
       if (response.ok) {
         setAccounts(accounts.filter(account => account.id !== accountId))
+        showAlert({
+          title: 'Success',
+          message: 'Account deleted successfully.',
+          type: 'success'
+        })
+      } else {
+        showAlert({
+          title: 'Error',
+          message: 'Failed to delete account. Please try again.',
+          type: 'error'
+        })
       }
     } catch (error) {
       console.error('Error deleting account:', error)
+      showAlert({
+        title: 'Error',
+        message: 'An error occurred while deleting the account.',
+        type: 'error'
+      })
+    } finally {
+      setDeleteLoading(false)
+      closeConfirm()
     }
   }
 
@@ -206,9 +246,10 @@ export default function Accounts() {
                 </button>
                 <button
                   type="submit"
-                  className="bg-blue-600 border border-transparent rounded-md shadow-sm py-2 px-4 text-sm font-medium text-white hover:bg-blue-700"
+                  disabled={createLoading}
+                  className="bg-blue-600 border border-transparent rounded-md shadow-sm py-2 px-4 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
                 >
-                  Add Account
+                  {createLoading ? <LoadingSpinner size="sm" /> : 'Add Account'}
                 </button>
               </div>
             </form>
@@ -293,9 +334,10 @@ export default function Accounts() {
                 <div className="flex space-x-2">
                   <button
                     onClick={() => handleDelete(account.id)}
-                    className="text-status-error hover:text-red-700"
+                    disabled={deleteLoading}
+                    className="text-status-error hover:text-red-700 disabled:opacity-50"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    {deleteLoading ? <LoadingSpinner size="sm" /> : <Trash2 className="h-4 w-4" />}
                   </button>
                 </div>
               </div>
@@ -326,6 +368,33 @@ export default function Accounts() {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Alert Modal */}
+      {alertModal && (
+        <AlertModal
+          isOpen={alertModal.isOpen}
+          onClose={closeAlert}
+          title={alertModal.title}
+          message={alertModal.message}
+          type={alertModal.type}
+          confirmText={alertModal.confirmText}
+        />
+      )}
+
+      {/* Confirm Modal */}
+      {confirmModal && (
+        <ConfirmModal
+          isOpen={confirmModal.isOpen}
+          onClose={closeConfirm}
+          onConfirm={confirmModal.onConfirm}
+          title={confirmModal.title}
+          message={confirmModal.message}
+          confirmText={confirmModal.confirmText}
+          cancelText={confirmModal.cancelText}
+          type={confirmModal.type}
+          loading={confirmModal.loading}
+        />
       )}
     </div>
   )

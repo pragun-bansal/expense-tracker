@@ -79,7 +79,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       })
 
       // Update account balance
-      await prisma.account.update({
+      await prisma.userAccount.update({
         where: { id: recurringExpense.accountId },
         data: {
           balance: {

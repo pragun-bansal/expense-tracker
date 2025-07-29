@@ -6,6 +6,9 @@ import Link from 'next/link'
 import { PlusCircle, Filter, Search, Edit, Trash2, Image } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
 import { useCurrency } from '@/hooks/useCurrency'
+import ConfirmModal from '@/components/ConfirmModal'
+import LoadingSpinner from '@/components/LoadingSpinner'
+import { useModal } from '@/hooks/useModal'
 
 interface Expense {
   id: string
@@ -29,8 +32,11 @@ interface Expense {
 export default function Expenses() {
   const { data: session } = useSession()
   const { formatAmount } = useCurrency()
+  const { confirmModal, showConfirm, closeConfirm } = useModal()
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [loading, setLoading] = useState(true)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [filterLoading, setFilterLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterCategory, setFilterCategory] = useState('')
   const [filterAccount, setFilterAccount] = useState('')
@@ -89,8 +95,19 @@ export default function Expenses() {
   }
 
   const handleDeleteExpense = async (expenseId: string) => {
-    if (!confirm('Are you sure you want to delete this expense?')) return
+    const confirmed = await showConfirm({
+      title: 'Delete Expense',
+      message: 'Are you sure you want to delete this expense?',
+      confirmText: 'Delete',
+      type: 'danger'
+    })
+    
+    if (!confirmed) {
+      closeConfirm()
+      return
+    }
 
+    setDeleteLoading(true)
     try {
       const response = await fetch(`/api/expenses/${expenseId}`, {
         method: 'DELETE'
@@ -101,7 +118,11 @@ export default function Expenses() {
       }
     } catch (error) {
       console.error('Error deleting expense:', error)
+    } finally {
+      setDeleteLoading(false)
     }
+    
+    closeConfirm()
   }
 
   const filteredExpenses = expenses.filter(expense =>
@@ -199,11 +220,15 @@ export default function Expenses() {
 
             <div className="flex items-end">
               <button
-                onClick={fetchExpenses}
-                className="inline-flex items-center justify-center w-full px-4 py-2 border border-input rounded-md shadow-sm text-sm font-medium text-button-secondary bg-button-secondary bg-button-secondary:hover focus:outline-none focus:ring-2 focus:ring-offset-2 ring-focus"
+                onClick={() => {
+                  setFilterLoading(true)
+                  fetchExpenses().finally(() => setFilterLoading(false))
+                }}
+                disabled={filterLoading}
+                className="inline-flex items-center justify-center w-full px-4 py-2 border border-input rounded-md shadow-sm text-sm font-medium text-button-secondary bg-button-secondary bg-button-secondary:hover focus:outline-none focus:ring-2 focus:ring-offset-2 ring-focus disabled:opacity-50"
               >
-                <Filter className="h-4 w-4 mr-2" />
-                Apply Filters
+                {filterLoading ? <LoadingSpinner size="sm" /> : <Filter className="h-4 w-4 mr-2" />}
+                {filterLoading ? 'Applying...' : 'Apply Filters'}
               </button>
             </div>
           </div>
@@ -294,9 +319,10 @@ export default function Expenses() {
                       </Link>
                       <button
                         onClick={() => handleDeleteExpense(expense.id)}
-                        className="text-status-error hover:text-red-700"
+                        disabled={deleteLoading}
+                        className="text-status-error hover:text-red-700 disabled:opacity-50"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        {deleteLoading ? <LoadingSpinner size="sm" /> : <Trash2 className="h-4 w-4" />}
                       </button>
                     </div>
                   </td>
@@ -360,9 +386,10 @@ export default function Expenses() {
                 </Link>
                 <button
                   onClick={() => handleDeleteExpense(expense.id)}
-                  className="text-status-error hover:text-red-700"
+                  disabled={deleteLoading}
+                  className="text-status-error hover:text-red-700 disabled:opacity-50"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  {deleteLoading ? <LoadingSpinner size="sm" /> : <Trash2 className="h-4 w-4" />}
                 </button>
               </div>
             </div>
@@ -382,6 +409,21 @@ export default function Expenses() {
         <div className="text-center py-12">
           <p className="text-muted">No expenses found. Start by adding your first expense!</p>
         </div>
+      )}
+
+      {/* Confirm Modal */}
+      {confirmModal && (
+        <ConfirmModal
+          isOpen={confirmModal.isOpen}
+          onClose={closeConfirm}
+          onConfirm={confirmModal.onConfirm}
+          title={confirmModal.title}
+          message={confirmModal.message}
+          confirmText={confirmModal.confirmText}
+          cancelText={confirmModal.cancelText}
+          type={confirmModal.type}
+          loading={confirmModal.loading}
+        />
       )}
     </div>
   )

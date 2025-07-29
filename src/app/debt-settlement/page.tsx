@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { Calculator, Users, ArrowRight, CheckCircle, AlertCircle } from 'lucide-react'
 import { useCurrency } from '@/hooks/useCurrency'
+import AlertModal from '@/components/AlertModal'
+import ConfirmModal from '@/components/ConfirmModal'
+import { useModal } from '@/hooks/useModal'
 
 interface Group {
   id: string
@@ -45,6 +48,7 @@ interface DebtSettlementResult {
 export default function DebtSettlement() {
   const { data: session } = useSession()
   const { formatAmount } = useCurrency()
+  const { alertModal, confirmModal, showAlert, showConfirm, closeAlert, closeConfirm } = useModal()
   const [groups, setGroups] = useState<Group[]>([])
   const [selectedGroup, setSelectedGroup] = useState<string>('')
   const [settlementResult, setSettlementResult] = useState<DebtSettlementResult | null>(null)
@@ -80,11 +84,19 @@ export default function DebtSettlement() {
         setSettlementResult(data)
       } else {
         const error = await response.json()
-        alert(error.error || 'Failed to calculate debt settlement')
+        showAlert({
+          title: 'Error',
+          message: error.error || 'Failed to calculate debt settlement',
+          type: 'error'
+        })
       }
     } catch (error) {
       console.error('Error calculating debt settlement:', error)
-      alert('Something went wrong')
+      showAlert({
+        title: 'Error',
+        message: 'Something went wrong while calculating debt settlement.',
+        type: 'error'
+      })
     } finally {
       setLoading(false)
     }
@@ -106,16 +118,28 @@ export default function DebtSettlement() {
 
       if (response.ok) {
         const result = await response.json()
-        alert(result.message)
+        showAlert({
+          title: 'Success',
+          message: result.message,
+          type: 'success'
+        })
         // Recalculate after settlement
         calculateDebtSettlement()
       } else {
         const error = await response.json()
-        alert(error.error || 'Failed to settle debts')
+        showAlert({
+          title: 'Error',
+          message: error.error || 'Failed to settle debts',
+          type: 'error'
+        })
       }
     } catch (error) {
       console.error('Error settling debts:', error)
-      alert('Something went wrong')
+      showAlert({
+        title: 'Error',
+        message: 'Something went wrong while settling debts.',
+        type: 'error'
+      })
     } finally {
       setSettling(false)
     }
@@ -323,6 +347,33 @@ export default function DebtSettlement() {
             Select a group and calculate debt settlement to see optimization results.
           </p>
         </div>
+      )}
+
+      {/* Alert Modal */}
+      {alertModal && (
+        <AlertModal
+          isOpen={alertModal.isOpen}
+          onClose={closeAlert}
+          title={alertModal.title}
+          message={alertModal.message}
+          type={alertModal.type}
+          confirmText={alertModal.confirmText}
+        />
+      )}
+
+      {/* Confirm Modal */}
+      {confirmModal && (
+        <ConfirmModal
+          isOpen={confirmModal.isOpen}
+          onClose={closeConfirm}
+          onConfirm={confirmModal.onConfirm}
+          title={confirmModal.title}
+          message={confirmModal.message}
+          confirmText={confirmModal.confirmText}
+          cancelText={confirmModal.cancelText}
+          type={confirmModal.type}
+          loading={confirmModal.loading}
+        />
       )}
     </div>
   )

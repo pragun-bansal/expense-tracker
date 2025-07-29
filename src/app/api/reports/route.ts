@@ -82,7 +82,7 @@ async function generateSummaryReport(userId: string, dateFilter: any) {
         account: true
       }
     }),
-    prisma.account.findMany({
+    prisma.userAccount.findMany({
       where: { userId }
     }),
     prisma.budget.findMany({

@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     // Ensure special accounts exist
     await ensureSpecialAccountsExist(session.user.id)
 
-    const accounts = await prisma.account.findMany({
+    const accounts = await prisma.userAccount.findMany({
       where: { userId: session.user.id },
       orderBy: [
         { type: 'asc' }, // Special accounts first
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const account = await prisma.account.create({
+    const account = await prisma.userAccount.create({
       data: {
         name,
         type,

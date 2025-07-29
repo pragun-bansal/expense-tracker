@@ -2,7 +2,7 @@ import { prisma } from './prisma'
 
 export async function getOrCreateOthersAccount(userId: string) {
   // Try to find existing Others account
-  let account = await prisma.account.findFirst({
+  let account = await prisma.userAccount.findFirst({
     where: {
       userId,
       type: 'OTHERS_FIXED'
@@ -11,7 +11,7 @@ export async function getOrCreateOthersAccount(userId: string) {
 
   if (!account) {
     // Create the Others account
-    account = await prisma.account.create({
+    account = await prisma.userAccount.create({
       data: {
         name: 'Others',
         type: 'OTHERS_FIXED',
@@ -27,7 +27,7 @@ export async function getOrCreateOthersAccount(userId: string) {
 
 export async function getOrCreateGroupLendingAccount(userId: string) {
   // Try to find existing Group Lending/Borrowing account
-  let account = await prisma.account.findFirst({
+  let account = await prisma.userAccount.findFirst({
     where: {
       userId,
       type: 'GROUP_LENDING'
@@ -36,7 +36,7 @@ export async function getOrCreateGroupLendingAccount(userId: string) {
 
   if (!account) {
     // Create the Group Lending/Borrowing account
-    account = await prisma.account.create({
+    account = await prisma.userAccount.create({
       data: {
         name: 'Group Lending/Borrowing',
         type: 'GROUP_LENDING',
@@ -51,7 +51,7 @@ export async function getOrCreateGroupLendingAccount(userId: string) {
 }
 
 export async function isSpecialAccount(accountId: string): Promise<boolean> {
-  const account = await prisma.account.findUnique({
+  const account = await prisma.userAccount.findUnique({
     where: { id: accountId }
   })
   

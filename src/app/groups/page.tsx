@@ -6,6 +6,9 @@ import Link from 'next/link'
 import { Plus, Users, DollarSign, UserPlus, Settings } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
 import { useCurrency } from '@/hooks/useCurrency'
+import AlertModal from '@/components/AlertModal'
+import ConfirmModal from '@/components/ConfirmModal'
+import { useModal } from '@/hooks/useModal'
 
 interface Group {
   id: string
@@ -43,6 +46,7 @@ interface Group {
 export default function Groups() {
   const { data: session } = useSession()
   const { formatAmount } = useCurrency()
+  const { alertModal, confirmModal, showAlert, showConfirm, closeAlert, closeConfirm } = useModal()
   const [groups, setGroups] = useState<Group[]>([])
   const [loading, setLoading] = useState(true)
   const [showCreateModal, setShowCreateModal] = useState(false)
@@ -182,20 +186,48 @@ export default function Groups() {
   const handleDeleteGroup = async () => {
     if (!selectedGroup) return
     
-    if (confirm(`Are you sure you want to delete "${selectedGroup.name}"? This action cannot be undone.`)) {
-      try {
-        const response = await fetch(`/api/groups/${selectedGroup.id}`, {
-          method: 'DELETE'
-        })
+    const confirmed = await showConfirm({
+      title: 'Delete Group',
+      message: `Are you sure you want to delete "${selectedGroup.name}"? This action cannot be undone and will remove all associated expenses.`,
+      confirmText: 'Delete',
+      type: 'danger'
+    })
 
-        if (response.ok) {
-          setShowSettingsModal(false)
-          setSelectedGroup(null)
-          fetchGroups()
-        }
-      } catch (error) {
-        console.error('Error deleting group:', error)
+    if (!confirmed) {
+      closeConfirm()
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/groups/${selectedGroup.id}`, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        setShowSettingsModal(false)
+        setSelectedGroup(null)
+        fetchGroups()
+        showAlert({
+          title: 'Success',
+          message: 'Group deleted successfully.',
+          type: 'success'
+        })
+      } else {
+        showAlert({
+          title: 'Error',
+          message: 'Failed to delete group. Please try again.',
+          type: 'error'
+        })
       }
+    } catch (error) {
+      console.error('Error deleting group:', error)
+      showAlert({
+        title: 'Error',
+        message: 'An error occurred while deleting the group.',
+        type: 'error'
+      })
+    } finally {
+      closeConfirm()
     }
   }
 
@@ -538,9 +570,10 @@ export default function Groups() {
                   <button
                     type="button"
                     onClick={handleDeleteGroup}
-                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                    disabled={deleteLoading}
+                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
                   >
-                    Delete Group
+                    {deleteLoading ? <LoadingSpinner size="sm" /> : 'Delete Group'}
                   </button>
                   
                   <div className="flex space-x-3">
@@ -553,9 +586,10 @@ export default function Groups() {
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                      disabled={updateLoading}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
                     >
-                      Save Changes
+                      {updateLoading ? <LoadingSpinner size="sm" /> : 'Save Changes'}
                     </button>
                   </div>
                 </div>
@@ -563,6 +597,33 @@ export default function Groups() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Alert Modal */}
+      {alertModal && (
+        <AlertModal
+          isOpen={alertModal.isOpen}
+          onClose={closeAlert}
+          title={alertModal.title}
+          message={alertModal.message}
+          type={alertModal.type}
+          confirmText={alertModal.confirmText}
+        />
+      )}
+
+      {/* Confirm Modal */}
+      {confirmModal && (
+        <ConfirmModal
+          isOpen={confirmModal.isOpen}
+          onClose={closeConfirm}
+          onConfirm={confirmModal.onConfirm}
+          title={confirmModal.title}
+          message={confirmModal.message}
+          confirmText={confirmModal.confirmText}
+          cancelText={confirmModal.cancelText}
+          type={confirmModal.type}
+          loading={confirmModal.loading}
+        />
       )}
     </div>
   )

@@ -160,7 +160,7 @@ export async function GET(request: NextRequest) {
       return new NextResponse(JSON.stringify(backup, null, 2), {
         headers: {
           'Content-Type': 'application/json',
-          'Content-Disposition': `attachment; filename="expense-tracker-backup-${new Date().toISOString().split('T')[0]}.json"`
+          'Content-Disposition': `attachment; filename="fina-backup-${new Date().toISOString().split('T')[0]}.json"`
         }
       })
     }
@@ -181,7 +181,7 @@ export async function GET(request: NextRequest) {
       return new NextResponse(csvData, {
         headers: {
           'Content-Type': 'text/csv',
-          'Content-Disposition': `attachment; filename="expense-tracker-backup-${new Date().toISOString().split('T')[0]}.csv"`
+          'Content-Disposition': `attachment; filename="fina-backup-${new Date().toISOString().split('T')[0]}.csv"`
         }
       })
     }
@@ -229,7 +229,7 @@ export async function POST(request: NextRequest) {
     if (backupData.accounts) {
       for (const account of backupData.accounts) {
         try {
-          await prisma.account.upsert({
+          await prisma.userAccount.upsert({
             where: { id: account.id },
             create: {
               id: account.id,
@@ -289,7 +289,7 @@ export async function POST(request: NextRequest) {
           const category = await prisma.category.findFirst({
             where: { name: expense.category, userId: session.user.id, type: 'EXPENSE' }
           })
-          const account = await prisma.account.findFirst({
+          const account = await prisma.userAccount.findFirst({
             where: { name: expense.account, userId: session.user.id }
           })
 
@@ -335,7 +335,7 @@ export async function POST(request: NextRequest) {
           const category = await prisma.category.findFirst({
             where: { name: income.category, userId: session.user.id, type: 'INCOME' }
           })
-          const account = await prisma.account.findFirst({
+          const account = await prisma.userAccount.findFirst({
             where: { name: income.account, userId: session.user.id }
           })
 

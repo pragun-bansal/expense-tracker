@@ -135,7 +135,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get account balances
-    const accountBalances = await prisma.account.findMany({
+    const accountBalances = await prisma.userAccount.findMany({
       where: { userId },
       select: {
         id: true,

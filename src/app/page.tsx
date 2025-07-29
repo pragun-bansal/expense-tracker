@@ -29,9 +29,9 @@ export default function Home() {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-8">Expense Tracker</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-8">Fina</h1>
           <p className="text-lg text-gray-600 mb-8">
-            Track your expenses, split bills with friends, and manage your finances effortlessly.
+            Smart personal finance management and group expense splitting made effortless.
           </p>
         </div>
         

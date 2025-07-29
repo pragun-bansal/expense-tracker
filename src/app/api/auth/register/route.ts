@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
-import { ensureSpecialAccountsExist } from '@/lib/specialAccounts'
+import { createDefaultAccounts } from '@/lib/userSetup'
 
 async function seedDefaultData(userId: string) {
   // Create expense categories
@@ -47,7 +47,7 @@ async function seedDefaultData(userId: string) {
   ];
 
   for (const account of accounts) {
-    await prisma.account.create({
+    await prisma.userAccount.create({
       data: account
     });
   }
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Seed default categories and accounts for new user
-    await seedDefaultData(user.id)
+    await createDefaultAccounts(user.id)
 
     return NextResponse.json({
       message: 'User created successfully',
