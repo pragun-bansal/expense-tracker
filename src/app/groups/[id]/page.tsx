@@ -153,6 +153,9 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
   const [settleData, setSettleData] = useState<{fromUserId?: string, toUserId?: string, amount?: number, isLender?: boolean}>({ })
   const [settlementAccountId, setSettlementAccountId] = useState('')
   const [settleDebtLoading, setSettleDebtLoading] = useState(false)
+  const [addExpenseLoading, setAddExpenseLoading] = useState(false)
+  const [deleteExpenseLoading, setDeleteExpenseLoading] = useState(false)
+  const [deleteSettlementLoading, setDeleteSettlementLoading] = useState(false)
   const [activeTab, setActiveTab] = useState<'expenses' | 'balances' | 'stats' | 'settlements' | 'activity'>('expenses')
   const [showEditSettlement, setShowEditSettlement] = useState(false)
   const [editingSettlement, setEditingSettlement] = useState<any>(null)
@@ -244,6 +247,7 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
   const handleAddExpense = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!group) return
+    setAddExpenseLoading(true)
 
     try {
       let splits = newExpense.splits
@@ -357,9 +361,27 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
         fetchBalances()
         fetchStats()
         fetchActivities()
+        showAlert({
+          title: 'Success',
+          message: 'Expense added successfully!',
+          type: 'success'
+        })
+      } else {
+        showAlert({
+          title: 'Error',
+          message: 'Failed to add expense. Please try again.',
+          type: 'error'
+        })
       }
     } catch (error) {
       console.error('Error adding expense:', error)
+      showAlert({
+        title: 'Error',
+        message: 'An error occurred while adding the expense.',
+        type: 'error'
+      })
+    } finally {
+      setAddExpenseLoading(false)
     }
   }
 
@@ -374,6 +396,8 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
       return
     }
 
+    setDeleteExpenseLoading(true)
+    
     try {
       const response = await fetch(`/api/groups/${id}/expenses/${expenseId}`, {
         method: 'DELETE'
@@ -1261,14 +1285,14 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
       {/* Add Expense Modal */}
       {showAddExpense && (
         <div className="fixed inset-0 bg-modal-overlay overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-card">
+          <div className="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-card">
             <div className="mt-3">
               <h3 className="text-lg font-medium text-heading mb-4">
                 Add New Expense
               </h3>
-              <form onSubmit={handleAddExpense} className="space-y-4">
+              <form onSubmit={handleAddExpense} className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-input-label mb-1">
+                  <label className="block text-sm font-medium text-input-label mb-3">
                     Description *
                   </label>
                   <input
@@ -1276,13 +1300,13 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
                     required
                     value={newExpense.description}
                     onChange={(e) => setNewExpense(prev => ({ ...prev, description: e.target.value }))}
-                    className="w-full border border-input rounded-md px-3 py-2 bg-input text-heading"
+                    className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input placeholder-gray-400 transition-all duration-200"
                     placeholder="e.g., Dinner at restaurant"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-input-label mb-1">
+                  <label className="block text-sm font-medium text-input-label mb-3">
                     Amount *
                   </label>
                   <input
@@ -1291,19 +1315,19 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
                     required
                     value={newExpense.amount}
                     onChange={(e) => setNewExpense(prev => ({ ...prev, amount: e.target.value }))}
-                    className="w-full border border-input rounded-md px-3 py-2 bg-input text-heading"
+                    className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input placeholder-gray-400 transition-all duration-200"
                     placeholder="0.00"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-input-label mb-1">
+                  <label className="block text-sm font-medium text-input-label mb-3">
                     Account (Optional)
                   </label>
                   <select
                     value={newExpense.accountId}
                     onChange={(e) => setNewExpense(prev => ({ ...prev, accountId: e.target.value }))}
-                    className="w-full border border-input rounded-md px-3 py-2 bg-input text-heading"
+                    className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200 appearance-none bg-arrow-down bg-no-repeat bg-right bg-origin-content"
                   >
                     <option value="">Select Account</option>
                     <optgroup label="Accounts">
@@ -1320,7 +1344,7 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-input-label mb-1">
+                  <label className="block text-sm font-medium text-input-label mb-3">
                     Split Type
                   </label>
                   <select
@@ -1329,7 +1353,7 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
                       setNewExpense(prev => ({ ...prev, splitType: e.target.value }))
                       setTimeout(initializeSplits, 100) // Initialize splits after state update
                     }}
-                    className="w-full border border-input rounded-md px-3 py-2 bg-input text-heading"
+                    className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200 appearance-none bg-arrow-down bg-no-repeat bg-right bg-origin-content"
                   >
                     <option value="EQUAL">Equal Split</option>
                     <option value="CUSTOM">Custom Amounts</option>
@@ -1356,7 +1380,7 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
                               type="checkbox"
                               checked={lender.selected}
                               onChange={(e) => updateLenderSelection(lender.userId, e.target.checked)}
-                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                              className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-input rounded transition-all duration-200"
                             />
                             <div className="flex-1 flex items-center">
                               <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center text-white text-xs font-medium mr-3">
@@ -1374,22 +1398,22 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
                             {lender.selected && (
                               <div className="flex space-x-2">
                                 {showAmountInput && (
-                                  <div className="w-20">
+                                  <div className="w-24">
                                     <input
                                       type="number"
                                       step="0.01"
                                       value={lender.amount || ''}
                                       onChange={(e) => updateLenderAmount(lender.userId, parseFloat(e.target.value) || 0)}
-                                      className="w-full border border-input rounded px-2 py-1 text-sm bg-input text-heading"
+                                      className="w-full px-3 py-2 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-sm bg-input text-input placeholder-gray-400 transition-all duration-200"
                                       placeholder="0.00"
                                     />
                                   </div>
                                 )}
-                                <div className="w-32">
+                                <div className="w-36">
                                   <select
                                     value={lender.accountId}
                                     onChange={(e) => updateLenderAccount(lender.userId, e.target.value)}
-                                    className="w-full border border-input rounded px-2 py-1 text-sm bg-input text-heading"
+                                    className="w-full px-3 py-2 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-sm bg-input text-input transition-all duration-200 appearance-none bg-arrow-down bg-no-repeat bg-right bg-origin-content"
                                   >
                                     <option value="">Others</option>
                                     {accounts.map((account) => (
@@ -1431,7 +1455,7 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
                               type="checkbox"
                               checked={split.selected}
                               onChange={(e) => updateSplitSelection(split.userId, e.target.checked)}
-                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                              className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-input rounded transition-all duration-200"
                             />
                             <div className="flex-1 flex items-center">
                               <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-medium mr-3">
@@ -1447,13 +1471,13 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
                               </div>
                             </div>
                             {newExpense.splitType === 'CUSTOM' && split.selected && (
-                              <div className="w-24">
+                              <div className="w-28">
                                 <input
                                   type="number"
                                   step="0.01"
                                   value={split.amount || ''}
                                   onChange={(e) => updateSplitAmount(split.userId, parseFloat(e.target.value) || 0)}
-                                  className="w-full border border-input rounded px-2 py-1 text-sm bg-input text-heading"
+                                  className="w-full px-3 py-2 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-sm bg-input text-input placeholder-gray-400 transition-all duration-200"
                                   placeholder="0.00"
                                 />
                               </div>
@@ -1477,19 +1501,20 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
                   </div>
                 )}
 
-                <div className="flex justify-end space-x-3 pt-4">
+                <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-6">
                   <button
                     type="button"
                     onClick={() => setShowAddExpense(false)}
-                    className="px-4 py-2 text-input-label border border-input rounded-md hover:bg-button-secondary-hover"
+                    className="bg-input py-3 px-6 border border-input rounded-lg shadow-sm text-base font-medium text-input-label hover:bg-button-secondary-hover transition-all duration-200 text-center"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    disabled={addExpenseLoading}
+                    className="bg-blue-600 border border-transparent rounded-lg shadow-sm py-3 px-6 text-base font-medium text-white hover:bg-blue-700 disabled:opacity-50 transition-all duration-200 flex items-center justify-center min-w-[140px]"
                   >
-                    Add Expense
+                    {addExpenseLoading ? <LoadingSpinner size="sm" /> : 'Add Expense'}
                   </button>
                 </div>
               </form>

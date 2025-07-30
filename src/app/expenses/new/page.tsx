@@ -108,7 +108,7 @@ export default function NewExpense() {
           handleBudgetAlert(data.budgetAlert)
         }
         
-        router.push('/expenses')
+        router.push('/transactions')
       } else {
         const data = await response.json()
         setError(data.error || 'Failed to create expense')
@@ -262,7 +262,7 @@ export default function NewExpense() {
 
   return (
     <div className="min-h-screen bg-page">
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-12 py-6 sm:py-8 lg:py-12">
         <div className="mb-8">
           <Link
             href="/expenses"
@@ -274,62 +274,57 @@ export default function NewExpense() {
         </div>
 
         <div className="bg-card shadow-card rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
+          <div className="px-4 py-6 sm:px-8 sm:py-8 lg:p-10">
             <h3 className="text-lg font-medium leading-6 text-card-header mb-6">
               Add New Expense
             </h3>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
               <div>
-                <label htmlFor="amount" className="block text-sm font-medium text-input-label">
+                <label htmlFor="amount" className="block text-sm font-medium text-input-label mb-3">
                   Amount *
                 </label>
-                <div className="mt-1">
-                  <input
-                    type="number"
-                    step="0.01"
-                    name="amount"
-                    id="amount"
-                    required
-                    value={formData.amount}
-                    onChange={handleInputChange}
-                    className="block w-full border-input rounded-md shadow-sm ring-focus border-input-focus:focus sm:text-sm bg-input text-input"
-                    placeholder="0.00"
-                  />
-                </div>
+                <input
+                  type="number"
+                  step="0.01"
+                  name="amount"
+                  id="amount"
+                  required
+                  value={formData.amount}
+                  onChange={handleInputChange}
+                  className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input placeholder-gray-400 transition-all duration-200"
+                  placeholder="0.00"
+                />
               </div>
 
               <div>
-                <label htmlFor="description" className="block text-sm font-medium text-input-label">
+                <label htmlFor="description" className="block text-sm font-medium text-input-label mb-3">
                   Description
                 </label>
-                <div className="mt-1">
-                  <textarea
-                    name="description"
-                    id="description"
-                    rows={3}
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    className="block w-full border-input rounded-md shadow-sm ring-focus border-input-focus:focus sm:text-sm bg-input text-input"
-                    placeholder="What did you spend on?"
-                  />
-                </div>
+                <textarea
+                  name="description"
+                  id="description"
+                  rows={4}
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input placeholder-gray-400 transition-all duration-200 resize-none"
+                  placeholder="What did you spend on?"
+                />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                 <div>
-                  <label htmlFor="categoryId" className="block text-sm font-medium text-input-label">
+                  <label htmlFor="categoryId" className="block text-sm font-medium text-input-label mb-3">
                     Category *
                   </label>
-                  <div className="mt-1">
-                    <select
-                      name="categoryId"
-                      id="categoryId"
-                      required
-                      value={formData.categoryId}
-                      onChange={handleInputChange}
-                      className="block w-full border-input rounded-md shadow-sm ring-focus border-input-focus:focus sm:text-sm bg-input text-input"
-                    >
+                  <select
+                    name="categoryId"
+                    id="categoryId"
+                    required
+                    value={formData.categoryId}
+                    onChange={handleInputChange}
+                    className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200 appearance-none bg-arrow-down bg-no-repeat bg-right bg-origin-content"
+                  >
                       <option value="">Select a category</option>
                       {categories.map((category) => (
                         <option key={category.id} value={category.id}>
@@ -337,21 +332,19 @@ export default function NewExpense() {
                         </option>
                       ))}
                     </select>
-                  </div>
                 </div>
 
                 <div>
-                  <label htmlFor="accountId" className="block text-sm font-medium text-input-label">
+                  <label htmlFor="accountId" className="block text-sm font-medium text-input-label mb-3">
                     Account (Optional)
                   </label>
-                  <div className="mt-1">
-                    <select
-                      name="accountId"
-                      id="accountId"
-                      value={formData.accountId}
-                      onChange={handleInputChange}
-                      className="block w-full border-input rounded-md shadow-sm ring-focus border-input-focus:focus sm:text-sm bg-input text-input"
-                    >
+                  <select
+                    name="accountId"
+                    id="accountId"
+                    value={formData.accountId}
+                    onChange={handleInputChange}
+                    className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200 appearance-none bg-arrow-down bg-no-repeat bg-right bg-origin-content"
+                  >
                       {accounts
                         .filter(account => account.type === 'OTHERS_FIXED')
                         .map((account) => (
@@ -369,33 +362,29 @@ export default function NewExpense() {
                           ))}
                       </optgroup>
                     </select>
-                  </div>
                 </div>
               </div>
 
               <div>
-                <label htmlFor="date" className="block text-sm font-medium text-input-label">
+                <label htmlFor="date" className="block text-sm font-medium text-input-label mb-3">
                   Date
                 </label>
-                <div className="mt-1">
-                  <input
-                    type="date"
-                    name="date"
-                    id="date"
-                    value={formData.date}
-                    onChange={handleInputChange}
-                    className="block w-full border-input rounded-md shadow-sm ring-focus border-input-focus:focus sm:text-sm bg-input text-input"
-                  />
-                </div>
+                <input
+                  type="date"
+                  name="date"
+                  id="date"
+                  value={formData.date}
+                  onChange={handleInputChange}
+                  className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200"
+                />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-input-label">
+                <label className="block text-sm font-medium text-input-label mb-3">
                   Receipt Image
                 </label>
-                <div className="mt-1">
-                  {!uploadedFile ? (
-                    <div className="flex justify-center px-6 pt-5 pb-6 border-2 border-input border-dashed rounded-md">
+                {!uploadedFile ? (
+                    <div className="flex justify-center px-8 py-10 border-2 border-input border-dashed rounded-lg bg-input/20 hover:border-input-focus transition-all duration-200">
                       <div className="space-y-1 text-center">
                         <Upload className="mx-auto h-12 w-12 text-gray-400" />
                         <div className="flex text-sm text-muted">
@@ -467,7 +456,6 @@ export default function NewExpense() {
                       </div>
                     </div>
                   )}
-                </div>
               </div>
 
               <div className="flex items-center">
@@ -488,17 +476,17 @@ export default function NewExpense() {
                 <div className="text-status-error text-sm">{error}</div>
               )}
 
-              <div className="flex justify-end space-x-3">
+              <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-6">
                 <Link
                   href="/expenses"
-                  className="bg-input py-2 px-4 border border-input rounded-md shadow-sm text-sm font-medium text-input-label hover:bg-button-secondary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="bg-input py-3 px-6 border border-input rounded-lg shadow-sm text-sm sm:text-base font-medium text-input-label hover:bg-button-secondary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 text-center"
                 >
                   Cancel
                 </Link>
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="bg-blue-600 border border-transparent rounded-md shadow-sm py-2 px-4 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                  className="bg-blue-600 border border-transparent rounded-lg shadow-sm py-3 px-6 text-sm sm:text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-all duration-200"
                 >
                   {isLoading ? 'Adding...' : 'Add Expense'}
                 </button>

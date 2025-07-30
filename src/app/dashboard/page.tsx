@@ -51,38 +51,38 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 sm:space-y-10 p-4 sm:p-6 lg:p-12">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center">
-        <div className="mb-6 lg:mb-0">
-          <h1 className="text-3xl lg:text-4xl font-bold text-heading mb-2">
+      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start">
+        <div className="mb-6 sm:mb-8 lg:mb-0">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-heading mb-2 sm:mb-3">
             Welcome back, {session.user.name}
           </h1>
-          <p className="text-body text-lg">
+          <p className="text-body text-base sm:text-lg">
             Here's your financial overview
           </p>
         </div>
-        <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+        <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 lg:space-x-5 w-full sm:w-auto">
           <Link
             href="/expenses/new"
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-button-primary bg-button-primary bg-button-primary:hover"
+            className="inline-flex items-center justify-center px-4 sm:px-6 py-3 border border-transparent text-sm sm:text-base font-medium rounded-lg text-button-primary bg-button-primary bg-button-primary:hover transition-all duration-200 shadow-sm hover:shadow-md"
           >
-            <PlusCircle className="h-5 w-5 mr-2" />
+            <PlusCircle className="h-4 sm:h-5 w-4 sm:w-5 mr-2" />
             Add Expense
           </Link>
           <Link
             href="/groups/new"
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-button-secondary bg-button-secondary bg-button-secondary:hover"
+            className="inline-flex items-center justify-center px-4 sm:px-6 py-3 border border-transparent text-sm sm:text-base font-medium rounded-lg text-button-secondary bg-button-secondary bg-button-secondary:hover transition-all duration-200 shadow-sm hover:shadow-md"
           >
-            <Users className="h-5 w-5 mr-2" />
+            <Users className="h-4 sm:h-5 w-4 sm:w-5 mr-2" />
             Create Group
           </Link>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-card p-6 rounded-lg shadow-card">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+        <div className="bg-card p-6 sm:p-8 rounded-xl shadow-card hover:shadow-lg transition-all duration-200">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-muted text-sm font-medium">Total Expenses</p>
@@ -96,7 +96,7 @@ export default function Dashboard() {
           </div>
         </div>
         
-        <div className="bg-card p-6 rounded-lg shadow-card">
+        <div className="bg-card p-6 sm:p-8 rounded-xl shadow-card hover:shadow-lg transition-all duration-200">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-muted text-sm font-medium">This Month</p>
@@ -110,7 +110,7 @@ export default function Dashboard() {
           </div>
         </div>
         
-        <div className="bg-card p-6 rounded-lg shadow-card">
+        <div className="bg-card p-6 sm:p-8 rounded-xl shadow-card hover:shadow-lg transition-all duration-200">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-muted text-sm font-medium">Accounts</p>

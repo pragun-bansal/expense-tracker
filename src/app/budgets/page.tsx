@@ -264,10 +264,10 @@ export default function Budgets() {
             <h3 className="text-lg font-medium leading-6 text-heading mb-4">
               {editingId ? 'Edit Budget' : 'Add New Budget'}
             </h3>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
                 <div>
-                  <label htmlFor="amount" className="block text-sm font-medium text-input-label">
+                  <label htmlFor="amount" className="block text-sm font-medium text-input-label mb-3">
                     Budget Amount *
                   </label>
                   <input
@@ -277,19 +277,19 @@ export default function Budgets() {
                     required
                     value={formData.amount}
                     onChange={(e) => setFormData({...formData, amount: e.target.value})}
-                    className="mt-1 block w-full border-input rounded-md shadow-sm ring-focus focus:border-blue-500 sm:text-sm bg-input text-heading"
+                    className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input placeholder-gray-400 transition-all duration-200"
                     placeholder="0.00"
                   />
                 </div>
                 <div>
-                  <label htmlFor="period" className="block text-sm font-medium text-input-label">
+                  <label htmlFor="period" className="block text-sm font-medium text-input-label mb-3">
                     Period *
                   </label>
                   <select
                     id="period"
                     value={formData.period}
                     onChange={(e) => setFormData({...formData, period: e.target.value})}
-                    className="mt-1 block w-full border-input rounded-md shadow-sm ring-focus focus:border-blue-500 sm:text-sm bg-input text-heading"
+                    className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200 appearance-none bg-arrow-down bg-no-repeat bg-right bg-origin-content"
                   >
                     <option value="WEEKLY">Weekly</option>
                     <option value="MONTHLY">Monthly</option>
@@ -297,7 +297,7 @@ export default function Budgets() {
                   </select>
                 </div>
                 <div>
-                  <label htmlFor="categoryId" className="block text-sm font-medium text-input-label">
+                  <label htmlFor="categoryId" className="block text-sm font-medium text-input-label mb-3">
                     Category *
                   </label>
                   <select
@@ -305,7 +305,7 @@ export default function Budgets() {
                     required
                     value={formData.categoryId}
                     onChange={(e) => setFormData({...formData, categoryId: e.target.value})}
-                    className="mt-1 block w-full border-input rounded-md shadow-sm ring-focus focus:border-blue-500 sm:text-sm bg-input text-heading"
+                    className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200 appearance-none bg-arrow-down bg-no-repeat bg-right bg-origin-content"
                   >
                     <option value="">Select a category</option>
                     {categories.map((category) => (
@@ -316,18 +316,18 @@ export default function Budgets() {
                   </select>
                 </div>
               </div>
-              <div className="flex justify-end space-x-3">
+              <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-4">
                 <button
                   type="button"
                   onClick={handleCancelEdit}
-                  className="bg-input py-2 px-4 border border-input rounded-md shadow-sm text-sm font-medium text-input-label hover:bg-button-secondary-hover"
+                  className="bg-input py-3 px-6 border border-input rounded-lg shadow-sm text-sm sm:text-base font-medium text-input-label hover:bg-button-secondary-hover transition-all duration-200 text-center"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={createLoading || updateLoading}
-                  className="bg-blue-600 border border-transparent rounded-md shadow-sm py-2 px-4 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                  className="bg-blue-600 border border-transparent rounded-lg shadow-sm py-3 px-6 text-sm sm:text-base font-medium text-white hover:bg-blue-700 disabled:opacity-50 transition-all duration-200"
                 >
                   {(editingId ? updateLoading : createLoading) ? (
                     <LoadingSpinner size="sm" />

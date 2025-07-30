@@ -677,36 +677,36 @@ export default function BudgetsAndCategories() {
                 {editingCategory ? 'Edit Category' : `Add ${activeTab} Category`}
               </h3>
 
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-input-label mb-1">
+                  <label className="block text-sm font-medium text-input-label mb-3">
                     Category Name *
                   </label>
                   <input
                     type="text"
                     value={categoryForm.name}
                     onChange={(e) => setCategoryForm({...categoryForm, name: e.target.value})}
-                    className="w-full border border-input rounded-md px-3 py-2 bg-input text-heading focus:outline-none focus:ring-2 focus:ring-focus focus:border-blue-500"
+                    className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input placeholder-gray-400 transition-all duration-200"
                     placeholder="Enter category name"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-input-label mb-1">
+                  <label className="block text-sm font-medium text-input-label mb-3">
                     Color
                   </label>
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-4">
                     <input
                       type="color"
                       value={categoryForm.color}
                       onChange={(e) => setCategoryForm({...categoryForm, color: e.target.value})}
-                      className="w-12 h-10 border border-input rounded-md cursor-pointer"
+                      className="w-14 h-12 border border-input rounded-lg cursor-pointer transition-all duration-200"
                     />
                     <div 
-                      className="w-10 h-10 rounded-full border border-input"
+                      className="w-12 h-12 rounded-full border border-input shadow-sm"
                       style={{ backgroundColor: categoryForm.color }}
                     />
-                    <span className="text-sm text-muted">{categoryForm.color}</span>
+                    <span className="text-sm text-muted font-mono">{categoryForm.color}</span>
                   </div>
                 </div>
 
@@ -735,11 +735,11 @@ export default function BudgetsAndCategories() {
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-3 pt-6">
+              <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-6">
                 <button
                   type="button"
                   onClick={() => setShowCategoryModal(false)}
-                  className="px-4 py-2 text-input-label border border-input rounded-md hover:bg-button-secondary-hover focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2"
+                  className="bg-input py-3 px-6 border border-input rounded-lg shadow-sm text-base font-medium text-input-label hover:bg-button-secondary-hover transition-all duration-200 text-center"
                 >
                   Cancel
                 </button>
@@ -747,7 +747,7 @@ export default function BudgetsAndCategories() {
                   type="button"
                   onClick={editingCategory ? handleUpdateCategory : handleCreateCategory}
                   disabled={!categoryForm.name.trim() || createLoading || updateLoading}
-                  className="px-4 py-2 bg-button-primary text-button-primary rounded-md hover:bg-button-primary-hover focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-blue-600 border border-transparent rounded-lg shadow-sm py-3 px-6 text-base font-medium text-white hover:bg-blue-700 disabled:opacity-50 transition-all duration-200 flex items-center justify-center min-w-[140px]"
                 >
                   {(editingCategory ? updateLoading : createLoading) ? (
                     <LoadingSpinner size="sm" />
@@ -770,9 +770,9 @@ export default function BudgetsAndCategories() {
                 {budgetCategory.budget ? 'Edit Budget' : 'Set Budget'} for "{budgetCategory.name}"
               </h3>
 
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-input-label mb-1">
+                  <label className="block text-sm font-medium text-input-label mb-3">
                     Budget Amount *
                   </label>
                   <input
@@ -780,19 +780,19 @@ export default function BudgetsAndCategories() {
                     step="0.01"
                     value={budgetForm.amount}
                     onChange={(e) => setBudgetForm({...budgetForm, amount: e.target.value})}
-                    className="w-full border border-input rounded-md px-3 py-2 bg-input text-heading focus:outline-none focus:ring-2 focus:ring-focus focus:border-blue-500"
+                    className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input placeholder-gray-400 transition-all duration-200"
                     placeholder="0.00"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-input-label mb-1">
+                  <label className="block text-sm font-medium text-input-label mb-3">
                     Period
                   </label>
                   <select
                     value={budgetForm.period}
                     onChange={(e) => setBudgetForm({...budgetForm, period: e.target.value as 'MONTHLY' | 'YEARLY'})}
-                    className="w-full border border-input rounded-md px-3 py-2 bg-input text-heading focus:outline-none focus:ring-2 focus:ring-focus focus:border-blue-500"
+                    className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200 appearance-none bg-arrow-down bg-no-repeat bg-right bg-origin-content"
                   >
                     <option value="MONTHLY">Monthly</option>
                     <option value="YEARLY">Yearly</option>
@@ -800,11 +800,11 @@ export default function BudgetsAndCategories() {
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-3 pt-6">
+              <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-6">
                 <button
                   type="button"
                   onClick={() => setShowBudgetModal(false)}
-                  className="px-4 py-2 text-input-label border border-input rounded-md hover:bg-button-secondary-hover focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2"
+                  className="bg-input py-3 px-6 border border-input rounded-lg shadow-sm text-base font-medium text-input-label hover:bg-button-secondary-hover transition-all duration-200 text-center"
                 >
                   Cancel
                 </button>
@@ -812,7 +812,7 @@ export default function BudgetsAndCategories() {
                   type="button"
                   onClick={handleSetBudget}
                   disabled={!budgetForm.amount || parseFloat(budgetForm.amount) <= 0 || budgetLoading}
-                  className="px-4 py-2 bg-button-success text-button-success rounded-md hover:bg-button-success-hover focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-green-600 border border-transparent rounded-lg shadow-sm py-3 px-6 text-base font-medium text-white hover:bg-green-700 disabled:opacity-50 transition-all duration-200 flex items-center justify-center min-w-[140px]"
                 >
                   {budgetLoading ? (
                     <LoadingSpinner size="sm" />

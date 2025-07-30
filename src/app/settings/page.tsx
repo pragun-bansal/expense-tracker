@@ -200,27 +200,27 @@ export default function Settings() {
                 Profile Information
               </h3>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
               <div>
-                <label className="block text-sm font-medium text-input-label">
+                <label className="block text-sm font-medium text-input-label mb-3">
                   Name
                 </label>
                 <input
                   type="text"
                   value={session?.user?.name || ''}
                   disabled
-                  className="mt-1 block w-full border-input rounded-md shadow-sm bg-input text-heading sm:text-sm"
+                  className="block w-full px-4 py-3 border-input rounded-lg shadow-sm bg-input text-input text-base transition-all duration-200"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-input-label">
+                <label className="block text-sm font-medium text-input-label mb-3">
                   Email
                 </label>
                 <input
                   type="email"
                   value={session?.user?.email || ''}
                   disabled
-                  className="mt-1 block w-full border-input rounded-md shadow-sm bg-input text-heading sm:text-sm"
+                  className="block w-full px-4 py-3 border-input rounded-lg shadow-sm bg-input text-input text-base transition-all duration-200"
                 />
               </div>
             </div>
@@ -237,7 +237,7 @@ export default function Settings() {
               </h3>
             </div>
             <div>
-              <label className="block text-sm font-medium text-input-label mb-2">
+              <label className="block text-sm font-medium text-input-label mb-3">
                 Preferred Currency
               </label>
               <p className="text-sm text-muted mb-4">
@@ -246,7 +246,7 @@ export default function Settings() {
               <select
                 value={settings.currency}
                 onChange={(e) => setSettings({...settings, currency: e.target.value})}
-                className="block w-full max-w-xs border-input rounded-md shadow-sm bg-input text-heading sm:text-sm focus:ring-blue-500 focus:border-blue-500"
+                className="block w-full max-w-xs px-4 py-3 border-input rounded-lg shadow-sm bg-input text-input text-base focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none bg-arrow-down bg-no-repeat bg-right bg-origin-content"
               >
                 {currencies.map((currency) => (
                   <option key={currency.code} value={currency.code}>
@@ -285,7 +285,7 @@ export default function Settings() {
             </div>
             
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between py-2">
                 <div>
                   <label className="text-sm font-medium text-input-label">
                     Email Notifications
@@ -298,11 +298,11 @@ export default function Settings() {
                   type="checkbox"
                   checked={settings.emailNotifications}
                   onChange={(e) => setSettings({...settings, emailNotifications: e.target.checked})}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-input rounded transition-all duration-200"
                 />
               </div>
               
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between py-2">
                 <div>
                   <label className="text-sm font-medium text-input-label">
                     Budget Alerts
@@ -315,11 +315,11 @@ export default function Settings() {
                   type="checkbox"
                   checked={settings.budgetAlerts}
                   onChange={(e) => setSettings({...settings, budgetAlerts: e.target.checked})}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-input rounded transition-all duration-200"
                 />
               </div>
               
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between py-2">
                 <div>
                   <label className="text-sm font-medium text-input-label">
                     Weekly Reports
@@ -332,11 +332,11 @@ export default function Settings() {
                   type="checkbox"
                   checked={settings.weeklyReports}
                   onChange={(e) => setSettings({...settings, weeklyReports: e.target.checked})}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-input rounded transition-all duration-200"
                 />
               </div>
               
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between py-2">
                 <div>
                   <label className="text-sm font-medium text-input-label">
                     Monthly Reports
@@ -349,18 +349,18 @@ export default function Settings() {
                   type="checkbox"
                   checked={settings.monthlyReports}
                   onChange={(e) => setSettings({...settings, monthlyReports: e.target.checked})}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-input rounded transition-all duration-200"
                 />
               </div>
             </div>
             
-            <div className="mt-6">
+            <div className="mt-8">
               <button
                 onClick={handleSaveSettings}
                 disabled={saveSettingsLoading}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 transition-all duration-200"
               >
-                {saveSettingsLoading ? <LoadingSpinner size="sm" /> : <Save className="h-4 w-4 mr-2" />}
+                {saveSettingsLoading ? <LoadingSpinner size="sm" /> : <Save className="h-5 w-5 mr-2" />}
                 {saveSettingsLoading ? 'Saving...' : 'Save Settings'}
               </button>
             </div>

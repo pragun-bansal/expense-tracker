@@ -413,10 +413,10 @@ export default function RecurringExpenses() {
             <h3 className="text-lg font-medium leading-6 text-heading mb-4">
               {showEditForm ? 'Edit Recurring Expense' : 'Add Recurring Expense'}
             </h3>
-            <form onSubmit={showEditForm ? handleEditSubmit : handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <form onSubmit={showEditForm ? handleEditSubmit : handleSubmit} className="space-y-6 sm:space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                 <div>
-                  <label htmlFor="amount" className="block text-sm font-medium text-input-label">
+                  <label htmlFor="amount" className="block text-sm font-medium text-input-label mb-3">
                     Amount *
                   </label>
                   <input
@@ -426,19 +426,19 @@ export default function RecurringExpenses() {
                     required
                     value={formData.amount}
                     onChange={(e) => setFormData({...formData, amount: e.target.value})}
-                    className="mt-1 block w-full border-input rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-input text-heading"
+                    className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input placeholder-gray-400 transition-all duration-200"
                     placeholder="0.00"
                   />
                 </div>
                 <div>
-                  <label htmlFor="frequency" className="block text-sm font-medium text-input-label">
+                  <label htmlFor="frequency" className="block text-sm font-medium text-input-label mb-3">
                     Frequency *
                   </label>
                   <select
                     id="frequency"
                     value={formData.frequency}
                     onChange={(e) => setFormData({...formData, frequency: e.target.value})}
-                    className="mt-1 block w-full border-input rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-input text-heading"
+                    className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200 appearance-none bg-arrow-down bg-no-repeat bg-right bg-origin-content"
                   >
                     <option value="DAILY">Daily</option>
                     <option value="WEEKLY">Weekly</option>
@@ -447,7 +447,7 @@ export default function RecurringExpenses() {
                   </select>
                 </div>
                 <div>
-                  <label htmlFor="categoryId" className="block text-sm font-medium text-input-label">
+                  <label htmlFor="categoryId" className="block text-sm font-medium text-input-label mb-3">
                     Category *
                   </label>
                   <select
@@ -455,7 +455,7 @@ export default function RecurringExpenses() {
                     required
                     value={formData.categoryId}
                     onChange={(e) => setFormData({...formData, categoryId: e.target.value})}
-                    className="mt-1 block w-full border-input rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-input text-heading"
+                    className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200 appearance-none bg-arrow-down bg-no-repeat bg-right bg-origin-content"
                   >
                     <option value="">Select a category</option>
                     {categories.map((category) => (
@@ -466,7 +466,7 @@ export default function RecurringExpenses() {
                   </select>
                 </div>
                 <div>
-                  <label htmlFor="accountId" className="block text-sm font-medium text-input-label">
+                  <label htmlFor="accountId" className="block text-sm font-medium text-input-label mb-3">
                     Account *
                   </label>
                   <select
@@ -474,7 +474,7 @@ export default function RecurringExpenses() {
                     required
                     value={formData.accountId}
                     onChange={(e) => setFormData({...formData, accountId: e.target.value})}
-                    className="mt-1 block w-full border-input rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-input text-heading"
+                    className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200 appearance-none bg-arrow-down bg-no-repeat bg-right bg-origin-content"
                   >
                     <option value="">Select an account</option>
                     {accounts.map((account) => (
@@ -486,7 +486,7 @@ export default function RecurringExpenses() {
                 </div>
               </div>
               <div>
-                <label htmlFor="description" className="block text-sm font-medium text-input-label">
+                <label htmlFor="description" className="block text-sm font-medium text-input-label mb-3">
                   Description
                 </label>
                 <input
@@ -494,13 +494,13 @@ export default function RecurringExpenses() {
                   id="description"
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  className="mt-1 block w-full border-input rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-input text-heading"
+                  className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input placeholder-gray-400 transition-all duration-200"
                   placeholder="Description of the recurring expense"
                 />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                 <div>
-                  <label htmlFor="startDate" className="block text-sm font-medium text-input-label">
+                  <label htmlFor="startDate" className="block text-sm font-medium text-input-label mb-3">
                     Start Date *
                   </label>
                   <input
@@ -509,11 +509,11 @@ export default function RecurringExpenses() {
                     required
                     value={formData.startDate}
                     onChange={(e) => setFormData({...formData, startDate: e.target.value})}
-                    className="mt-1 block w-full border-input rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-input text-heading"
+                    className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200"
                   />
                 </div>
                 <div>
-                  <label htmlFor="endDate" className="block text-sm font-medium text-input-label">
+                  <label htmlFor="endDate" className="block text-sm font-medium text-input-label mb-3">
                     End Date (Optional)
                   </label>
                   <input
@@ -521,11 +521,11 @@ export default function RecurringExpenses() {
                     id="endDate"
                     value={formData.endDate}
                     onChange={(e) => setFormData({...formData, endDate: e.target.value})}
-                    className="mt-1 block w-full border-input rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-input text-heading"
+                    className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200"
                   />
                 </div>
               </div>
-              <div className="flex justify-end space-x-3">
+              <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-6">
                 <button
                   type="button"
                   onClick={() => {
@@ -534,13 +534,13 @@ export default function RecurringExpenses() {
                     setEditingExpense(null)
                     resetForm()
                   }}
-                  className="bg-input py-2 px-4 border border-input rounded-md shadow-sm text-sm font-medium text-input-label hover:bg-button-secondary-hover"
+                  className="bg-input py-3 px-6 border border-input rounded-lg shadow-sm text-sm sm:text-base font-medium text-input-label hover:bg-button-secondary-hover transition-all duration-200 text-center"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="bg-blue-600 border border-transparent rounded-md shadow-sm py-2 px-4 text-sm font-medium text-white hover:bg-blue-700"
+                  className="bg-blue-600 border border-transparent rounded-lg shadow-sm py-3 px-6 text-sm sm:text-base font-medium text-white hover:bg-blue-700 transition-all duration-200"
                 >
                   {showEditForm ? 'Update Recurring Expense' : 'Add Recurring Expense'}
                 </button>

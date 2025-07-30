@@ -175,10 +175,10 @@ export default function Accounts() {
             <h3 className="text-lg font-medium leading-6 text-card-header mb-4">
               Add New Account
             </h3>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-input-label">
+                  <label htmlFor="name" className="block text-sm font-medium text-input-label mb-3">
                     Account Name *
                   </label>
                   <input
@@ -187,19 +187,19 @@ export default function Accounts() {
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="mt-1 block w-full border-input rounded-md shadow-sm ring-focus border-input-focus:focus sm:text-sm bg-input text-input"
+                    className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input placeholder-gray-400 transition-all duration-200"
                     placeholder="My Bank Account"
                   />
                 </div>
                 <div>
-                  <label htmlFor="type" className="block text-sm font-medium text-input-label">
+                  <label htmlFor="type" className="block text-sm font-medium text-input-label mb-3">
                     Account Type *
                   </label>
                   <select
                     id="type"
                     value={formData.type}
                     onChange={(e) => setFormData({...formData, type: e.target.value})}
-                    className="mt-1 block w-full border-input rounded-md shadow-sm ring-focus border-input-focus:focus sm:text-sm bg-input text-input"
+                    className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200 appearance-none bg-arrow-down bg-no-repeat bg-right bg-origin-content"
                   >
                     <option value="BANK">Bank Account</option>
                     <option value="CASH">Cash</option>
@@ -209,9 +209,9 @@ export default function Accounts() {
                   </select>
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                 <div>
-                  <label htmlFor="balance" className="block text-sm font-medium text-input-label">
+                  <label htmlFor="balance" className="block text-sm font-medium text-input-label mb-3">
                     Initial Balance
                   </label>
                   <input
@@ -220,11 +220,11 @@ export default function Accounts() {
                     id="balance"
                     value={formData.balance}
                     onChange={(e) => setFormData({...formData, balance: parseFloat(e.target.value) || 0})}
-                    className="mt-1 block w-full border-input rounded-md shadow-sm ring-focus border-input-focus:focus sm:text-sm bg-input text-input"
+                    className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input placeholder-gray-400 transition-all duration-200"
                   />
                 </div>
                 <div>
-                  <label htmlFor="color" className="block text-sm font-medium text-input-label">
+                  <label htmlFor="color" className="block text-sm font-medium text-input-label mb-3">
                     Color
                   </label>
                   <input
@@ -232,22 +232,22 @@ export default function Accounts() {
                     id="color"
                     value={formData.color}
                     onChange={(e) => setFormData({...formData, color: e.target.value})}
-                    className="mt-1 block w-full h-10 border-input rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    className="block w-full h-12 px-4 py-3 border-input rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                   />
                 </div>
               </div>
-              <div className="flex justify-end space-x-3">
+              <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-4">
                 <button
                   type="button"
                   onClick={() => setShowAddForm(false)}
-                  className="bg-input py-2 px-4 border border-input rounded-md shadow-sm text-sm font-medium text-input-label hover:bg-button-secondary-hover"
+                  className="bg-input py-3 px-6 border border-input rounded-lg shadow-sm text-sm sm:text-base font-medium text-input-label hover:bg-button-secondary-hover transition-all duration-200 text-center"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={createLoading}
-                  className="bg-blue-600 border border-transparent rounded-md shadow-sm py-2 px-4 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                  className="bg-blue-600 border border-transparent rounded-lg shadow-sm py-3 px-6 text-sm sm:text-base font-medium text-white hover:bg-blue-700 disabled:opacity-50 transition-all duration-200"
                 >
                   {createLoading ? <LoadingSpinner size="sm" /> : 'Add Account'}
                 </button>

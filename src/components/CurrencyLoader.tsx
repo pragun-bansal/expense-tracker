@@ -30,35 +30,35 @@ export function CurrencyLoader() {
           {/* Falling currency notes */}
           {/* First set of notes */}
           <div className="absolute top-0 left-1/4 w-8 h-4 bg-gradient-to-r from-green-500 to-green-600 rounded-sm shadow-md animate-[fall_2s_infinite] opacity-80">
-            <div className="text-white text-xs font-bold text-center leading-4">$</div>
+            <div className="text-white text-xs font-bold text-center leading-4">₹</div>
           </div>
           <div className="absolute top-0 left-1/2 w-8 h-4 bg-gradient-to-r from-green-500 to-green-600 rounded-sm shadow-md animate-[fall_2s_infinite] opacity-80" style={{animationDelay: '0.3s'}}>
-            <div className="text-white text-xs font-bold text-center leading-4">$</div>
+            <div className="text-white text-xs font-bold text-center leading-4">₹</div>
           </div>
           <div className="absolute top-0 right-1/4 w-8 h-4 bg-gradient-to-r from-green-500 to-green-600 rounded-sm shadow-md animate-[fall_2s_infinite] opacity-80" style={{animationDelay: '0.6s'}}>
-            <div className="text-white text-xs font-bold text-center leading-4">$</div>
+            <div className="text-white text-xs font-bold text-center leading-4">₹</div>
           </div>
           
           {/* Second set of notes */}
           <div className="absolute top-0 left-1/6 w-8 h-4 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-sm shadow-md animate-[fall_2.5s_infinite] opacity-70" style={{animationDelay: '1s'}}>
-            <div className="text-white text-xs font-bold text-center leading-4">$</div>
+            <div className="text-white text-xs font-bold text-center leading-4">₹</div>
           </div>
           <div className="absolute top-0 left-2/3 w-8 h-4 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-sm shadow-md animate-[fall_2.5s_infinite] opacity-70" style={{animationDelay: '1.3s'}}>
-            <div className="text-white text-xs font-bold text-center leading-4">$</div>
+            <div className="text-white text-xs font-bold text-center leading-4">₹</div>
           </div>
           <div className="absolute top-0 right-1/6 w-8 h-4 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-sm shadow-md animate-[fall_2.5s_infinite] opacity-70" style={{animationDelay: '1.6s'}}>
-            <div className="text-white text-xs font-bold text-center leading-4">$</div>
+            <div className="text-white text-xs font-bold text-center leading-4">₹</div>
           </div>
           
           {/* Third set of notes */}
           <div className="absolute top-0 left-1/3 w-8 h-4 bg-gradient-to-r from-teal-500 to-teal-600 rounded-sm shadow-md animate-[fall_3s_infinite] opacity-60" style={{animationDelay: '2s'}}>
-            <div className="text-white text-xs font-bold text-center leading-4">$</div>
+            <div className="text-white text-xs font-bold text-center leading-4">₹</div>
           </div>
           <div className="absolute top-0 left-3/5 w-8 h-4 bg-gradient-to-r from-teal-500 to-teal-600 rounded-sm shadow-md animate-[fall_3s_infinite] opacity-60" style={{animationDelay: '2.3s'}}>
-            <div className="text-white text-xs font-bold text-center leading-4">$</div>
+            <div className="text-white text-xs font-bold text-center leading-4">₹</div>
           </div>
           <div className="absolute top-0 right-1/3 w-8 h-4 bg-gradient-to-r from-teal-500 to-teal-600 rounded-sm shadow-md animate-[fall_3s_infinite] opacity-60" style={{animationDelay: '2.6s'}}>
-            <div className="text-white text-xs font-bold text-center leading-4">$</div>
+            <div className="text-white text-xs font-bold text-center leading-4">₹</div>
           </div>
 
           {/* Progress bar at bottom */}

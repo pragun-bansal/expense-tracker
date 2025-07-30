@@ -8,6 +8,7 @@ import { CurrencyLoader } from '@/components/CurrencyLoader'
 import { useCurrency } from '@/hooks/useCurrency'
 import AlertModal from '@/components/AlertModal'
 import ConfirmModal from '@/components/ConfirmModal'
+import LoadingSpinner from '@/components/LoadingSpinner'
 import { useModal } from '@/hooks/useModal'
 
 interface Group {
@@ -49,6 +50,9 @@ export default function Groups() {
   const { alertModal, confirmModal, showAlert, showConfirm, closeAlert, closeConfirm } = useModal()
   const [groups, setGroups] = useState<Group[]>([])
   const [loading, setLoading] = useState(true)
+  const [createLoading, setCreateLoading] = useState(false)
+  const [updateLoading, setUpdateLoading] = useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false)
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showSettingsModal, setShowSettingsModal] = useState(false)
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null)
@@ -85,6 +89,8 @@ export default function Groups() {
 
   const handleCreateGroup = async (e: React.FormEvent) => {
     e.preventDefault()
+    setCreateLoading(true)
+    
     try {
       const response = await fetch('/api/groups', {
         method: 'POST',
@@ -99,10 +105,28 @@ export default function Groups() {
       if (response.ok) {
         setShowCreateModal(false)
         setNewGroup({ name: '', description: '', memberEmails: [''] })
-        fetchGroups()
+        await fetchGroups()
+        showAlert({
+          title: 'Success',
+          message: 'Group created successfully!',
+          type: 'success'
+        })
+      } else {
+        showAlert({
+          title: 'Error',
+          message: 'Failed to create group. Please try again.',
+          type: 'error'
+        })
       }
     } catch (error) {
       console.error('Error creating group:', error)
+      showAlert({
+        title: 'Error',
+        message: 'An error occurred while creating the group.',
+        type: 'error'
+      })
+    } finally {
+      setCreateLoading(false)
     }
   }
 
@@ -161,6 +185,7 @@ export default function Groups() {
   const handleUpdateGroup = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!selectedGroup) return
+    setUpdateLoading(true)
 
     try {
       const response = await fetch(`/api/groups/${selectedGroup.id}`, {
@@ -176,10 +201,28 @@ export default function Groups() {
       if (response.ok) {
         setShowSettingsModal(false)
         setSelectedGroup(null)
-        fetchGroups()
+        await fetchGroups()
+        showAlert({
+          title: 'Success',
+          message: 'Group updated successfully!',
+          type: 'success'
+        })
+      } else {
+        showAlert({
+          title: 'Error',
+          message: 'Failed to update group. Please try again.',
+          type: 'error'
+        })
       }
     } catch (error) {
       console.error('Error updating group:', error)
+      showAlert({
+        title: 'Error',
+        message: 'An error occurred while updating the group.',
+        type: 'error'
+      })
+    } finally {
+      setUpdateLoading(false)
     }
   }
 
@@ -198,6 +241,8 @@ export default function Groups() {
       return
     }
 
+    setDeleteLoading(true)
+
     try {
       const response = await fetch(`/api/groups/${selectedGroup.id}`, {
         method: 'DELETE'
@@ -206,7 +251,7 @@ export default function Groups() {
       if (response.ok) {
         setShowSettingsModal(false)
         setSelectedGroup(null)
-        fetchGroups()
+        await fetchGroups()
         showAlert({
           title: 'Success',
           message: 'Group deleted successfully.',
@@ -227,6 +272,7 @@ export default function Groups() {
         type: 'error'
       })
     } finally {
+      setDeleteLoading(false)
       closeConfirm()
     }
   }
@@ -377,14 +423,14 @@ export default function Groups() {
       {/* Create Group Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-modal-overlay overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-card">
+          <div className="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-card">
             <div className="mt-3">
               <h3 className="text-lg font-medium text-heading mb-4">
                 Create New Group
               </h3>
-              <form onSubmit={handleCreateGroup} className="space-y-4">
+              <form onSubmit={handleCreateGroup} className="space-y-6 sm:space-y-8">
                 <div>
-                  <label className="block text-sm font-medium text-input-label mb-1">
+                  <label className="block text-sm font-medium text-input-label mb-3">
                     Group Name *
                   </label>
                   <input
@@ -392,70 +438,73 @@ export default function Groups() {
                     required
                     value={newGroup.name}
                     onChange={(e) => setNewGroup(prev => ({ ...prev, name: e.target.value }))}
-                    className="w-full border border-input rounded-md px-3 py-2 bg-input text-heading"
+                    className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input placeholder-gray-400 transition-all duration-200"
                     placeholder="e.g., Roommates, Vacation Trip"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-input-label mb-1">
+                  <label className="block text-sm font-medium text-input-label mb-3">
                     Description
                   </label>
                   <textarea
                     value={newGroup.description}
                     onChange={(e) => setNewGroup(prev => ({ ...prev, description: e.target.value }))}
-                    className="w-full border border-input rounded-md px-3 py-2 bg-input text-heading"
-                    rows={2}
+                    className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input placeholder-gray-400 transition-all duration-200 resize-none"
+                    rows={3}
                     placeholder="Optional description"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-input-label mb-1">
+                  <label className="block text-sm font-medium text-input-label mb-3">
                     Member Emails
                   </label>
-                  {newGroup.memberEmails.map((email, index) => (
-                    <div key={index} className="flex items-center mb-2">
-                      <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => updateMemberEmail(index, e.target.value)}
-                        className="flex-1 border border-input rounded-md px-3 py-2 bg-input text-heading"
-                        placeholder="member@example.com"
-                      />
-                      {newGroup.memberEmails.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => removeMemberEmailField(index)}
-                          className="ml-2 text-red-600 hover:text-red-800"
-                        >
-                          Remove
-                        </button>
-                      )}
-                    </div>
-                  ))}
+                  <div className="space-y-3">
+                    {newGroup.memberEmails.map((email, index) => (
+                      <div key={index} className="flex items-center gap-3">
+                        <input
+                          type="email"
+                          value={email}
+                          onChange={(e) => updateMemberEmail(index, e.target.value)}
+                          className="flex-1 px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input placeholder-gray-400 transition-all duration-200"
+                          placeholder="member@example.com"
+                        />
+                        {newGroup.memberEmails.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeMemberEmailField(index)}
+                            className="px-3 py-2 text-red-600 hover:text-red-800 text-sm font-medium transition-colors duration-200"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                   <button
                     type="button"
                     onClick={addMemberEmailField}
-                    className="text-blue-600 hover:text-blue-800 text-sm"
+                    className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors duration-200"
                   >
                     + Add another member
                   </button>
                 </div>
 
-                <div className="flex justify-end space-x-3 pt-4">
+                <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-6">
                   <button
                     type="button"
                     onClick={() => setShowCreateModal(false)}
-                    className="px-4 py-2 text-input-label border border-input rounded-md hover:bg-button-secondary-hover"
+                    className="bg-input py-3 px-6 border border-input rounded-lg shadow-sm text-sm sm:text-base font-medium text-input-label hover:bg-button-secondary-hover transition-all duration-200 text-center"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    disabled={createLoading}
+                    className="bg-blue-600 border border-transparent rounded-lg shadow-sm py-3 px-6 text-sm sm:text-base font-medium text-white hover:bg-blue-700 disabled:opacity-50 transition-all duration-200 flex items-center justify-center min-w-[140px]"
                   >
-                    Create Group
+                    {createLoading ? <LoadingSpinner size="sm" /> : 'Create Group'}
                   </button>
                 </div>
               </form>
@@ -467,15 +516,15 @@ export default function Groups() {
       {/* Group Settings Modal */}
       {showSettingsModal && selectedGroup && (
         <div className="fixed inset-0 bg-modal-overlay overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-card">
+          <div className="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-card">
             <div className="mt-3">
               <h3 className="text-lg font-medium text-heading mb-4">
                 Group Settings
               </h3>
               
-              <form onSubmit={handleUpdateGroup} className="space-y-4">
+              <form onSubmit={handleUpdateGroup} className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-input-label mb-1">
+                  <label className="block text-sm font-medium text-input-label mb-3">
                     Group Name *
                   </label>
                   <input
@@ -483,19 +532,19 @@ export default function Groups() {
                     required
                     value={editGroup.name}
                     onChange={(e) => setEditGroup(prev => ({ ...prev, name: e.target.value }))}
-                    className="w-full border border-input rounded-md px-3 py-2 bg-input text-heading"
+                    className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input placeholder-gray-400 transition-all duration-200"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-input-label mb-1">
+                  <label className="block text-sm font-medium text-input-label mb-3">
                     Description
                   </label>
                   <textarea
                     value={editGroup.description}
                     onChange={(e) => setEditGroup(prev => ({ ...prev, description: e.target.value }))}
-                    className="w-full border border-input rounded-md px-3 py-2 bg-input text-heading"
-                    rows={2}
+                    className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input placeholder-gray-400 transition-all duration-200 resize-none"
+                    rows={3}
                   />
                 </div>
 
@@ -534,60 +583,62 @@ export default function Groups() {
 
                 {/* Add New Members */}
                 <div>
-                  <label className="block text-sm font-medium text-input-label mb-1">
+                  <label className="block text-sm font-medium text-input-label mb-3">
                     Add New Members
                   </label>
-                  {editGroup.newMemberEmails.map((email, index) => (
-                    <div key={index} className="flex items-center mb-2">
-                      <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => updateNewMemberEmail(index, e.target.value)}
-                        className="flex-1 border border-input rounded-md px-3 py-2 bg-input text-heading"
-                        placeholder="member@example.com"
-                      />
-                      {editGroup.newMemberEmails.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => removeNewMemberEmailField(index)}
-                          className="ml-2 text-red-600 hover:text-red-800 text-sm"
-                        >
-                          Remove
-                        </button>
-                      )}
-                    </div>
-                  ))}
+                  <div className="space-y-3">
+                    {editGroup.newMemberEmails.map((email, index) => (
+                      <div key={index} className="flex items-center gap-3">
+                        <input
+                          type="email"
+                          value={email}
+                          onChange={(e) => updateNewMemberEmail(index, e.target.value)}
+                          className="flex-1 px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input placeholder-gray-400 transition-all duration-200"
+                          placeholder="member@example.com"
+                        />
+                        {editGroup.newMemberEmails.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeNewMemberEmailField(index)}
+                            className="px-3 py-2 text-red-600 hover:text-red-800 text-sm font-medium transition-colors duration-200"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                   <button
                     type="button"
                     onClick={addNewMemberEmailField}
-                    className="text-blue-600 hover:text-blue-800 text-sm"
+                    className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors duration-200 mt-3"
                   >
                     + Add another member
                   </button>
                 </div>
 
-                <div className="flex justify-between items-center pt-4">
+                <div className="flex flex-col sm:flex-row justify-between items-center pt-6 gap-4">
                   <button
                     type="button"
                     onClick={handleDeleteGroup}
                     disabled={deleteLoading}
-                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
+                    className="bg-red-600 border border-transparent rounded-lg shadow-sm py-3 px-6 text-base font-medium text-white hover:bg-red-700 disabled:opacity-50 transition-all duration-200 w-full sm:w-auto"
                   >
                     {deleteLoading ? <LoadingSpinner size="sm" /> : 'Delete Group'}
                   </button>
                   
-                  <div className="flex space-x-3">
+                  <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
                     <button
                       type="button"
                       onClick={() => setShowSettingsModal(false)}
-                      className="px-4 py-2 text-input-label border border-input rounded-md hover:bg-button-secondary-hover"
+                      className="bg-input py-3 px-6 border border-input rounded-lg shadow-sm text-base font-medium text-input-label hover:bg-button-secondary-hover transition-all duration-200 text-center"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={updateLoading}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                      className="bg-blue-600 border border-transparent rounded-lg shadow-sm py-3 px-6 text-base font-medium text-white hover:bg-blue-700 disabled:opacity-50 transition-all duration-200"
                     >
                       {updateLoading ? <LoadingSpinner size="sm" /> : 'Save Changes'}
                     </button>
