@@ -37,7 +37,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
       <Sidebar />
       <div className="lg:pl-64">
-          <ThemeToggle />
+          {/*<ThemeToggle />*/}
         <main className="py-6 px-4 sm:px-6 lg:px-8">
           {children}
         </main>

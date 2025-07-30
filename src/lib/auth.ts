@@ -70,29 +70,49 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async session({ session, user }) {
-      console.log('Session callback - session:', session)
-      console.log('Session callback - user:', user)
+      // console.log('Session callback - session:', session)
+      // console.log('Session callback - user:', user)
       if (user) {
         session.user.id = user.id
-      }
-      return session
-    },
-    async signIn({ user, account, profile }) {
-      console.log('SignIn callback - user:', user)
-      console.log('SignIn callback - account:', account)
-      console.log('SignIn callback - profile:', profile)
-      
-      // For OAuth users, ensure they have the default accounts set up
-      if (account?.provider === 'google' && user?.id) {
+        
+        // Ensure OAuth users have default accounts set up
         try {
-          // Check if user already has accounts
           const existingAccounts = await prisma.userAccount.findMany({
             where: { userId: user.id }
           })
           
           if (existingAccounts.length === 0) {
-            console.log('Creating default accounts for new OAuth user:', user.id)
+            // console.log('Creating default accounts for OAuth user in session callback:', user.id)
             await createDefaultAccounts(user.id)
+          }
+        } catch (error) {
+          console.error('Error setting up OAuth user accounts in session callback:', error)
+        }
+      }
+      return session
+    },
+    async signIn({ user, account, profile: _profile }) {
+      // console.log('SignIn callback - user:', user)
+      // console.log('SignIn callback - account:', account)
+      // console.log('SignIn callback - profile:', _profile)
+      
+      // For OAuth users, ensure they have the default accounts set up
+      if (account?.provider === 'google' && user?.id) {
+        try {
+          // Only proceed if user.id is a valid MongoDB ObjectId (24 hex characters)
+          // During OAuth flow, user.id might be the provider account ID which is not a valid ObjectId
+          if (/^[0-9a-fA-F]{24}$/.test(user.id)) {
+            // Check if user already has accounts
+            const existingAccounts = await prisma.userAccount.findMany({
+              where: { userId: user.id }
+            })
+            
+            if (existingAccounts.length === 0) {
+              // console.log('Creating default accounts for new OAuth user:', user.id)
+              await createDefaultAccounts(user.id)
+            }
+          } else {
+            // console.log('Skipping account setup during OAuth flow - user.id is not a valid ObjectId yet:', user.id)
           }
         } catch (error) {
           console.error('Error setting up OAuth user accounts:', error)
@@ -101,6 +121,6 @@ export const authOptions: NextAuthOptions = {
       
       return true
     }
-  },
-  debug: process.env.NODE_ENV === 'development'
+  }
+  // debug: process.env.NODE_ENV === 'development' // Commented out to reduce log noise
 }

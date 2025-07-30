@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { PlusCircle, Filter, Search, Edit, Trash2 } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
 import { useCurrency } from '@/hooks/useCurrency'
-import { ConfirmModal } from '@/components/ConfirmModal'
+import ConfirmModal from '@/components/ConfirmModal'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import { useModal } from '@/hooks/useModal'
 
