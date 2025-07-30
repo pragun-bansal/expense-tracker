@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Plus, DollarSign, Users, Receipt, Check, X, Trash2, Edit } from 'lucide-react'
+import { ArrowLeft, Plus, DollarSign, Users, Receipt, Check, X, Trash2, Edit, ChevronDown, ChevronUp } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
 import { formatActivityDescription } from '@/lib/activityLogger'
 import { useCurrency } from '@/hooks/useCurrency'
@@ -159,6 +159,17 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
   const [activeTab, setActiveTab] = useState<'expenses' | 'balances' | 'stats' | 'settlements' | 'activity'>('expenses')
   const [showEditSettlement, setShowEditSettlement] = useState(false)
   const [editingSettlement, setEditingSettlement] = useState<any>(null)
+  const [expandedExpenses, setExpandedExpenses] = useState<Set<string>>(new Set())
+
+  const toggleExpenseExpansion = (expenseId: string) => {
+    const newExpanded = new Set(expandedExpenses)
+    if (newExpanded.has(expenseId)) {
+      newExpanded.delete(expenseId)
+    } else {
+      newExpanded.add(expenseId)
+    }
+    setExpandedExpenses(newExpanded)
+  }
 
   const [newExpense, setNewExpense] = useState({
     description: '',
@@ -703,8 +714,8 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
   )
 
   return (
-    <div>
-      <div className="mb-8">
+    <div className="p-4 sm:p-6 lg:p-8">
+      <div className="mb-6 sm:mb-8 flex items-center justify-between">
         <Link
           href="/groups"
           className="inline-flex items-center text-sm font-medium text-muted hover:text-body"
@@ -712,44 +723,55 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Groups
         </Link>
+        <button
+            onClick={() => {
+              setShowAddExpense(true)
+              setTimeout(initializeSplits, 100)
+            }}
+          className="inline-flex sm:hidden items-center px-3 py-2 text-xs sm:text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md shadow-sm transition-colors duration-200"
+        >
+          <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+          Add Expense
+        </button>
       </div>
 
       {/* Header */}
-      <div className="sm:flex sm:items-center sm:justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-heading">{group.name}</h1>
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6 sm:mb-8">
+        <div className="mb-0">
+          <h1 className="text-2xl sm:text-3xl font-bold text-heading">{group.name}</h1>
           {group.description && (
             <p className="mt-2 text-sm text-muted">
               {group.description}
             </p>
           )}
-          <div className="mt-4 flex items-center space-x-4">
+          <div className="flex-row sm:mt-4 flex items-center space-y-0 space-x-4">
+            <div className="flex -space-x-2 overflow-x-auto">
+              {group.members.map((member) => (
+                  <div
+                      key={member.id}
+                      className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-medium border-2 border-card flex-shrink-0"
+                      title={member.user.name}
+                  >
+                    {member.user.name?.[0]?.toUpperCase() || 'U'}
+                  </div>
+              ))}
+            </div>
             <div className="flex items-center">
-              <Users className="h-4 w-4 text-gray-400 mr-1" />
+              {/*<Users className="h-4 w-4 text-gray-400 mr-1" />*/}
               <span className="text-sm text-muted">
                 {group.members.length} members
               </span>
             </div>
-            <div className="flex -space-x-2">
-              {group.members.map((member) => (
-                <div
-                  key={member.id}
-                  className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-medium border-2 border-card"
-                  title={member.user.name}
-                >
-                  {member.user.name?.[0]?.toUpperCase() || 'U'}
-                </div>
-              ))}
-            </div>
+
           </div>
         </div>
-        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+        <div className="w-full sm:w-auto hidden sm:block">
           <button
             onClick={() => {
               setShowAddExpense(true)
               setTimeout(initializeSplits, 100)
             }}
-            className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:w-auto"
+            className="w-full sm:w-auto inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           >
             <Plus className="h-4 w-4 mr-2" />
             Add Expense
@@ -758,175 +780,302 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-card-border mb-8">
-        <nav className="flex space-x-8">
-          <button
-            onClick={() => setActiveTab('expenses')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'expenses'
-                ? 'border-blue-500 text-status-info'
-                : 'border-transparent text-muted hover:text-body'
-            }`}
-          >
-            Expenses
-          </button>
-          <button
-            onClick={() => setActiveTab('balances')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'balances'
-                ? 'border-blue-500 text-status-info'
-                : 'border-transparent text-muted hover:text-body'
-            }`}
-          >
-            Outstanding Balances
-          </button>
-          <button
-            onClick={() => setActiveTab('stats')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'stats'
-                ? 'border-blue-500 text-status-info'
-                : 'border-transparent text-muted hover:text-body'
-            }`}
-          >
-            Statistics
-          </button>
-          <button
-            onClick={() => setActiveTab('settlements')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'settlements'
-                ? 'border-blue-500 text-status-info'
-                : 'border-transparent text-muted hover:text-body'
-            }`}
-          >
-            Settlement History
-          </button>
-          <button
-            onClick={() => setActiveTab('activity')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'activity'
-                ? 'border-blue-500 text-status-info'
-                : 'border-transparent text-muted hover:text-body'
-            }`}
-          >
-            Activity Log
-          </button>
-        </nav>
+      <div className="border-b border-card-border mb-6 sm:mb-8">
+        <div className="overflow-x-auto scrollbar-thin">
+          <nav className="flex space-x-3 sm:space-x-8 min-w-max sm:min-w-0">
+            <button
+              onClick={() => setActiveTab('expenses')}
+              className={`py-2 px-3 sm:px-2 border-b-2 font-medium text-sm whitespace-nowrap flex-shrink-0 ${
+                activeTab === 'expenses'
+                  ? 'border-blue-500 text-status-info'
+                  : 'border-transparent text-muted hover:text-body'
+              }`}
+            >
+              Expenses
+            </button>
+            <button
+              onClick={() => setActiveTab('balances')}
+              className={`py-2 px-3 sm:px-2 border-b-2 font-medium text-sm whitespace-nowrap flex-shrink-0 ${
+                activeTab === 'balances'
+                  ? 'border-blue-500 text-status-info'
+                  : 'border-transparent text-muted hover:text-body'
+              }`}
+            >
+              Balances
+            </button>
+            <button
+              onClick={() => setActiveTab('stats')}
+              className={`py-2 px-3 sm:px-2 border-b-2 font-medium text-sm whitespace-nowrap flex-shrink-0 ${
+                activeTab === 'stats'
+                  ? 'border-blue-500 text-status-info'
+                  : 'border-transparent text-muted hover:text-body'
+              }`}
+            >
+              Statistics
+            </button>
+            <button
+              onClick={() => setActiveTab('settlements')}
+              className={`py-2 px-3 sm:px-2 border-b-2 font-medium text-sm whitespace-nowrap flex-shrink-0 ${
+                activeTab === 'settlements'
+                  ? 'border-blue-500 text-status-info'
+                  : 'border-transparent text-muted hover:text-body'
+              }`}
+            >
+              Settlements
+            </button>
+            <button
+              onClick={() => setActiveTab('activity')}
+              className={`py-2 px-3 sm:px-2 border-b-2 font-medium text-sm whitespace-nowrap flex-shrink-0 ${
+                activeTab === 'activity'
+                  ? 'border-blue-500 text-status-info'
+                  : 'border-transparent text-muted hover:text-body'
+              }`}
+            >
+              Activity
+            </button>
+          </nav>
+        </div>
       </div>
 
       {/* Expenses Tab */}
       {activeTab === 'expenses' && (
         <div className="space-y-4">
-          {expenses.map((expense) => {
-            const myShare = expense.splits.find(split => split.user.id === session?.user?.id)
-            const isLentByMe = expense.lenders.some(lender => lender.user.id === session?.user?.id)
-            const lenderNames = expense.lenders.map(lender => lender.user.name).join(', ')
+          {/* Desktop View */}
+          <div className="hidden lg:block space-y-4">
+            {expenses.map((expense) => {
+              const myShare = expense.splits.find(split => split.user.id === session?.user?.id)
+              const isLentByMe = expense.lenders.some(lender => lender.user.id === session?.user?.id)
+              const lenderNames = expense.lenders.map(lender => lender.user.name).join(', ')
 
-            return (
-              <div key={expense.id} className="bg-card rounded-lg shadow-card p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center">
-                      <Receipt className="h-5 w-5 text-gray-400 mr-2" />
-                      <h3 className="text-lg font-medium text-heading">
-                        {expense.description}
-                      </h3>
+              return (
+                <div key={expense.id} className="bg-card rounded-lg shadow-card p-6">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center">
+                        <Receipt className="h-5 w-5 text-gray-400 mr-2" />
+                        <h3 className="text-lg font-medium text-heading">
+                          {expense.description}
+                        </h3>
+                      </div>
+                      <div className="mt-2 flex items-center space-x-4 text-sm text-muted">
+                        <span>Paid by {lenderNames}</span>
+                        <span>•</span>
+                        <span>{new Date(expense.date).toLocaleDateString()}</span>
+                        <span>•</span>
+                        <span>{expense.splitType.toLowerCase()} split</span>
+                        {expense.account && (
+                          <>
+                            <span>•</span>
+                            <span>Account: {expense.account.name}</span>
+                          </>
+                        )}
+                      </div>
                     </div>
-                    <div className="mt-2 flex items-center space-x-4 text-sm text-muted">
-                      <span>Paid by {lenderNames}</span>
-                      <span>•</span>
-                      <span>{new Date(expense.date).toLocaleDateString()}</span>
-                      <span>•</span>
-                      <span>{expense.splitType.toLowerCase()} split</span>
-                      {expense.account && (
-                        <>
-                          <span>•</span>
-                          <span>Account: {expense.account.name}</span>
-                        </>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-heading">
+                        {formatAmount(expense.amount)}
+                      </div>
+                      {myShare && (
+                        <div className={`text-sm ${myShare.settled ? 'text-status-success' : 'text-status-error'}`}>
+                          Your share: {formatAmount(myShare.amount)}
+                          {myShare.settled ? ' (settled)' : ' (unsettled)'}
+                        </div>
                       )}
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-heading">
-                      {formatAmount(expense.amount)}
+
+                  {/* Split details */}
+                  <div className="mt-4 border-t border-card-border pt-4">
+                    <h4 className="text-sm font-medium text-heading mb-2">Split Details</h4>
+                    <div className="space-y-2">
+                      {expense.splits.map((split) => {
+                        const isLender = expense.lenders.some(lender => lender.user.id === split.user.id)
+                        const lenderAmount = expense.lenders.find(lender => lender.user.id === split.user.id)?.amount || 0
+                        
+                        return (
+                          <div key={split.id} className="flex items-center justify-between">
+                            <div className="flex items-center">
+                              <div className="h-6 w-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-medium mr-3">
+                                {split.user.name?.[0]?.toUpperCase() || 'U'}
+                              </div>
+                              <span className="text-sm text-heading">
+                                {split.user.name}
+                              </span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <span className="text-sm text-heading">
+                                {formatAmount(split.amount)}
+                              </span>
+                            </div>
+                          </div>
+                        )
+                      })}
                     </div>
-                    {myShare && (
-                      <div className={`text-sm ${myShare.settled ? 'text-status-success' : 'text-status-error'}`}>
-                        Your share: {formatAmount(myShare.amount)}
-                        {myShare.settled ? ' (settled)' : ' (unsettled)'}
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="mt-4 border-t border-card-border pt-4 flex items-center justify-end">
+                    {/* Edit and Delete buttons - only for admins or lenders */}
+                    {(group?.members.find(m => m.user.id === session?.user?.id)?.role === 'ADMIN' || isLentByMe) && (
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleEditExpense(expense)}
+                          className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteExpense(expense.id)}
+                          className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </button>
                       </div>
                     )}
                   </div>
                 </div>
+              )
+            })}
+          </div>
 
-                {/* Split details */}
-                <div className="mt-4 border-t border-card-border pt-4">
-                  <h4 className="text-sm font-medium text-heading mb-2">Split Details</h4>
-                  <div className="space-y-2">
-                    {expense.splits.map((split) => {
-                      const isLender = expense.lenders.some(lender => lender.user.id === split.user.id)
-                      const lenderAmount = expense.lenders.find(lender => lender.user.id === split.user.id)?.amount || 0
-                      
-                      // Show status if:
-                      // 1. Not a lender at all (pure borrower), OR
-                      // 2. Is a lender but their split amount > their lender amount (they owe more than they lent)
-                      const shouldShowStatus = !isLender || (isLender && split.amount > lenderAmount)
-                      
-                      return (
-                        <div key={split.id} className="flex items-center justify-between">
-                          <div className="flex items-center">
-                            <div className="h-6 w-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-medium mr-3">
-                              {split.user.name?.[0]?.toUpperCase() || 'U'}
-                            </div>
-                            <span className="text-sm text-heading">
-                              {split.user.name}
-                            </span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            {/*{shouldShowStatus && (*/}
-                            {/*    <span className={`text-xs px-2 py-1 rounded-full ${*/}
-                            {/*        split.settled*/}
-                            {/*            ? 'bg-status-success text-status-success'*/}
-                            {/*            : 'bg-status-error text-status-error'*/}
-                            {/*    }`}>*/}
-                            {/*    {split.settled ? 'Settled' : 'Pending'}*/}
-                            {/*  </span>*/}
-                            {/*)}*/}
-                            <span className="text-sm text-heading">
-                              {formatAmount(split.amount)}
-                            </span>
+          {/* Mobile Card View */}
+          <div className="lg:hidden space-y-3">
+            {expenses.map((expense) => {
+              const myShare = expense.splits.find(split => split.user.id === session?.user?.id)
+              const isLentByMe = expense.lenders.some(lender => lender.user.id === session?.user?.id)
+              const lenderNames = expense.lenders.map(lender => lender.user.name).join(', ')
+              const isExpanded = expandedExpenses.has(expense.id)
 
+              return (
+                <div key={expense.id} className="bg-card rounded-lg shadow-card overflow-hidden">
+                  {/* Collapsible Header */}
+                  <div 
+                    className="p-3 sm:p-4 cursor-pointer"
+                    onClick={() => toggleExpenseExpansion(expense.id)}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start space-x-2 sm:space-x-3 flex-1 min-w-0">
+                        <Receipt className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0 mt-0.5" />
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-sm font-medium text-heading truncate">
+                            {expense.description}
+                          </h3>
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2 mt-1">
+                            <p className="text-xs text-muted">
+                              {new Date(expense.date).toLocaleDateString()}
+                            </p>
+                            {myShare && (
+                              <div className="flex items-center space-x-1 sm:space-x-2">
+                                <span className="text-xs text-muted hidden sm:inline">•</span>
+                                <span className={`text-xs whitespace-nowrap ${myShare.settled ? 'text-status-success' : 'text-status-error'}`}>
+                                  You: {formatAmount(myShare.amount)}
+                                </span>
+                              </div>
+                            )}
                           </div>
                         </div>
-                      )
-                    })}
+                      </div>
+                      <div className="flex items-center space-x-2 flex-shrink-0">
+                        <div className="text-right">
+                          <div className="text-sm sm:text-lg font-bold text-heading">
+                            {formatAmount(expense.amount)}
+                          </div>
+                        </div>
+                        {isExpanded ? (
+                          <ChevronUp className="h-4 w-4 text-muted" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4 text-muted" />
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
 
-                {/* Action buttons */}
-                <div className="mt-4 border-t border-card-border pt-4 flex items-center justify-end">
-                  {/* Edit and Delete buttons - only for admins or lenders */}
-                  {(group?.members.find(m => m.user.id === session?.user?.id)?.role === 'ADMIN' || isLentByMe) && (
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleEditExpense(expense)}
-                        className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                      >
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteExpense(expense.id)}
-                        className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
-                      </button>
+                  {/* Expanded Details */}
+                  {isExpanded && (
+                    <div className="px-4 pb-4 border-t border-table-border">
+                      <div className="space-y-4 mt-4">
+                        {/* Basic Info */}
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <p className="text-xs font-medium text-input-label uppercase tracking-wider mb-1">
+                              Paid By
+                            </p>
+                            <p className="text-heading">{lenderNames}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium text-input-label uppercase tracking-wider mb-1">
+                              Split Type
+                            </p>
+                            <p className="text-heading">{expense.splitType.toLowerCase()}</p>
+                          </div>
+                          {expense.account && (
+                            <div className="col-span-2">
+                              <p className="text-xs font-medium text-input-label uppercase tracking-wider mb-1">
+                                Account
+                              </p>
+                              <p className="text-heading">{expense.account.name}</p>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Split Details */}
+                        <div>
+                          <p className="text-xs font-medium text-input-label uppercase tracking-wider mb-2">
+                            Split Details
+                          </p>
+                          <div className="space-y-2">
+                            {expense.splits.map((split) => (
+                              <div key={split.id} className="flex items-center justify-between">
+                                <div className="flex items-center">
+                                  <div className="h-6 w-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-medium mr-2">
+                                    {split.user.name?.[0]?.toUpperCase() || 'U'}
+                                  </div>
+                                  <span className="text-sm text-heading">
+                                    {split.user.name}
+                                  </span>
+                                </div>
+                                <span className="text-sm text-heading">
+                                  {formatAmount(split.amount)}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        {(group?.members.find(m => m.user.id === session?.user?.id)?.role === 'ADMIN' || isLentByMe) && (
+                          <div className="flex justify-end space-x-2 pt-3 border-t border-table-border">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleEditExpense(expense)
+                              }}
+                              className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-link hover:text-link-hover rounded-md hover:bg-button-secondary-hover transition-colors duration-200"
+                            >
+                              <Edit className="h-4 w-4 mr-1" />
+                              Edit
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleDeleteExpense(expense.id)
+                              }}
+                              className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-600 hover:text-red-800 rounded-md hover:bg-red-50 transition-colors duration-200"
+                            >
+                              <Trash2 className="h-4 w-4 mr-1" />
+                              Delete
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
-              </div>
-            )
-          })}
+              )
+            })}
+          </div>
 
           {expenses.length === 0 && (
             <div className="text-center py-12">
@@ -942,28 +1091,28 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
 
       {/* Balances Tab */}
       {activeTab === 'balances' && (
-        <div className="space-y-8">
+        <div className="space-y-6 sm:space-y-8">
           {/* Current Balances */}
           <div>
             <h3 className="text-lg font-medium text-heading mb-4">Current Balances</h3>
             <div className="bg-card rounded-lg shadow-card overflow-hidden">
               <div className="divide-y divide-table-border">
                 {balances.map((balance) => (
-                  <div key={balance.userId} className="p-4 flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-medium mr-3">
+                  <div key={balance.userId} className="p-3 sm:p-4 flex items-center justify-between">
+                    <div className="flex items-center min-w-0 flex-1">
+                      <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs sm:text-sm font-medium mr-3 flex-shrink-0">
                         {balance.user.name?.[0]?.toUpperCase() || 'U'}
                       </div>
-                      <div>
-                        <div className="text-sm font-medium text-heading">
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-medium text-heading truncate">
                           {balance.user.name}
                         </div>
-                        <div className="text-sm text-muted">
+                        <div className="text-xs sm:text-sm text-muted truncate">
                           {balance.user.email}
                         </div>
                       </div>
                     </div>
-                    <div className={`text-lg font-semibold ${
+                    <div className={`text-sm sm:text-lg font-semibold flex-shrink-0 ${
                       balance.balance > 0 
                         ? 'text-status-success' 
                         : balance.balance < 0 
@@ -984,31 +1133,31 @@ export default function GroupDetail({ params }: { params: Promise<{ id: string }
               <h3 className="text-lg font-medium text-heading mb-4">Suggested Settlements</h3>
               <div className="space-y-3">
                 {suggestedSettlements.map((settlement, index) => (
-                  <div key={index} className="bg-status-info border border-blue-200 rounded-lg p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-medium mr-3">
+                  <div key={index} className="bg-status-info border border-blue-200 rounded-lg p-3 sm:p-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+                      <div className="flex items-center flex-wrap">
+                        <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-medium mr-2 flex-shrink-0">
                           {settlement.from.name?.[0]?.toUpperCase() || 'U'}
                         </div>
-                        <span className="text-sm text-status-info">
+                        <span className="text-sm text-status-info truncate">
                           {settlement.from.name}
                         </span>
                         <span className="mx-2 text-status-info">owes</span>
-                        <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center text-white text-xs font-medium mr-3">
+                        <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-full bg-green-500 flex items-center justify-center text-white text-xs font-medium mr-2 flex-shrink-0">
                           {settlement.to.name?.[0]?.toUpperCase() || 'U'}
                         </div>
-                        <span className="text-sm text-status-info">
+                        <span className="text-sm text-status-info truncate">
                           {settlement.to.name}
                         </span>
                       </div>
-                      <div className="flex items-center space-x-3">
-                        <div className="text-lg font-semibold text-status-info">
+                      <div className="flex items-center justify-between sm:justify-end space-x-3">
+                        <div className="text-base sm:text-lg font-semibold text-status-info">
                           {formatAmount(settlement.amount)}
                         </div>
                         {(settlement.from.id === session?.user?.id || settlement.to.id === session?.user?.id) && (
                           <button
                             onClick={() => initiateBalanceSettle(settlement.from.id, settlement.to.id, settlement.amount)}
-                            className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                            className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 whitespace-nowrap"
                           >
                             <Check className="h-3 w-3 mr-1" />
                             Settle

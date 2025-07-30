@@ -125,7 +125,7 @@ export default function Analytics() {
             <select
               value={period}
               onChange={(e) => setPeriod(e.target.value)}
-              className="border-input rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-input text-heading"
+              className="px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200 appearance-none bg-arrow-down bg-no-repeat bg-right bg-origin-content"
             >
               <option value="month">This Month</option>
               <option value="quarter">Last 3 Months</option>

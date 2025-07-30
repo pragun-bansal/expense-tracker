@@ -154,159 +154,149 @@ export default function EditIncome({ params }: { params: { id: string } }) {
   }
 
   return (
-    <div>
+    <div className="px-4 sm:px-6 lg:px-12 py-6 sm:py-8 lg:py-12">
       <div className="mb-8">
         <Link
           href="/income"
-          className="inline-flex items-center text-sm font-medium text-muted hover:text-body"
+          className="inline-flex items-center text-sm font-medium text-muted hover:text-body transition-colors duration-200"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Income
         </Link>
       </div>
 
-      <div className="max-w-2xl">
+      <div className="max-w-3xl mx-auto">
         <div className="bg-card shadow-card rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
-            <h3 className="text-lg font-medium leading-6 text-heading mb-6">
+          <div className="px-8 py-8 sm:p-10">
+            <h3 className="text-xl sm:text-2xl font-semibold leading-6 text-heading mb-8">
               Edit Income
             </h3>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-8">
               <div>
-                <label htmlFor="amount" className="block text-sm font-medium text-input-label">
+                <label htmlFor="amount" className="block text-sm font-medium text-input-label mb-3">
                   Amount *
                 </label>
-                <div className="mt-1">
-                  <input
-                    type="number"
-                    step="0.01"
-                    name="amount"
-                    id="amount"
-                    required
-                    value={formData.amount}
-                    onChange={handleInputChange}
-                    className="block w-full border-input rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm bg-input text-heading"
-                    placeholder="0.00"
-                  />
-                </div>
+                <input
+                  type="number"
+                  step="0.01"
+                  name="amount"
+                  id="amount"
+                  required
+                  value={formData.amount}
+                  onChange={handleInputChange}
+                  className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input placeholder-gray-400 transition-all duration-200"
+                  placeholder="0.00"
+                />
               </div>
 
               <div>
-                <label htmlFor="description" className="block text-sm font-medium text-input-label">
+                <label htmlFor="description" className="block text-sm font-medium text-input-label mb-3">
                   Description
                 </label>
-                <div className="mt-1">
-                  <textarea
-                    name="description"
-                    id="description"
-                    rows={3}
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    className="block w-full border-input rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm bg-input text-heading"
-                    placeholder="What did you earn from?"
-                  />
-                </div>
+                <textarea
+                  name="description"
+                  id="description"
+                  rows={4}
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input placeholder-gray-400 transition-all duration-200 resize-none"
+                  placeholder="What did you earn from?"
+                />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                 <div>
-                  <label htmlFor="categoryId" className="block text-sm font-medium text-input-label">
+                  <label htmlFor="categoryId" className="block text-sm font-medium text-input-label mb-3">
                     Category *
                   </label>
-                  <div className="mt-1">
-                    <select
-                      name="categoryId"
-                      id="categoryId"
-                      required
-                      value={formData.categoryId}
-                      onChange={handleInputChange}
-                      className="block w-full border-input rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm bg-input text-heading"
-                    >
-                      <option value="">Select a category</option>
-                      {categories.map((category) => (
-                        <option key={category.id} value={category.id}>
-                          {category.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  <select
+                    name="categoryId"
+                    id="categoryId"
+                    required
+                    value={formData.categoryId}
+                    onChange={handleInputChange}
+                    className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200 appearance-none bg-arrow-down bg-no-repeat bg-right bg-origin-content"
+                  >
+                    <option value="">Select a category</option>
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div>
-                  <label htmlFor="accountId" className="block text-sm font-medium text-input-label">
+                  <label htmlFor="accountId" className="block text-sm font-medium text-input-label mb-3">
                     Account *
                   </label>
-                  <div className="mt-1">
-                    <select
-                      name="accountId"
-                      id="accountId"
-                      required
-                      value={formData.accountId}
-                      onChange={handleInputChange}
-                      className="block w-full border-input rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm bg-input text-heading"
-                    >
-                      <option value="">Select an account</option>
-                      {accounts.map((account) => (
-                        <option key={account.id} value={account.id}>
-                          {account.name} ({formatAmount(account.balance)})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  <select
+                    name="accountId"
+                    id="accountId"
+                    required
+                    value={formData.accountId}
+                    onChange={handleInputChange}
+                    className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200 appearance-none bg-arrow-down bg-no-repeat bg-right bg-origin-content"
+                  >
+                    <option value="">Select an account</option>
+                    {accounts.map((account) => (
+                      <option key={account.id} value={account.id}>
+                        {account.name} ({formatAmount(account.balance)})
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                 <div>
-                  <label htmlFor="date" className="block text-sm font-medium text-input-label">
+                  <label htmlFor="date" className="block text-sm font-medium text-input-label mb-3">
                     Date
                   </label>
-                  <div className="mt-1">
-                    <input
-                      type="date"
-                      name="date"
-                      id="date"
-                      value={formData.date}
-                      onChange={handleInputChange}
-                      className="block w-full border-input rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm bg-input text-heading"
-                    />
-                  </div>
+                  <input
+                    type="date"
+                    name="date"
+                    id="date"
+                    value={formData.date}
+                    onChange={handleInputChange}
+                    className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200"
+                  />
                 </div>
 
                 <div>
-                  <label htmlFor="source" className="block text-sm font-medium text-input-label">
+                  <label htmlFor="source" className="block text-sm font-medium text-input-label mb-3">
                     Source
                   </label>
-                  <div className="mt-1">
-                    <input
-                      type="text"
-                      name="source"
-                      id="source"
-                      value={formData.source}
-                      onChange={handleInputChange}
-                      className="block w-full border-input rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm bg-input text-heading"
-                      placeholder="e.g., Company Name, Client, etc."
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    name="source"
+                    id="source"
+                    value={formData.source}
+                    onChange={handleInputChange}
+                    className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input placeholder-gray-400 transition-all duration-200"
+                    placeholder="e.g., Company Name, Client, etc."
+                  />
                 </div>
               </div>
 
               {error && (
-                <div className="text-status-error text-sm">{error}</div>
+                <div className="bg-status-error border border-status-error rounded-lg p-4">
+                  <p className="text-sm text-status-error font-medium">{error}</p>
+                </div>
               )}
 
-              <div className="flex justify-end space-x-3">
+              <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-6 border-t border-input">
                 <Link
                   href="/income"
-                  className="bg-input py-2 px-4 border border-input rounded-md shadow-sm text-sm font-medium text-input-label hover:bg-button-secondary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                  className="bg-input py-3 px-6 border border-input rounded-lg shadow-sm text-sm sm:text-base font-medium text-input-label hover:bg-button-secondary-hover transition-all duration-200 text-center"
                 >
                   Cancel
                 </Link>
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="bg-green-600 border border-transparent rounded-md shadow-sm py-2 px-4 text-sm font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
+                  className="bg-green-600 border border-transparent rounded-lg shadow-sm py-3 px-6 text-sm sm:text-base font-medium text-white hover:bg-green-700 disabled:opacity-50 transition-all duration-200 min-w-[140px]"
                 >
                   {isLoading ? 'Updating...' : 'Update Income'}
                 </button>

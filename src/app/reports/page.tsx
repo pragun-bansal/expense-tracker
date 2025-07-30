@@ -119,32 +119,32 @@ export default function Reports() {
   }
 
   return (
-    <div>
+    <div className="px-4 sm:px-6 lg:px-12 py-6 sm:py-8 lg:py-12">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-heading">Reports</h1>
-        <p className="mt-2 text-sm text-muted">
+        <h1 className="text-2xl sm:text-3xl font-bold text-heading">Reports</h1>
+        <p className="mt-2 text-base text-muted">
           Generate detailed financial reports and export your data
         </p>
       </div>
 
       {/* Report Generation Form */}
       <div className="bg-card shadow-card rounded-lg mb-8">
-        <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg font-medium leading-6 text-heading mb-4">
+        <div className="px-6 py-6 sm:p-8">
+          <h3 className="text-xl font-semibold leading-6 text-heading mb-6">
             Generate Report
           </h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div>
-              <label htmlFor="reportType" className="block text-sm font-medium text-input-label">
+              <label htmlFor="reportType" className="block text-sm font-medium text-input-label mb-3">
                 Report Type
               </label>
               <select
                 id="reportType"
                 value={reportType}
                 onChange={(e) => setReportType(e.target.value)}
-                className="mt-1 block w-full border-input rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-input text-heading"
+                className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200 appearance-none bg-arrow-down bg-no-repeat bg-right bg-origin-content"
               >
                 <option value="summary">Summary Report</option>
                 <option value="detailed">Detailed Transactions</option>
@@ -154,7 +154,7 @@ export default function Reports() {
             </div>
             
             <div>
-              <label htmlFor="startDate" className="block text-sm font-medium text-input-label">
+              <label htmlFor="startDate" className="block text-sm font-medium text-input-label mb-3">
                 Start Date
               </label>
               <input
@@ -162,12 +162,12 @@ export default function Reports() {
                 id="startDate"
                 value={dateRange.startDate}
                 onChange={(e) => setDateRange({...dateRange, startDate: e.target.value})}
-                className="mt-1 block w-full border-input rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-input text-heading"
+                className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200"
               />
             </div>
             
             <div>
-              <label htmlFor="endDate" className="block text-sm font-medium text-input-label">
+              <label htmlFor="endDate" className="block text-sm font-medium text-input-label mb-3">
                 End Date
               </label>
               <input
@@ -175,16 +175,16 @@ export default function Reports() {
                 id="endDate"
                 value={dateRange.endDate}
                 onChange={(e) => setDateRange({...dateRange, endDate: e.target.value})}
-                className="mt-1 block w-full border-input rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-input text-heading"
+                className="block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200"
               />
             </div>
           </div>
           
-          <div className="flex justify-end space-x-3">
+          <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4">
             <button
               onClick={() => generateReport('json')}
               disabled={generating}
-              className="inline-flex items-center px-4 py-2 border border-input text-sm font-medium rounded-md text-input-label bg-input hover:bg-button-secondary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+              className="inline-flex items-center px-6 py-3 border border-input text-sm sm:text-base font-medium rounded-lg text-input-label bg-input hover:bg-button-secondary-hover disabled:opacity-50 transition-all duration-200 justify-center"
             >
               <TrendingUp className="h-4 w-4 mr-2" />
               {generating ? 'Loading...' : 'Preview Report'}
@@ -192,7 +192,7 @@ export default function Reports() {
             <button
               onClick={() => generateReport('csv')}
               disabled={generating}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+              className="inline-flex items-center px-6 py-3 border border-transparent text-sm sm:text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 transition-all duration-200 justify-center"
             >
               <Download className="h-4 w-4 mr-2" />
               {generating ? 'Generating...' : 'Download CSV'}
@@ -203,58 +203,58 @@ export default function Reports() {
 
       {/* Report Templates */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="bg-card p-6 rounded-lg shadow-card">
-          <div className="flex items-center mb-4">
+        <div className="bg-card p-6 sm:p-8 rounded-lg shadow-card hover:shadow-lg transition-all duration-200">
+          <div className="flex items-center mb-6">
             <FileText className="h-8 w-8 text-status-info" />
-            <h3 className="ml-3 text-lg font-medium text-heading">
+            <h3 className="ml-3 text-lg font-semibold text-heading">
               Monthly Summary
             </h3>
           </div>
-          <p className="text-sm text-muted mb-4">
+          <p className="text-base text-muted mb-6">
             Overview of income, expenses, and savings for the current month
           </p>
           <button 
             onClick={() => downloadPredefinedReport('monthly')}
             disabled={generating}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+            className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-all duration-200 text-sm sm:text-base font-medium"
           >
             {generating ? 'Generating...' : 'Download CSV'}
           </button>
         </div>
 
-        <div className="bg-card p-6 rounded-lg shadow-card">
-          <div className="flex items-center mb-4">
+        <div className="bg-card p-6 sm:p-8 rounded-lg shadow-card hover:shadow-lg transition-all duration-200">
+          <div className="flex items-center mb-6">
             <Calendar className="h-8 w-8 text-status-success" />
-            <h3 className="ml-3 text-lg font-medium text-heading">
+            <h3 className="ml-3 text-lg font-semibold text-heading">
               Yearly Report
             </h3>
           </div>
-          <p className="text-sm text-muted mb-4">
+          <p className="text-base text-muted mb-6">
             Complete financial overview for the entire year with trends
           </p>
           <button 
             onClick={() => downloadPredefinedReport('yearly')}
             disabled={generating}
-            className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50"
+            className="w-full bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 disabled:opacity-50 transition-all duration-200 text-sm sm:text-base font-medium"
           >
             {generating ? 'Generating...' : 'Download CSV'}
           </button>
         </div>
 
-        <div className="bg-card p-6 rounded-lg shadow-card">
-          <div className="flex items-center mb-4">
+        <div className="bg-card p-6 sm:p-8 rounded-lg shadow-card hover:shadow-lg transition-all duration-200">
+          <div className="flex items-center mb-6">
             <Filter className="h-8 w-8 text-status-info" />
-            <h3 className="ml-3 text-lg font-medium text-heading">
+            <h3 className="ml-3 text-lg font-semibold text-heading">
               Category Analysis
             </h3>
           </div>
-          <p className="text-sm text-muted mb-4">
+          <p className="text-base text-muted mb-6">
             Detailed breakdown of spending by category with insights
           </p>
           <button 
             onClick={() => downloadPredefinedReport('category')}
             disabled={generating}
-            className="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50"
+            className="w-full bg-purple-600 text-white py-3 px-6 rounded-lg hover:bg-purple-700 disabled:opacity-50 transition-all duration-200 text-sm sm:text-base font-medium"
           >
             {generating ? 'Generating...' : 'Download CSV'}
           </button>
@@ -264,8 +264,8 @@ export default function Reports() {
       {/* Report Preview */}
       {reportData && (
         <div className="bg-card shadow-card rounded-lg mt-8">
-          <div className="px-4 py-5 sm:p-6">
-            <h3 className="text-lg font-medium leading-6 text-heading mb-4">
+          <div className="px-6 py-6 sm:p-8">
+            <h3 className="text-xl font-semibold leading-6 text-heading mb-6">
               Report Preview - {reportType.charAt(0).toUpperCase() + reportType.slice(1)}
             </h3>
             

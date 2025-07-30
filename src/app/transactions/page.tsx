@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
-import { Filter, Search, ArrowUpCircle, ArrowDownCircle, Calendar, Download, Edit, Users, PlusCircle, Trash2 } from 'lucide-react'
+import { Filter, Search, ArrowUpCircle, ArrowDownCircle, Calendar, Download, Edit, Users, PlusCircle, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useModal } from '@/hooks/useModal'
@@ -53,6 +53,8 @@ export default function Transactions() {
     startDate: '',
     endDate: ''
   })
+  const [showMobileFilters, setShowMobileFilters] = useState(false)
+  const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set())
   const [categories, setCategories] = useState([])
   const [accounts, setAccounts] = useState([])
   const [sortBy, setSortBy] = useState('date')
@@ -69,6 +71,16 @@ export default function Transactions() {
       fetchAccounts()
     }
   }, [session])
+
+  const toggleCardExpansion = (transactionKey: string) => {
+    const newExpanded = new Set(expandedCards)
+    if (newExpanded.has(transactionKey)) {
+      newExpanded.delete(transactionKey)
+    } else {
+      newExpanded.add(transactionKey)
+    }
+    setExpandedCards(newExpanded)
+  }
 
   const fetchTransactions = async () => {
     try {
@@ -328,21 +340,21 @@ export default function Transactions() {
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none flex gap-2">
           <Link
             href="/income/new"
-            className="inline-flex items-center justify-center rounded-md border border-transparent bg-button-success px-4 py-2 text-sm font-medium text-button-success shadow-sm bg-button-success:hover focus:outline-none focus:ring-2 ring-focus focus:ring-offset-2 sm:w-auto"
+            className="inline-flex items-center justify-center rounded-md border border-transparent bg-button-success px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-button-success shadow-sm bg-button-success:hover focus:outline-none focus:ring-2 ring-focus focus:ring-offset-2 sm:w-auto"
           >
             <PlusCircle className="h-4 w-4 mr-2" />
             Add Income
           </Link>
           <Link
             href="/expenses/new"
-            className="inline-flex items-center justify-center rounded-md border border-transparent bg-button-primary px-4 py-2 text-sm font-medium text-button-primary shadow-sm bg-button-primary:hover focus:outline-none ring-focus focus:ring-2 focus:ring-offset-2 sm:w-auto"
+            className="inline-flex items-center justify-center rounded-md border border-transparent bg-button-primary px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-button-primary shadow-sm bg-button-primary:hover focus:outline-none ring-focus focus:ring-2 focus:ring-offset-2 sm:w-auto"
           >
             <PlusCircle className="h-4 w-4 mr-2" />
             Add Expense
           </Link>
           <button
             onClick={exportTransactions}
-            className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:w-auto"
+            className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:w-auto"
           >
             <Download className="h-4 w-4 mr-2" />
             Export CSV
@@ -351,7 +363,7 @@ export default function Transactions() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
         <div className="bg-card p-4 sm:p-6 rounded-lg shadow-card">
           <div className="flex items-center">
             <ArrowUpCircle className="h-6 w-6 sm:h-8 sm:w-8 text-status-success flex-shrink-0" />
@@ -404,13 +416,59 @@ export default function Transactions() {
       {/* Filters */}
       <div className="bg-card shadow-card rounded-lg mb-8">
         <div className="px-4 py-5 sm:p-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-            <div>
+          {/* Mobile Search and Filter Toggle */}
+          <div className="sm:hidden mb-4">
+            <div className="flex gap-3">
+              {/* Search Bar */}
+              <div className="flex-1">
+                <label htmlFor="mobile-search" className="block text-sm font-medium text-input-label mb-1">
+                  Search
+                </label>
+                <div className="relative rounded-lg shadow-sm">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Search className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    id="mobile-search"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="block w-full pl-12 pr-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input placeholder-gray-400 transition-all duration-200"
+                    placeholder="Search transactions..."
+                  />
+                </div>
+              </div>
+              
+              {/* Filter Toggle Button */}
+              <div>
+                <label className="block text-sm font-medium text-input-label mb-1">
+                  &nbsp;
+                </label>
+                <button
+                  onClick={() => setShowMobileFilters(!showMobileFilters)}
+                  className="flex items-center justify-center px-4 py-3 bg-input border border-input rounded-lg text-input font-medium hover:bg-button-secondary-hover transition-all duration-200 min-w-[100px]"
+                >
+                  <Filter className="h-5 w-5 mr-2" />
+                  Filters
+                  {showMobileFilters ? (
+                    <ChevronUp className="h-4 w-4 ml-1" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 ml-1" />
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          {/* Filter Grid - Hidden on mobile unless toggled */}
+          <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 ${!showMobileFilters ? 'hidden sm:grid' : 'mt-4 sm:mt-0'}`}>
+            {/* Desktop Search */}
+            <div className="hidden sm:block">
               <label htmlFor="search" className="block text-sm font-medium text-input-label">
                 Search
               </label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <div className="mt-1 relative rounded-lg shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <Search className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
@@ -418,7 +476,7 @@ export default function Transactions() {
                   id="search"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 border border-input rounded-md leading-5 bg-input placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 ring-focus focus:border-blue-500 sm:text-sm text-heading"
+                  className="block w-full pl-12 pr-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input placeholder-gray-400 transition-all duration-200"
                   placeholder="Search transactions..."
                 />
               </div>
@@ -432,7 +490,7 @@ export default function Transactions() {
                 id="type"
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value)}
-                className="mt-1 block w-full border-input rounded-md shadow-sm ring-focus focus:border-blue-500 sm:text-sm bg-input text-heading"
+                className="mt-1 block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200 appearance-none bg-arrow-down bg-no-repeat bg-right bg-origin-content"
               >
                 <option value="">All Types</option>
                 <option value="income">Income</option>
@@ -450,7 +508,7 @@ export default function Transactions() {
                 id="category"
                 value={filterCategory}
                 onChange={(e) => setFilterCategory(e.target.value)}
-                className="mt-1 block w-full border-input rounded-md shadow-sm ring-focus focus:border-blue-500 sm:text-sm bg-input text-heading"
+                className="mt-1 block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200 appearance-none bg-arrow-down bg-no-repeat bg-right bg-origin-content"
               >
                 <option value="">All Categories</option>
                 {categories.map((category: any) => (
@@ -469,7 +527,7 @@ export default function Transactions() {
                 id="account"
                 value={filterAccount}
                 onChange={(e) => setFilterAccount(e.target.value)}
-                className="mt-1 block w-full border-input rounded-md shadow-sm ring-focus focus:border-blue-500 sm:text-sm bg-input text-heading"
+                className="mt-1 block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200 appearance-none bg-arrow-down bg-no-repeat bg-right bg-origin-content"
               >
                 <option value="">All Accounts</option>
                 {accounts.map((account: any) => (
@@ -489,7 +547,7 @@ export default function Transactions() {
                 id="startDate"
                 value={dateRange.startDate}
                 onChange={(e) => setDateRange({...dateRange, startDate: e.target.value})}
-                className="mt-1 block w-full border-input rounded-md shadow-sm ring-focus focus:border-blue-500 sm:text-sm bg-input text-heading"
+                className="mt-1 block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200"
               />
             </div>
 
@@ -502,15 +560,15 @@ export default function Transactions() {
                 id="endDate"
                 value={dateRange.endDate}
                 onChange={(e) => setDateRange({...dateRange, endDate: e.target.value})}
-                className="mt-1 block w-full border-input rounded-md shadow-sm ring-focus focus:border-blue-500 sm:text-sm bg-input text-heading"
+                className="mt-1 block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200"
               />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Transactions Table */}
-      <div className="bg-card shadow-card overflow-hidden rounded-lg">
+      {/* Desktop Table View */}
+      <div className="hidden lg:block bg-card shadow-card overflow-hidden rounded-lg">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-table-border">
             <thead className="bg-muted">
@@ -665,6 +723,181 @@ export default function Transactions() {
         </div>
       </div>
 
+      {/* Mobile Card View */}
+      <div className="lg:hidden space-y-4">
+        {filteredTransactions.map((transaction) => {
+          const transactionKey = `${transaction.type}-${transaction.id}`
+          const isExpanded = expandedCards.has(transactionKey)
+          
+          return (
+            <div key={transactionKey} className="bg-card shadow-card rounded-lg overflow-hidden">
+              {/* Card Header - Always Visible */}
+              <div 
+                className="p-4 cursor-pointer"
+                onClick={() => toggleCardExpansion(transactionKey)}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    {transaction.type === 'income' ? (
+                      <ArrowUpCircle className="h-5 w-5 text-status-success" />
+                    ) : transaction.type === 'expense' ? (
+                      <ArrowDownCircle className="h-5 w-5 text-status-error" />
+                    ) : transaction.type === 'lending' ? (
+                      <Users className="h-5 w-5 text-green-600" />
+                    ) : (
+                      <Users className="h-5 w-5 text-orange-600" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center space-x-2">
+                        <p className="text-sm font-medium text-heading truncate">
+                          {transaction.description}
+                        </p>
+                        {transaction.isRecurring && (
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-status-info text-status-info">
+                            R
+                          </span>
+                        )}
+                        {transaction.groupExpense && (
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-status-info text-status-info">
+                            <Users className="h-2.5 w-2.5" />
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted">
+                        {new Date(transaction.date).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className={`text-sm font-semibold ${
+                      transaction.type === 'income' ? 'text-status-success' : 
+                      transaction.type === 'expense' ? 'text-status-error' :
+                      transaction.type === 'lending' ? 'text-green-600' : 'text-orange-600'
+                    }`}>
+                      {transaction.type === 'income' || transaction.type === 'lending' ? '+' : '-'}{formatAmount(transaction.amount)}
+                    </span>
+                    {isExpanded ? (
+                      <ChevronUp className="h-4 w-4 text-muted" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4 text-muted" />
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Expanded Details */}
+              {isExpanded && (
+                <div className="px-4 pb-4 border-t border-table-border">
+                  <div className="grid grid-cols-2 gap-4 mt-4">
+                    <div>
+                      <p className="text-xs font-medium text-input-label uppercase tracking-wider mb-1">
+                        Type
+                      </p>
+                      <span className={`text-sm font-medium ${
+                        transaction.type === 'income' ? 'text-status-success' : 
+                        transaction.type === 'expense' ? 'text-status-error' :
+                        transaction.type === 'lending' ? 'text-green-600' : 'text-orange-600'
+                      }`}>
+                        {transaction.type === 'income' ? 'Income' : 
+                         transaction.type === 'expense' ? 'Expense' :
+                         transaction.type === 'lending' ? 'Lending' : 'Borrowing'}
+                      </span>
+                    </div>
+                    
+                    <div>
+                      <p className="text-xs font-medium text-input-label uppercase tracking-wider mb-1">
+                        Category
+                      </p>
+                      <span
+                        className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                        style={{
+                          backgroundColor: transaction.category.color + '20',
+                          color: transaction.category.color || '#374151'
+                        }}
+                      >
+                        {transaction.category.name}
+                      </span>
+                    </div>
+                    
+                    <div>
+                      <p className="text-xs font-medium text-input-label uppercase tracking-wider mb-1">
+                        Account
+                      </p>
+                      <p className="text-sm text-heading">
+                        {transaction.account.name}
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <p className="text-xs font-medium text-input-label uppercase tracking-wider mb-1">
+                        Source
+                      </p>
+                      <p className="text-sm text-heading">
+                        {transaction.groupExpense ? (
+                          <span className="text-status-info font-medium">
+                            {transaction.groupExpense.group.name}
+                          </span>
+                        ) : transaction.source ? (
+                          transaction.source
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Group Type Badge */}
+                  {transaction.groupType && (
+                    <div className="mt-3">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-muted text-body">
+                        {transaction.groupType.replace('_', ' ').toLowerCase()}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  {!transaction.groupExpense && !transaction.groupType && (
+                    <div className="flex justify-end space-x-3 mt-4 pt-3 border-t border-table-border">
+                      {(transaction.type === 'income' || transaction.type === 'expense') && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setEditingTransaction(transaction)
+                            setShowEditModal(true)
+                          }}
+                          className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-link hover:text-link-hover rounded-md hover:bg-button-secondary-hover transition-colors duration-200"
+                        >
+                          <Edit className="h-4 w-4 mr-1" />
+                          Edit
+                        </button>
+                      )}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDeleteTransaction(transaction)
+                        }}
+                        className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-600 hover:text-red-800 rounded-md hover:bg-red-50 transition-colors duration-200"
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                  
+                  {(transaction.groupExpense || transaction.groupType) && (
+                    <div className="mt-4 pt-3 border-t border-table-border">
+                      <p className="text-xs text-gray-400 text-center">
+                        {transaction.groupExpense ? 'Group transactions cannot be edited individually' : 'Group lending/borrowing transaction'}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+
       {filteredTransactions.length === 0 && (
         <div className="text-center py-12">
           <p className="text-muted">No transactions found. Try adjusting your filters.</p>
@@ -767,7 +1000,7 @@ function EditTransactionForm({
           required
           value={formData.amount}
           onChange={(e) => setFormData({...formData, amount: parseFloat(e.target.value) || 0})}
-          className="w-full border border-input rounded-md px-3 py-2 bg-input text-heading"
+          className="w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input placeholder-gray-400 transition-all duration-200"
         />
       </div>
 
@@ -779,7 +1012,7 @@ function EditTransactionForm({
           type="text"
           value={formData.description}
           onChange={(e) => setFormData({...formData, description: e.target.value})}
-          className="w-full border border-input rounded-md px-3 py-2 bg-input text-heading"
+          className="w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input placeholder-gray-400 transition-all duration-200"
         />
       </div>
 
@@ -791,7 +1024,7 @@ function EditTransactionForm({
           required
           value={formData.categoryId}
           onChange={(e) => setFormData({...formData, categoryId: e.target.value})}
-          className="w-full border border-input rounded-md px-3 py-2 bg-input text-heading"
+          className="w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200 appearance-none bg-arrow-down bg-no-repeat bg-right bg-origin-content"
         >
           {categories.filter(cat => cat.type === transaction.type.toUpperCase()).map(category => (
             <option key={category.id} value={category.id}>
@@ -809,7 +1042,7 @@ function EditTransactionForm({
           required
           value={formData.accountId}
           onChange={(e) => setFormData({...formData, accountId: e.target.value})}
-          className="w-full border border-input rounded-md px-3 py-2 bg-input text-heading"
+          className="w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200 appearance-none bg-arrow-down bg-no-repeat bg-right bg-origin-content"
         >
           {accounts.map(account => (
             <option key={account.id} value={account.id}>
@@ -828,7 +1061,7 @@ function EditTransactionForm({
           required
           value={formData.date}
           onChange={(e) => setFormData({...formData, date: e.target.value})}
-          className="w-full border border-input rounded-md px-3 py-2 bg-input text-heading"
+          className="w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200"
         />
       </div>
 

@@ -282,19 +282,19 @@ export default function Groups() {
   }
 
   return (
-    <div>
+    <div className="p-4 sm:p-6 lg:p-8">
       {/* Header */}
-      <div className="sm:flex sm:items-center sm:justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-heading">Groups</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8">
+        <div className="mb-4 sm:mb-0">
+          <h1 className="text-2xl sm:text-3xl font-bold text-heading">Groups</h1>
           <p className="mt-2 text-sm text-body">
             Manage shared expenses with friends and family
           </p>
         </div>
-        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+        <div className="w-full sm:w-auto">
           <button
             onClick={() => setShowCreateModal(true)}
-            className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 ring-focus focus:ring-offset-2 sm:w-auto"
+            className="w-full sm:w-auto inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 ring-focus focus:ring-offset-2"
           >
             <Plus className="h-4 w-4 mr-2" />
             Create Group
@@ -303,7 +303,7 @@ export default function Groups() {
       </div>
 
       {/* Groups Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {groups.map((group) => {
           const totalExpenses = group.expenses.reduce((sum, expense) => sum + expense.amount, 0)
           const myUnsettledSplits = group.expenses.flatMap(expense => 
@@ -315,88 +315,100 @@ export default function Groups() {
           const myRole = group.members.find(member => member.user.id === session?.user?.id)?.role
 
           return (
-            <div key={group.id} className="bg-card rounded-lg shadow-card overflow-hidden">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-heading">
-                    {group.name}
-                  </h3>
+            <Link
+              key={group.id}
+              href={`/groups/${group.id}`}
+              className="block bg-card rounded-xl shadow-card hover:shadow-lg transition-all duration-200 overflow-hidden group"
+            >
+              <div className="p-4 sm:p-6">
+                {/* Header */}
+                <div className="flex items-start justify-between mb-3 sm:mb-4">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-base sm:text-lg font-semibold text-heading truncate group-hover:text-blue-600 transition-colors duration-200">
+                      {group.name}
+                    </h3>
+                    {group.description && (
+                      <p className="text-xs sm:text-sm text-muted mt-1 line-clamp-2">
+                        {group.description}
+                      </p>
+                    )}
+                  </div>
                   {myRole === 'ADMIN' && (
-                    <Settings 
-                      className="h-5 w-5 text-muted hover:text-body cursor-pointer" 
-                      onClick={() => openSettingsModal(group)}
-                    />
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault()
+                        openSettingsModal(group)
+                      }}
+                      className="p-1 text-muted hover:text-body rounded-md hover:bg-gray-100 transition-colors duration-200 flex-shrink-0 ml-2"
+                    >
+                      <Settings className="h-4 w-4" />
+                    </button>
                   )}
                 </div>
-                
-                {group.description && (
-                  <p className="text-body text-sm mb-4">
-                    {group.description}
-                  </p>
-                )}
 
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <Users className="h-4 w-4 text-gray-400 mr-2" />
-                      <span className="text-sm text-body">
-                        {group.members.length} members
-                      </span>
-                    </div>
-                    <div className="flex -space-x-2">
+                {/* Members & Total */}
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <div className="flex items-center space-x-2">
+                    <div className="flex -space-x-1.5 sm:-space-x-2">
                       {group.members.slice(0, 3).map((member) => (
                         <div
                           key={member.id}
-                          className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-medium border-2 border-card"
+                          className="h-6 w-6 sm:h-8 sm:w-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-medium border-2 border-card flex-shrink-0"
                           title={member.user.name}
                         >
                           {member.user.name?.[0]?.toUpperCase() || 'U'}
                         </div>
                       ))}
                       {group.members.length > 3 && (
-                        <div className="h-8 w-8 rounded-full bg-gray-500 flex items-center justify-center text-white text-xs font-medium border-2 border-card">
+                        <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-full bg-gray-400 flex items-center justify-center text-white text-xs font-medium border-2 border-card flex-shrink-0">
                           +{group.members.length - 3}
                         </div>
                       )}
                     </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <DollarSign className="h-4 w-4 text-gray-400 mr-2" />
-                      <span className="text-sm text-body">
-                        Total spent
-                      </span>
-                    </div>
-                    <span className="text-sm font-medium text-heading">
-                      {formatAmount(totalExpenses)}
+                    <span className="text-xs sm:text-sm text-muted">
+                      {group.members.length} member{group.members.length !== 1 ? 's' : ''}
                     </span>
                   </div>
-
-                  {myOwedAmount > 0 && (
-                    <div className="bg-status-error border border-status-error rounded-md p-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-status-error">
-                          You owe
-                        </span>
-                        <span className="text-sm font-medium text-status-error">
-                          {formatAmount(myOwedAmount)}
-                        </span>
-                      </div>
+                  <div className="text-right">
+                    <div className="text-sm sm:text-base font-semibold text-heading">
+                      {formatAmount(totalExpenses)}
                     </div>
-                  )}
+                    <div className="text-xs text-muted">
+                      total spent
+                    </div>
+                  </div>
                 </div>
 
-                <div className="mt-6 pt-4 border-t border-card-border">
-                  <Link
-                    href={`/groups/${group.id}`}
-                    className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-button-primary bg-button-primary:hover focus:outline-none focus:ring-2 focus:ring-offset-2 ring-focus"
-                  >
-                    View Details
-                  </Link>
+                {/* You Owe Section */}
+                {myOwedAmount > 0 && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-2 sm:p-3 mb-3 sm:mb-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs sm:text-sm font-medium text-red-700">
+                        You owe
+                      </span>
+                      <span className="text-xs sm:text-sm font-semibold text-red-700">
+                        {formatAmount(myOwedAmount)}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Status Indicator */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <div className={`h-2 w-2 rounded-full ${
+                      group.expenses.length > 0 ? 'bg-green-500' : 'bg-gray-300'
+                    }`} />
+                    <span className="text-xs text-muted">
+                      {group.expenses.length} expense{group.expenses.length !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                  <div className="text-xs text-blue-600 font-medium group-hover:text-blue-700 transition-colors duration-200">
+                    View Details →
+                  </div>
                 </div>
               </div>
-            </div>
+            </Link>
           )
         })}
       </div>

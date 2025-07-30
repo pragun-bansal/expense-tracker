@@ -225,15 +225,84 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Only group admins can settle debts' }, { status: 403 })
     }
 
-    // Create payment records and mark splits as settled
+    // Create payment records with personal transactions and mark splits as settled
     const paymentPromises = settlements.map(async (settlement: Settlement) => {
-      // Create payment record
+      // Get helper accounts and category
+      const defaultGroupCategory = await getOrCreateGroupCategory()
+      const payerOthersAccount = await getOrCreateOthersAccount(settlement.from)
+      const payeeOthersAccount = await getOrCreateOthersAccount(settlement.to)
+      const payerGroupLendingAccount = await getOrCreateGroupLendingAccount(settlement.from)
+      const payeeGroupLendingAccount = await getOrCreateGroupLendingAccount(settlement.to)
+      
+      // Get user names for transaction descriptions
+      const payerName = await getUserName(settlement.from)
+      const payeeName = await getUserName(settlement.to)
+
+      // Create expense for payer (money going out)
+      const payerExpense = await prisma.expense.create({
+        data: {
+          amount: settlement.amount,
+          description: `[Debt Settlement] Payment to ${payeeName}`,
+          date: new Date(),
+          userId: settlement.from,
+          accountId: payerOthersAccount.id,
+          categoryId: defaultGroupCategory.id,
+          groupType: 'SETTLEMENT_PAID'
+        }
+      })
+      await updateAccountBalance(payerOthersAccount.id, -settlement.amount)
+
+      // Reduce payer's debt in Group Lending/Borrowing account (add lending to offset the debt)
+      const payerLending = await prisma.lending.create({
+        data: {
+          amount: settlement.amount,
+          description: `[Debt Settlement] Debt reduction to ${payeeName}`,
+          date: new Date(),
+          userId: settlement.from,
+          accountId: payerGroupLendingAccount.id,
+          categoryId: defaultGroupCategory.id,
+          groupType: 'SETTLEMENT_PAID'
+        }
+      })
+      await updateAccountBalance(payerGroupLendingAccount.id, settlement.amount)
+
+      // Create income for payee (money coming in)
+      const payeeIncome = await prisma.income.create({
+        data: {
+          amount: settlement.amount,
+          description: `[Debt Settlement] Payment from ${payerName}`,
+          date: new Date(),
+          userId: settlement.to,
+          accountId: payeeOthersAccount.id,
+          categoryId: defaultGroupCategory.id,
+          groupType: 'SETTLEMENT_RECEIVED'
+        }
+      })
+      await updateAccountBalance(payeeOthersAccount.id, settlement.amount)
+
+      // Reduce payee's credit in Group Lending/Borrowing account (add borrowing to offset the credit)
+      const payeeBorrowing = await prisma.borrowing.create({
+        data: {
+          amount: settlement.amount,
+          description: `[Debt Settlement] Credit reduction from ${payerName}`,
+          date: new Date(),
+          userId: settlement.to,
+          accountId: payeeGroupLendingAccount.id,
+          categoryId: defaultGroupCategory.id,
+          groupType: 'SETTLEMENT_RECEIVED'
+        }
+      })
+      await updateAccountBalance(payeeGroupLendingAccount.id, -settlement.amount)
+
+      // Create payment record with transaction IDs
       const payment = await prisma.payment.create({
         data: {
           amount: settlement.amount,
           fromId: settlement.from,
           toId: settlement.to,
-          date: new Date()
+          date: new Date(),
+          // Store transaction IDs as metadata in a future update
+          // For now, we have the comprehensive transactions created above
         }
       })
 
@@ -253,14 +322,26 @@ export async function POST(request: NextRequest) {
         }
       })
 
-      return payment
+      return {
+        payment,
+        transactions: {
+          payerExpenseId: payerExpense.id,
+          payerLendingId: payerLending.id,
+          payeeIncomeId: payeeIncome.id,
+          payeeBorrowingId: payeeBorrowing.id
+        }
+      }
     })
 
     const payments = await Promise.all(paymentPromises)
 
     return NextResponse.json({
       message: `Created ${payments.length} payment records and settled debts`,
-      payments
+      payments: payments.map(p => p.payment),
+      transactionsSummary: {
+        totalTransactionsCreated: payments.length * 4, // 4 transactions per settlement
+        details: payments.map(p => p.transactions)
+      }
     })
   } catch (error) {
     console.error('Error settling debts:', error)
@@ -269,4 +350,96 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     )
   }
+}
+
+async function getOrCreateGroupCategory() {
+  let category = await prisma.category.findFirst({
+    where: {
+      name: 'Group Expenses',
+      type: 'EXPENSE'
+    }
+  })
+
+  if (!category) {
+    const firstUser = await prisma.user.findFirst()
+    if (firstUser) {
+      category = await prisma.category.create({
+        data: {
+          name: 'Group Expenses',
+          type: 'EXPENSE',
+          color: '#8B5CF6',
+          icon: '👥',
+          userId: firstUser.id
+        }
+      })
+    } else {
+      throw new Error('No users found in database')
+    }
+  }
+
+  return category
+}
+
+async function getOrCreateOthersAccount(userId: string) {
+  let account = await prisma.userAccount.findFirst({
+    where: {
+      userId,
+      type: 'OTHERS_FIXED'
+    }
+  })
+
+  if (!account) {
+    account = await prisma.userAccount.create({
+      data: {
+        name: 'Others',
+        type: 'OTHERS_FIXED',
+        balance: 0,
+        color: '#6B7280',
+        userId
+      }
+    })
+  }
+
+  return account
+}
+
+async function getOrCreateGroupLendingAccount(userId: string) {
+  let account = await prisma.userAccount.findFirst({
+    where: {
+      userId,
+      type: 'GROUP_LENDING'
+    }
+  })
+
+  if (!account) {
+    account = await prisma.userAccount.create({
+      data: {
+        name: 'Group Lending/Borrowing',
+        type: 'GROUP_LENDING',
+        balance: 0,
+        color: '#10B981',
+        userId
+      }
+    })
+  }
+
+  return account
+}
+
+async function updateAccountBalance(accountId: string, amount: number) {
+  await prisma.userAccount.update({
+    where: { id: accountId },
+    data: {
+      balance: {
+        increment: amount
+      }
+    }
+  })
+}
+
+async function getUserName(userId: string): Promise<string> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId }
+  })
+  return user?.name || user?.email || 'Unknown User'
 }

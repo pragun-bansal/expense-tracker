@@ -109,7 +109,7 @@ export default function BackupRestore() {
   }
 
   return (
-    <div>
+    <div className="px-4 sm:px-6 lg:px-12 py-6 sm:py-8 lg:py-12">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold text-heading">Backup & Restore</h1>
@@ -137,52 +137,52 @@ export default function BackupRestore() {
 
         {/* Export Backup */}
         <div className="bg-card shadow-card rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
-            <div className="flex items-center mb-4">
-              <Download className="h-5 w-5 text-muted mr-2" />
-              <h3 className="text-lg font-medium leading-6 text-heading">
+          <div className="px-6 py-6 sm:p-8">
+            <div className="flex items-center mb-6">
+              <Download className="h-6 w-6 text-muted mr-3" />
+              <h3 className="text-xl font-semibold leading-6 text-heading">
                 Export Backup
               </h3>
             </div>
-            <p className="text-sm text-muted mb-6">
+            <p className="text-base text-muted mb-8">
               Create a backup of all your expense tracking data including accounts, categories, expenses, income, budgets, and groups.
             </p>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="border border-card-border rounded-lg p-4">
-                <div className="flex items-center mb-2">
-                  <Database className="h-5 w-5 text-status-info mr-2" />
-                  <h4 className="font-medium text-heading">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="border border-card-border rounded-lg p-6">
+                <div className="flex items-center mb-4">
+                  <Database className="h-6 w-6 text-status-info mr-3" />
+                  <h4 className="text-lg font-semibold text-heading">
                     Complete Backup (JSON)
                   </h4>
                 </div>
-                <p className="text-sm text-muted mb-4">
+                <p className="text-base text-muted mb-6">
                   Full backup with all data and relationships. Use this for complete restoration.
                 </p>
                 <button
                   onClick={() => handleExportBackup('json')}
                   disabled={loading}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed w-full justify-center"
+                  className="inline-flex items-center px-6 py-3 border border-transparent text-sm sm:text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed w-full justify-center transition-all duration-200"
                 >
                   <Download className="h-4 w-4 mr-2" />
                   {loading ? 'Exporting...' : 'Export JSON'}
                 </button>
               </div>
 
-              <div className="border border-card-border rounded-lg p-4">
-                <div className="flex items-center mb-2">
-                  <FileText className="h-5 w-5 text-status-success mr-2" />
-                  <h4 className="font-medium text-heading">
+              <div className="border border-card-border rounded-lg p-6">
+                <div className="flex items-center mb-4">
+                  <FileText className="h-6 w-6 text-status-success mr-3" />
+                  <h4 className="text-lg font-semibold text-heading">
                     Simple Export (CSV)
                   </h4>
                 </div>
-                <p className="text-sm text-muted mb-4">
+                <p className="text-base text-muted mb-6">
                   Basic expense and income data in CSV format. Good for spreadsheet analysis.
                 </p>
                 <button
                   onClick={() => handleExportBackup('csv')}
                   disabled={loading}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed w-full justify-center"
+                  className="inline-flex items-center px-6 py-3 border border-transparent text-sm sm:text-base font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed w-full justify-center transition-all duration-200"
                 >
                   <Download className="h-4 w-4 mr-2" />
                   {loading ? 'Exporting...' : 'Export CSV'}
@@ -194,45 +194,47 @@ export default function BackupRestore() {
 
         {/* Restore Backup */}
         <div className="bg-card shadow-card rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
-            <div className="flex items-center mb-4">
-              <Upload className="h-5 w-5 text-muted mr-2" />
-              <h3 className="text-lg font-medium leading-6 text-heading">
+          <div className="px-6 py-6 sm:p-8">
+            <div className="flex items-center mb-6">
+              <Upload className="h-6 w-6 text-muted mr-3" />
+              <h3 className="text-xl font-semibold leading-6 text-heading">
                 Restore Backup
               </h3>
             </div>
-            <p className="text-sm text-muted mb-6">
+            <p className="text-base text-muted mb-8">
               Restore your data from a previous backup file. Only JSON backup files are supported for restoration.
             </p>
 
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-input-label mb-2">
+                <label className="block text-sm font-medium text-input-label mb-3">
                   Select Backup File
                 </label>
                 <input
                   type="file"
                   accept=".json"
                   onChange={handleFileSelect}
-                  className="block w-full text-sm text-muted file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900 dark:file:text-blue-300 dark:hover:file:bg-blue-800"
+                  className="block w-full px-4 py-3 border-input rounded-lg shadow-sm text-base text-input bg-input transition-all duration-200 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900 dark:file:text-blue-300 dark:hover:file:bg-blue-800"
                 />
               </div>
 
               {selectedFile && (
-                <div className="flex items-center p-3 bg-muted rounded-lg">
-                  <FileText className="h-5 w-5 text-muted mr-2" />
-                  <div className="flex-1">
-                    <div className="text-sm font-medium text-heading">
-                      {selectedFile.name}
-                    </div>
-                    <div className="text-xs text-muted">
-                      {(selectedFile.size / 1024).toFixed(1)} KB
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-6 bg-muted rounded-lg">
+                  <div className="flex items-center flex-1">
+                    <FileText className="h-6 w-6 text-muted mr-3" />
+                    <div>
+                      <div className="text-base font-medium text-heading">
+                        {selectedFile.name}
+                      </div>
+                      <div className="text-sm text-muted">
+                        {(selectedFile.size / 1024).toFixed(1)} KB
+                      </div>
                     </div>
                   </div>
                   <button
                     onClick={handleRestoreBackup}
                     disabled={loading}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center px-6 py-3 border border-transparent text-sm sm:text-base font-medium rounded-lg text-white bg-orange-600 hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 min-w-[160px] justify-center"
                   >
                     <Upload className="h-4 w-4 mr-2" />
                     {loading ? 'Restoring...' : 'Restore Backup'}
@@ -246,10 +248,10 @@ export default function BackupRestore() {
         {/* Restore Results */}
         {restoreResult && (
           <div className="bg-card shadow-card rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <div className="flex items-center mb-4">
-                <CheckCircle className="h-5 w-5 text-status-success mr-2" />
-                <h3 className="text-lg font-medium leading-6 text-heading">
+            <div className="px-6 py-6 sm:p-8">
+              <div className="flex items-center mb-6">
+                <CheckCircle className="h-6 w-6 text-status-success mr-3" />
+                <h3 className="text-xl font-semibold leading-6 text-heading">
                   Restore Results
                 </h3>
               </div>
@@ -334,28 +336,28 @@ export default function BackupRestore() {
 
         {/* Security Information */}
         <div className="bg-card shadow-card rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
-            <div className="flex items-center mb-4">
-              <Shield className="h-5 w-5 text-muted mr-2" />
-              <h3 className="text-lg font-medium leading-6 text-heading">
+          <div className="px-6 py-6 sm:p-8">
+            <div className="flex items-center mb-6">
+              <Shield className="h-6 w-6 text-muted mr-3" />
+              <h3 className="text-xl font-semibold leading-6 text-heading">
                 Security & Privacy
               </h3>
             </div>
-            <div className="space-y-3 text-sm text-muted">
+            <div className="space-y-4 text-base text-muted">
               <div className="flex items-start">
-                <CheckCircle className="h-4 w-4 text-status-success mr-2 mt-0.5 flex-shrink-0" />
+                <CheckCircle className="h-5 w-5 text-status-success mr-3 mt-0.5 flex-shrink-0" />
                 <span>Backup files are generated locally and not stored on our servers</span>
               </div>
               <div className="flex items-start">
-                <CheckCircle className="h-4 w-4 text-status-success mr-2 mt-0.5 flex-shrink-0" />
+                <CheckCircle className="h-5 w-5 text-status-success mr-3 mt-0.5 flex-shrink-0" />
                 <span>All sensitive data remains encrypted and secure</span>
               </div>
               <div className="flex items-start">
-                <CheckCircle className="h-4 w-4 text-status-success mr-2 mt-0.5 flex-shrink-0" />
+                <CheckCircle className="h-5 w-5 text-status-success mr-3 mt-0.5 flex-shrink-0" />
                 <span>You have full control over your backup files</span>
               </div>
               <div className="flex items-start">
-                <CheckCircle className="h-4 w-4 text-status-success mr-2 mt-0.5 flex-shrink-0" />
+                <CheckCircle className="h-5 w-5 text-status-success mr-3 mt-0.5 flex-shrink-0" />
                 <span>Restore only works with backups from the same user account</span>
               </div>
             </div>

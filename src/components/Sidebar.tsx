@@ -109,7 +109,7 @@ export default function Sidebar() {
                 </div>
               </div>
               <div className="flex items-center space-x-2">
-                <ThemeToggle />
+                <div className="hidden sm:flex"><ThemeToggle /></div>
                 <button
                   onClick={handleSignOut}
                   className="p-2 text-icon-neutral hover:text-text-muted"

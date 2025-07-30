@@ -184,19 +184,19 @@ export default function Notifications() {
   }
 
   return (
-    <div>
+    <div className="px-4 sm:px-6 lg:px-12 py-6 sm:py-8 lg:py-12">
       <div className="sm:flex sm:items-center sm:justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-heading">Notifications</h1>
-          <p className="mt-2 text-sm text-body">
+          <h1 className="text-2xl sm:text-3xl font-bold text-heading">Notifications</h1>
+          <p className="mt-2 text-base text-body">
             {unreadCount > 0 ? `${unreadCount} unread notifications` : 'All caught up!'}
           </p>
         </div>
-        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none flex space-x-3">
+        <div className="mt-6 sm:mt-0 sm:ml-16 sm:flex-none flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
           {unreadCount > 0 && (
             <button
               onClick={markAllAsRead}
-              className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="inline-flex items-center justify-center rounded-lg border border-transparent bg-blue-600 px-6 py-3 text-sm sm:text-base font-medium text-white shadow-sm hover:bg-blue-700 transition-all duration-200"
             >
               <Check className="h-4 w-4 mr-2" />
               Mark All Read
@@ -205,7 +205,7 @@ export default function Notifications() {
           {notifications.length > 0 && (
             <button
               onClick={deleteAllNotifications}
-              className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-card px-4 py-2 text-sm font-medium text-red-600 shadow-sm hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+              className="inline-flex items-center justify-center rounded-lg border border-input bg-card px-6 py-3 text-sm sm:text-base font-medium text-red-600 shadow-sm hover:bg-red-50 transition-all duration-200"
             >
               <Trash2 className="h-4 w-4 mr-2" />
               Delete All
@@ -214,11 +214,11 @@ export default function Notifications() {
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-4 sm:space-y-6">
         {notifications.map((notification) => (
           <div
             key={notification.id}
-            className={`bg-card rounded-lg shadow-card p-6 border-l-4 ${
+            className={`bg-card rounded-lg shadow-card p-6 sm:p-8 border-l-4 hover:shadow-lg transition-all duration-200 ${
               notification.read 
                 ? 'border-input' 
                 : 'border-status-info'
@@ -228,24 +228,24 @@ export default function Notifications() {
               <div className="flex-shrink-0">
                 {getNotificationIcon(notification)}
               </div>
-              <div className="ml-3 flex-1">
-                <div className="flex items-center justify-between">
-                  <h3 className={`text-sm font-medium ${
+              <div className="ml-4 flex-1">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+                  <h3 className={`text-base font-semibold ${
                     notification.read 
                       ? 'text-input-label' 
                       : 'text-heading'
                   }`}>
                     {notification.title}
                   </h3>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-xs text-muted">
+                  <div className="flex items-center justify-between sm:justify-end space-x-4">
+                    <span className="text-sm text-muted">
                       {new Date(notification.createdAt).toLocaleDateString()}
                     </span>
-                    <div className="flex items-center space-x-1">
+                    <div className="flex items-center space-x-2">
                       {!notification.read && (
                         <button
                           onClick={() => markAsRead(notification.id)}
-                          className="p-1 text-link hover:text-link-hover rounded-full hover:bg-blue-100"
+                          className="p-2 text-link hover:text-link-hover rounded-lg hover:bg-blue-100 transition-all duration-200"
                           title="Mark as read"
                         >
                           <Check className="h-4 w-4" />
@@ -253,7 +253,7 @@ export default function Notifications() {
                       )}
                       <button
                         onClick={() => deleteNotification(notification.id)}
-                        className="p-1 text-red-600 hover:text-red-800 rounded-full hover:bg-red-100"
+                        className="p-2 text-red-600 hover:text-red-800 rounded-lg hover:bg-red-100 transition-all duration-200"
                         title="Delete notification"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -261,14 +261,14 @@ export default function Notifications() {
                     </div>
                   </div>
                 </div>
-                <p className={`mt-1 text-sm ${
+                <p className={`mt-3 text-base ${
                   notification.read 
                     ? 'text-body' 
                     : 'text-input-label'
                 }`}>
                   {notification.message}
                 </p>
-                <p className="mt-1 text-xs text-muted">
+                <p className="mt-2 text-sm text-muted">
                   {new Date(notification.createdAt).toLocaleString()}
                 </p>
               </div>
@@ -277,10 +277,10 @@ export default function Notifications() {
         ))}
 
         {notifications.length === 0 && (
-          <div className="text-center py-12">
-            <Bell className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-heading">No notifications</h3>
-            <p className="mt-1 text-sm text-muted">
+          <div className="text-center py-16">
+            <Bell className="mx-auto h-16 w-16 text-gray-400" />
+            <h3 className="mt-4 text-lg font-semibold text-heading">No notifications</h3>
+            <p className="mt-2 text-base text-muted">
               You're all caught up! Notifications will appear here when you have activity.
             </p>
           </div>

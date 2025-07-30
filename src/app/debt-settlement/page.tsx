@@ -161,26 +161,26 @@ export default function DebtSettlement() {
   const isGroupAdmin = selectedGroupData?.members.find(m => m.user.id === session?.user?.id)?.role === 'ADMIN'
 
   return (
-    <div>
+    <div className="px-4 sm:px-6 lg:px-12 py-6 sm:py-8 lg:py-12">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold text-heading">Debt Settlement</h1>
-        <p className="mt-2 text-sm text-muted">
+        <p className="mt-2 text-base text-muted">
           Optimize debt settlement within your groups
         </p>
       </div>
 
       {/* Group Selection */}
       <div className="bg-card shadow-card rounded-lg mb-8">
-        <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg font-medium leading-6 text-heading mb-4">
+        <div className="px-6 py-6 sm:p-8">
+          <h3 className="text-xl font-semibold leading-6 text-heading mb-6">
             Select Group
           </h3>
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
             <select
               value={selectedGroup}
               onChange={(e) => setSelectedGroup(e.target.value)}
-              className="flex-1 block w-full border-input rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-input text-heading"
+              className="flex-1 block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200 appearance-none bg-arrow-down bg-no-repeat bg-right bg-origin-content"
             >
               <option value="">Select a group</option>
               {groups.map((group) => (
@@ -192,7 +192,7 @@ export default function DebtSettlement() {
             <button
               onClick={calculateDebtSettlement}
               disabled={!selectedGroup || loading}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center px-6 py-3 border border-transparent text-sm sm:text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 min-w-[180px] justify-center"
             >
               <Calculator className="h-4 w-4 mr-2" />
               {loading ? 'Calculating...' : 'Calculate Settlement'}
@@ -206,7 +206,7 @@ export default function DebtSettlement() {
         <div className="space-y-8">
           {/* Summary Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-card p-6 rounded-lg shadow-card">
+            <div className="bg-card p-6 sm:p-8 rounded-lg shadow-card hover:shadow-lg transition-all duration-200">
               <div className="flex items-center">
                 <Users className="h-8 w-8 text-status-info" />
                 <div className="ml-4">
@@ -217,7 +217,7 @@ export default function DebtSettlement() {
                 </div>
               </div>
             </div>
-            <div className="bg-card p-6 rounded-lg shadow-card">
+            <div className="bg-card p-6 sm:p-8 rounded-lg shadow-card hover:shadow-lg transition-all duration-200">
               <div className="flex items-center">
                 <ArrowRight className="h-8 w-8 text-status-success" />
                 <div className="ml-4">
@@ -228,7 +228,7 @@ export default function DebtSettlement() {
                 </div>
               </div>
             </div>
-            <div className="bg-card p-6 rounded-lg shadow-card">
+            <div className="bg-card p-6 sm:p-8 rounded-lg shadow-card hover:shadow-lg transition-all duration-200">
               <div className="flex items-center">
                 <AlertCircle className="h-8 w-8 text-status-warning" />
                 <div className="ml-4">
@@ -243,22 +243,22 @@ export default function DebtSettlement() {
 
           {/* User Debt Summary */}
           <div className="bg-card shadow-card rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg font-medium leading-6 text-heading mb-4">
+            <div className="px-6 py-6 sm:p-8">
+              <h3 className="text-xl font-semibold leading-6 text-heading mb-6">
                 Current Debt Summary
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {settlementResult.userDebts.map((debt) => (
-                  <div key={debt.userId} className="border border-card-border rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium text-heading">
+                  <div key={debt.userId} className="border border-card-border rounded-lg p-6 hover:shadow-md transition-all duration-200">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-semibold text-heading">
                         {debt.userName}
                       </h4>
                       <span className={`text-sm font-medium ${getBalanceColor(debt.netBalance)}`}>
                         {getBalanceText(debt.netBalance)}
                       </span>
                     </div>
-                    <div className="text-sm text-muted space-y-1">
+                    <div className="text-base text-muted space-y-2">
                       <div>Owed: {formatAmount(debt.totalOwed)}</div>
                       <div>Owes: {formatAmount(debt.totalOwes)}</div>
                     </div>
@@ -271,16 +271,16 @@ export default function DebtSettlement() {
           {/* Optimized Settlements */}
           {settlementResult.settlements.length > 0 ? (
             <div className="bg-card shadow-card rounded-lg">
-              <div className="px-4 py-5 sm:p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-medium leading-6 text-heading">
+              <div className="px-6 py-6 sm:p-8">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+                  <h3 className="text-xl font-semibold leading-6 text-heading">
                     Optimized Settlement Plan
                   </h3>
                   {isGroupAdmin && (
                     <button
                       onClick={settleDebts}
                       disabled={settling}
-                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="inline-flex items-center px-6 py-3 border border-transparent text-sm sm:text-base font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 min-w-[160px] justify-center"
                     >
                       <CheckCircle className="h-4 w-4 mr-2" />
                       {settling ? 'Settling...' : 'Settle All Debts'}
@@ -289,29 +289,29 @@ export default function DebtSettlement() {
                 </div>
                 <div className="space-y-4">
                   {settlementResult.settlements.map((settlement, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 border border-card-border rounded-lg">
+                    <div key={index} className="flex flex-col sm:flex-row sm:items-center justify-between p-6 border border-card-border rounded-lg hover:shadow-md transition-all duration-200 gap-4">
                       <div className="flex items-center space-x-4">
-                        <div className="text-sm">
-                          <span className="font-medium text-heading">
+                        <div className="text-base">
+                          <span className="font-semibold text-heading">
                             {settlement.fromName}
                           </span>
                           <span className="text-muted mx-2">pays</span>
-                          <span className="font-medium text-heading">
+                          <span className="font-semibold text-heading">
                             {settlement.toName}
                           </span>
                         </div>
-                        <ArrowRight className="h-4 w-4 text-gray-400" />
+                        <ArrowRight className="h-5 w-5 text-gray-400" />
                       </div>
-                      <div className="text-lg font-semibold text-status-success">
+                      <div className="text-xl font-semibold text-status-success">
                         {formatAmount(settlement.amount)}
                       </div>
                     </div>
                   ))}
                 </div>
-                <div className="mt-4 p-4 bg-status-info rounded-lg">
+                <div className="mt-6 p-6 bg-status-info rounded-lg">
                   <div className="flex items-center">
-                    <AlertCircle className="h-5 w-5 text-status-info mr-2" />
-                    <span className="text-sm text-status-info">
+                    <AlertCircle className="h-6 w-6 text-status-info mr-3" />
+                    <span className="text-base text-status-info">
                       This plan reduces {settlementResult.originalTransactions} transactions to {settlementResult.totalTransactions} optimized settlements.
                     </span>
                   </div>
@@ -320,13 +320,13 @@ export default function DebtSettlement() {
             </div>
           ) : (
             <div className="bg-card shadow-card rounded-lg">
-              <div className="px-4 py-5 sm:p-6">
-                <div className="text-center py-8">
-                  <CheckCircle className="mx-auto h-12 w-12 text-green-400" />
-                  <h3 className="mt-2 text-sm font-medium text-heading">
+              <div className="px-6 py-6 sm:p-8">
+                <div className="text-center py-12">
+                  <CheckCircle className="mx-auto h-16 w-16 text-green-400" />
+                  <h3 className="mt-4 text-lg font-semibold text-heading">
                     All Debts Settled!
                   </h3>
-                  <p className="mt-1 text-sm text-muted">
+                  <p className="mt-2 text-base text-muted">
                     No outstanding debts in this group.
                   </p>
                 </div>

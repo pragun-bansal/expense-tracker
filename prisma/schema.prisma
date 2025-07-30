@@ -302,8 +302,23 @@ model RecurringExpense {
   account         UserAccount    @relation(fields: [accountId], references: [id])
   category        Category       @relation(fields: [categoryId], references: [id])
   expenses        Expense[]
+  generations     RecurringExpenseGeneration[]
 
   @@map("recurring_expenses")
+}
+
+model RecurringExpenseGeneration {
+  id                  String   @id @default(auto()) @map("_id") @db.ObjectId
+  recurringExpenseId  String   @db.ObjectId
+  generatedExpenseIds String[] @db.ObjectId
+  processedDate       DateTime
+  dueDate             DateTime
+  amount              Float
+  createdAt           DateTime @default(now())
+
+  recurringExpense RecurringExpense @relation(fields: [recurringExpenseId], references: [id], onDelete: Cascade)
+
+  @@map("recurring_expense_generations")
 }
 
 model Notification {
