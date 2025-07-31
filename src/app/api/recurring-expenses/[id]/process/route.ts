@@ -88,6 +88,17 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         }
       })
 
+      // Create generation tracking record
+      await prisma.recurringExpenseGeneration.create({
+        data: {
+          recurringExpenseId: recurringExpense.id,
+          generatedExpenseIds: [expense.id],
+          processedDate: now,
+          dueDate: missedDueDate,
+          amount: recurringExpense.amount
+        }
+      })
+
       processedExpenses.push(expense)
     }
 

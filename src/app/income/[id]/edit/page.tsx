@@ -121,7 +121,7 @@ export default function EditIncome({ params }: { params: { id: string } }) {
       })
 
       if (response.ok) {
-        router.push('/income')
+        router.push('/transactions')
       } else {
         const data = await response.json()
         setError(data.error || 'Failed to update income')
@@ -157,11 +157,11 @@ export default function EditIncome({ params }: { params: { id: string } }) {
     <div className="px-4 sm:px-6 lg:px-12 py-6 sm:py-8 lg:py-12">
       <div className="mb-8">
         <Link
-          href="/income"
+          href="/transactions"
           className="inline-flex items-center text-sm font-medium text-muted hover:text-body transition-colors duration-200"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Income
+          Back to Transactions
         </Link>
       </div>
 
@@ -288,7 +288,7 @@ export default function EditIncome({ params }: { params: { id: string } }) {
 
               <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-6 border-t border-input">
                 <Link
-                  href="/income"
+                  href="/transactions"
                   className="bg-input py-3 px-6 border border-input rounded-lg shadow-sm text-sm sm:text-base font-medium text-input-label hover:bg-button-secondary-hover transition-all duration-200 text-center"
                 >
                   Cancel

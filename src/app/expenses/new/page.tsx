@@ -265,11 +265,11 @@ export default function NewExpense() {
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-12 py-6 sm:py-8 lg:py-12">
         <div className="mb-8">
           <Link
-            href="/expenses"
+            href="/transactions"
             className="inline-flex items-center text-sm font-medium text-link text-link:hover"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Expenses
+            Back to Transactions
           </Link>
         </div>
 
@@ -467,9 +467,9 @@ export default function NewExpense() {
                   onChange={handleInputChange}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
-                <label htmlFor="isRecurring" className="ml-2 block text-sm text-heading">
-                  This is a recurring expense
-                </label>
+                {/*<label htmlFor="isRecurring" className="ml-2 block text-sm text-heading">*/}
+                {/*  This is a recurring expense*/}
+                {/*</label>*/}
               </div>
 
               {error && (
@@ -478,7 +478,7 @@ export default function NewExpense() {
 
               <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-6">
                 <Link
-                  href="/expenses"
+                  href="/transactions"
                   className="bg-input py-3 px-6 border border-input rounded-lg shadow-sm text-sm sm:text-base font-medium text-input-label hover:bg-button-secondary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 text-center"
                 >
                   Cancel
