@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
-import { Plus, Edit3, Target, Trash2, Palette, DollarSign, Coffee, ShoppingCart, Home, Car, Fuel, Music, Smartphone, CreditCard, TrendingUp, Briefcase, Building, Plane, Book, Heart, Gift, Settings, Package } from 'lucide-react'
+import { Plus, Edit3, Target, Trash2, Palette, DollarSign, Coffee, ShoppingCart, Home, Car, Fuel, Music, Smartphone, CreditCard, TrendingUp, Briefcase, Building, Plane, Book, Heart, Gift, Settings, Package, RefreshCw } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
 import { useCurrency } from '@/hooks/useCurrency'
 import AlertModal from '@/components/AlertModal'
@@ -77,6 +77,8 @@ export default function BudgetsAndCategories() {
         const categoriesData = await categoriesResponse.json()
         const budgetsData = await budgetsResponse.json()
 
+        console.log('Budget data received:', budgetsData)
+
         // Combine categories with their budgets
         const categoriesWithBudgets = categoriesData.map((category: any) => {
           // Don't attach budgets to system categories or income categories
@@ -88,6 +90,14 @@ export default function BudgetsAndCategories() {
           }
 
           const budget = budgetsData.find((b: any) => b.categoryId === category.id)
+          if (budget) {
+            console.log(`Budget for ${category.name}:`, {
+              amount: budget.amount,
+              currentSpending: budget.currentSpending,
+              percentUsed: budget.percentUsed
+            })
+          }
+          
           return {
             ...category,
             budget: budget ? {
@@ -446,13 +456,23 @@ export default function BudgetsAndCategories() {
             Manage your spending categories and set budgets to track your finances
           </p>
         </div>
-        <button
-          onClick={() => openCategoryModal()}
-          className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-button-primary bg-button-primary hover:bg-button-primary-hover focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 w-full lg:w-auto"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add Category
-        </button>
+        <div className="flex gap-2 w-full lg:w-auto">
+          <button
+            onClick={fetchCategories}
+            disabled={loading}
+            className="inline-flex items-center justify-center px-3 py-2 border border-input text-sm font-medium rounded-md text-muted bg-card hover:bg-card-hover focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 disabled:opacity-50"
+            title="Refresh budget data"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          </button>
+          <button
+            onClick={() => openCategoryModal()}
+            className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-button-primary bg-button-primary hover:bg-button-primary-hover focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 flex-1 lg:flex-none"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add Category
+          </button>
+        </div>
       </div>
 
       {/* Tabs */}
@@ -574,18 +594,25 @@ export default function BudgetsAndCategories() {
                         />
                       </div>
                       
-                      <div className="text-xs text-center">
-                        <span className={`font-medium ${
-                          budgetStatus === 'over' ? 'text-status-error' : 
-                          budgetStatus === 'warning' ? 'text-status-warning' : 'text-status-success'
-                        }`}>
-                          {progress.toFixed(0)}% used
-                        </span>
-                        {budgetStatus === 'over' && (
-                          <span className="text-status-error ml-2">
-                            (Over by {formatAmount(category.budget.currentSpent - category.budget.amount)})
+                      <div className="text-xs text-center space-y-1">
+                        <div className="flex justify-center items-center space-x-2">
+                          <span className="text-muted">
+                            {formatAmount(category.budget.currentSpent)} of {formatAmount(category.budget.amount)}
                           </span>
-                        )}
+                        </div>
+                        <div>
+                          <span className={`font-medium ${
+                            budgetStatus === 'over' ? 'text-status-error' : 
+                            budgetStatus === 'warning' ? 'text-status-warning' : 'text-status-success'
+                          }`}>
+                            {progress.toFixed(0)}% used
+                          </span>
+                          {budgetStatus === 'over' && (
+                            <span className="text-status-error ml-2">
+                              (Over by {formatAmount(category.budget.currentSpent - category.budget.amount)})
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
 

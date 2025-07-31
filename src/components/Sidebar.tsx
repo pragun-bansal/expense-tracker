@@ -21,8 +21,7 @@ import {
   Repeat,
   Calculator,
   Shield,
-  Bell,
-  Palette
+  Bell
 } from 'lucide-react'
 import { ThemeToggle } from './ThemeToggle'
 
@@ -35,8 +34,7 @@ const navigation = [
   { name: 'Groups', href: '/groups', icon: Users },
   // { name: 'Debt Settlement', href: '/debt-settlement', icon: Calculator },
   { name: 'Analytics', href: '/analytics', icon: PieChart },
-  { name: 'Budgets', href: '/budgets', icon: Target },
-  { name: 'Budgets & Categories', href: '/budgets-categories', icon: Palette },
+  { name: 'Budgets & Categories', href: '/budgets-categories', icon: Target },
   { name: 'Reports', href: '/reports', icon: FileText },
   { name: 'Settings', href: '/settings', icon: Settings },
   { name: 'Backup', href: '/backup', icon: Shield },
