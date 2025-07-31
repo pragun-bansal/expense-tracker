@@ -12,13 +12,11 @@ export interface BudgetCheckResult {
 
 export async function checkBudgetAlert(userId: string, categoryId: string): Promise<BudgetCheckResult | null> {
   try {
-    // Find active budget for this user and category
+    // Find budget for this user and category
     const budget = await prisma.budget.findFirst({
       where: {
         userId,
-        categoryId,
-        startDate: { lte: new Date() },
-        endDate: { gte: new Date() }
+        categoryId
       },
       include: {
         user: {
@@ -38,17 +36,41 @@ export async function checkBudgetAlert(userId: string, categoryId: string): Prom
     })
 
     if (!budget) {
-      return null // No active budget for this category
+      return null // No budget for this category
     }
 
-    // Calculate current spending for this budget
+    // Calculate current period dates based on budget period and current date
+    const now = new Date()
+    let currentStartDate: Date
+    let currentEndDate: Date
+
+    switch (budget.period) {
+      case 'WEEKLY':
+        currentStartDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - now.getUTCDay()))
+        currentEndDate = new Date(currentStartDate.getTime() + 6 * 24 * 60 * 60 * 1000)
+        break
+      case 'MONTHLY':
+        currentStartDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1))
+        currentEndDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0))
+        break
+      case 'YEARLY':
+        currentStartDate = new Date(Date.UTC(now.getUTCFullYear(), 0, 1))
+        currentEndDate = new Date(Date.UTC(now.getUTCFullYear(), 11, 31))
+        break
+      default:
+        // Fallback to stored dates if period is unknown
+        currentStartDate = budget.startDate
+        currentEndDate = budget.endDate
+    }
+
+    // Calculate current spending for this budget using current period dates
     const currentSpending = await prisma.expense.aggregate({
       where: {
         userId: budget.userId,
         categoryId: budget.categoryId,
         date: {
-          gte: budget.startDate,
-          lte: budget.endDate
+          gte: currentStartDate,
+          lte: currentEndDate
         }
       },
       _sum: {
@@ -71,19 +93,19 @@ export async function checkBudgetAlert(userId: string, categoryId: string): Prom
     // Check if notification should be sent (80% threshold or exceeded)
     if (percentUsed >= 80 && budget.user.email) {
       // Check if we've already sent a notification for this budget recently
-      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000)
       const recentNotification = await prisma.budgetNotification.findFirst({
         where: {
           budgetId: budget.id,
           userId: budget.userId,
           createdAt: {
-            gte: oneDayAgo
+            gte: fiveMinutesAgo
           }
         }
       })
 
       if (recentNotification) {
-        result.reason = 'Notification already sent within 24 hours'
+        result.reason = 'Notification already sent within 5 minutes'
         return result
       }
 
@@ -144,12 +166,10 @@ export async function checkBudgetAlert(userId: string, categoryId: string): Prom
 
 export async function checkAllBudgetAlerts(userId: string): Promise<BudgetCheckResult[]> {
   try {
-    // Get all active budgets for the user
+    // Get all budgets for the user
     const budgets = await prisma.budget.findMany({
       where: {
-        userId,
-        startDate: { lte: new Date() },
-        endDate: { gte: new Date() }
+        userId
       },
       include: {
         category: {

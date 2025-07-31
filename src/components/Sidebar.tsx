@@ -24,6 +24,7 @@ import {
   Bell
 } from 'lucide-react'
 import { ThemeToggle } from './ThemeToggle'
+import { useNotifications } from '@/hooks/useNotifications'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -44,6 +45,7 @@ export default function Sidebar() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
   const { data: session } = useSession()
+  const { unreadCount } = useNotifications()
 
   const handleSignOut = () => {
     signOut({ callbackUrl: '/' })
@@ -71,19 +73,27 @@ export default function Sidebar() {
           <nav className="flex-1 space-y-1 px-2 py-4">
             {navigation.map((item) => {
               const isActive = pathname === item.href
+              const isNotifications = item.href === '/notifications'
               return (
                 <Link
                   key={item.name}
                   href={item.href}
                   onClick={() => setSidebarOpen(false)}
-                  className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  className={`group flex items-center justify-between px-2 py-2 text-sm font-medium rounded-md ${
                     isActive
                       ? 'bg-sidebar-nav-active text-sidebar-nav-active'
                       : 'text-sidebar-nav bg-sidebar-nav-hover text-sidebar-nav-hover'
                   }`}
                 >
-                  <item.icon className="mr-3 h-5 w-5" />
-                  {item.name}
+                  <div className="flex items-center">
+                    <item.icon className="mr-3 h-5 w-5" />
+                    {item.name}
+                  </div>
+                  {isNotifications && unreadCount > 0 && (
+                    <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
                 </Link>
               )
             })}
@@ -133,18 +143,26 @@ export default function Sidebar() {
           <nav className="flex-1 space-y-1 px-2 py-4">
             {navigation.map((item) => {
               const isActive = pathname === item.href
+              const isNotifications = item.href === '/notifications'
               return (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  className={`group flex items-center justify-between px-2 py-2 text-sm font-medium rounded-md ${
                     isActive
                       ? 'bg-sidebar-nav-active text-sidebar-nav-active'
                       : 'text-sidebar-nav bg-sidebar-nav-hover text-sidebar-nav-hover'
                   }`}
                 >
-                  <item.icon className="mr-3 h-5 w-5" />
-                  {item.name}
+                  <div className="flex items-center">
+                    <item.icon className="mr-3 h-5 w-5" />
+                    {item.name}
+                  </div>
+                  {isNotifications && unreadCount > 0 && (
+                    <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
                 </Link>
               )
             })}

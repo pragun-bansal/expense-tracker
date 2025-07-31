@@ -28,7 +28,7 @@ export function useBudgetAlerts() {
       duration: isExceeded ? 8000 : 6000, // Longer duration for exceeded budgets
       action: {
         label: 'View Budgets',
-        onClick: () => router.push('/budgets')
+        onClick: () => router.push('/budgets-categories')
       }
     })
   }

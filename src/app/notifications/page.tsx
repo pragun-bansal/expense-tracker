@@ -184,104 +184,111 @@ export default function Notifications() {
   }
 
   return (
-    <div className="px-4 sm:px-6 lg:px-12 py-6 sm:py-8 lg:py-12">
-      <div className="sm:flex sm:items-center sm:justify-between mb-8">
+    <div className="px-3 sm:px-4 lg:px-6 py-4 sm:py-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-heading">Notifications</h1>
-          <p className="mt-2 text-base text-body">
-            {unreadCount > 0 ? `${unreadCount} unread notifications` : 'All caught up!'}
+          <h1 className="text-xl sm:text-2xl font-bold text-heading">Notifications</h1>
+          <p className="mt-1 text-sm text-body">
+            {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up!'}
           </p>
         </div>
-        <div className="mt-6 sm:mt-0 sm:ml-16 sm:flex-none flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+        <div className="flex flex-row gap-2 sm:gap-3">
           {unreadCount > 0 && (
             <button
               onClick={markAllAsRead}
-              className="inline-flex items-center justify-center rounded-lg border border-transparent bg-blue-600 px-6 py-3 text-sm sm:text-base font-medium text-white shadow-sm hover:bg-blue-700 transition-all duration-200"
+              className="flex items-center justify-center rounded-md bg-blue-600 px-3 py-2 text-xs sm:text-sm font-medium text-white hover:bg-blue-700 transition-colors"
             >
-              <Check className="h-4 w-4 mr-2" />
+              <Check className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
               Mark All Read
             </button>
           )}
           {notifications.length > 0 && (
             <button
               onClick={deleteAllNotifications}
-              className="inline-flex items-center justify-center rounded-lg border border-input bg-card px-6 py-3 text-sm sm:text-base font-medium text-red-600 shadow-sm hover:bg-red-50 transition-all duration-200"
+              className="flex items-center justify-center rounded-md border border-red-300 bg-white px-3 py-2 text-xs sm:text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
             >
-              <Trash2 className="h-4 w-4 mr-2" />
+              <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
               Delete All
             </button>
           )}
         </div>
       </div>
 
-      <div className="space-y-4 sm:space-y-6">
+      <div className="space-y-3">
         {notifications.map((notification) => (
           <div
             key={notification.id}
-            className={`bg-card rounded-lg shadow-card p-6 sm:p-8 border-l-4 hover:shadow-lg transition-all duration-200 ${
+            className={`bg-card rounded-lg border-l-4 p-4 hover:shadow-sm transition-all ${
               notification.read 
-                ? 'border-input' 
-                : 'border-status-info'
+                ? 'border-gray-200 shadow-sm' 
+                : 'border-blue-500 shadow-md'
             }`}
           >
-            <div className="flex items-start">
-              <div className="flex-shrink-0">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 mt-0.5">
                 {getNotificationIcon(notification)}
               </div>
-              <div className="ml-4 flex-1">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-                  <h3 className={`text-base font-semibold ${
-                    notification.read 
-                      ? 'text-input-label' 
-                      : 'text-heading'
-                  }`}>
-                    {notification.title}
-                  </h3>
-                  <div className="flex items-center justify-between sm:justify-end space-x-4">
-                    <span className="text-sm text-muted">
-                      {new Date(notification.createdAt).toLocaleDateString()}
-                    </span>
-                    <div className="flex items-center space-x-2">
-                      {!notification.read && (
-                        <button
-                          onClick={() => markAsRead(notification.id)}
-                          className="p-2 text-link hover:text-link-hover rounded-lg hover:bg-blue-100 transition-all duration-200"
-                          title="Mark as read"
-                        >
-                          <Check className="h-4 w-4" />
-                        </button>
-                      )}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <h3 className={`text-sm sm:text-base font-medium leading-tight ${
+                      notification.read 
+                        ? 'text-gray-600' 
+                        : 'text-heading'
+                    }`}>
+                      {notification.title}
+                    </h3>
+                    <p className={`mt-1 text-xs sm:text-sm leading-relaxed ${
+                      notification.read 
+                        ? 'text-gray-500' 
+                        : 'text-body'
+                    }`}>
+                      {notification.message}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    {!notification.read && (
                       <button
-                        onClick={() => deleteNotification(notification.id)}
-                        className="p-2 text-red-600 hover:text-red-800 rounded-lg hover:bg-red-100 transition-all duration-200"
-                        title="Delete notification"
+                        onClick={() => markAsRead(notification.id)}
+                        className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors"
+                        title="Mark as read"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Check className="h-3 w-3 sm:h-4 sm:w-4" />
                       </button>
-                    </div>
+                    )}
+                    <button
+                      onClick={() => deleteNotification(notification.id)}
+                      className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
+                      title="Delete"
+                    >
+                      <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                    </button>
                   </div>
                 </div>
-                <p className={`mt-3 text-base ${
-                  notification.read 
-                    ? 'text-body' 
-                    : 'text-input-label'
-                }`}>
-                  {notification.message}
-                </p>
-                <p className="mt-2 text-sm text-muted">
-                  {new Date(notification.createdAt).toLocaleString()}
-                </p>
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-xs text-muted">
+                    {new Date(notification.createdAt).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </span>
+                  {!notification.read && (
+                    <span className="inline-block w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         ))}
 
         {notifications.length === 0 && (
-          <div className="text-center py-16">
-            <Bell className="mx-auto h-16 w-16 text-gray-400" />
-            <h3 className="mt-4 text-lg font-semibold text-heading">No notifications</h3>
-            <p className="mt-2 text-base text-muted">
-              You're all caught up! Notifications will appear here when you have activity.
+          <div className="text-center py-12">
+            <Bell className="mx-auto h-12 w-12 text-gray-300" />
+            <h3 className="mt-3 text-base font-medium text-heading">No notifications</h3>
+            <p className="mt-1 text-sm text-muted">
+              You're all caught up!
             </p>
           </div>
         )}

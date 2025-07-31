@@ -108,15 +108,39 @@ async function generateSummaryReport(userId: string, dateFilter: any) {
     return acc
   }, {} as Record<string, number>)
 
-  // Calculate actual spending for each budget based on expenses within budget period
+  // Calculate actual spending for each budget based on current period dates
   const budgetStatus = await Promise.all(budgets.map(async (budget) => {
+    // Calculate current period dates based on budget period and current date
+    const now = new Date()
+    let currentStartDate: Date
+    let currentEndDate: Date
+
+    switch (budget.period) {
+      case 'WEEKLY':
+        currentStartDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - now.getUTCDay()))
+        currentEndDate = new Date(currentStartDate.getTime() + 6 * 24 * 60 * 60 * 1000)
+        break
+      case 'MONTHLY':
+        currentStartDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1))
+        currentEndDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0))
+        break
+      case 'YEARLY':
+        currentStartDate = new Date(Date.UTC(now.getUTCFullYear(), 0, 1))
+        currentEndDate = new Date(Date.UTC(now.getUTCFullYear(), 11, 31))
+        break
+      default:
+        // Fallback to stored dates if period is unknown
+        currentStartDate = budget.startDate
+        currentEndDate = budget.endDate
+    }
+
     const budgetExpenses = await prisma.expense.aggregate({
       where: {
         userId: budget.userId,
         categoryId: budget.categoryId,
         date: {
-          gte: budget.startDate,
-          lte: budget.endDate
+          gte: currentStartDate,
+          lte: currentEndDate
         }
       },
       _sum: {
@@ -256,14 +280,38 @@ async function generateBudgetReport(userId: string, dateFilter: any) {
   })
 
   const budgetAnalysis = await Promise.all(budgets.map(async (budget) => {
-    // Calculate actual spending for this budget based on expenses within budget period
+    // Calculate current period dates based on budget period and current date
+    const now = new Date()
+    let currentStartDate: Date
+    let currentEndDate: Date
+
+    switch (budget.period) {
+      case 'WEEKLY':
+        currentStartDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - now.getUTCDay()))
+        currentEndDate = new Date(currentStartDate.getTime() + 6 * 24 * 60 * 60 * 1000)
+        break
+      case 'MONTHLY':
+        currentStartDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1))
+        currentEndDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0))
+        break
+      case 'YEARLY':
+        currentStartDate = new Date(Date.UTC(now.getUTCFullYear(), 0, 1))
+        currentEndDate = new Date(Date.UTC(now.getUTCFullYear(), 11, 31))
+        break
+      default:
+        // Fallback to stored dates if period is unknown
+        currentStartDate = budget.startDate
+        currentEndDate = budget.endDate
+    }
+
+    // Calculate actual spending for this budget based on current period dates
     const budgetExpenses = await prisma.expense.aggregate({
       where: {
         userId: budget.userId,
         categoryId: budget.categoryId,
         date: {
-          gte: budget.startDate,
-          lte: budget.endDate
+          gte: currentStartDate,
+          lte: currentEndDate
         }
       },
       _sum: {
@@ -288,8 +336,8 @@ async function generateBudgetReport(userId: string, dateFilter: any) {
       period: budget.period,
       dailyBudget,
       dailySpent,
-      startDate: budget.startDate,
-      endDate: budget.endDate
+      startDate: currentStartDate,
+      endDate: currentEndDate
     }
   }))
 

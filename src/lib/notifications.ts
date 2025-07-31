@@ -164,7 +164,7 @@ function getActionUrl(type: NotificationType, relatedId?: string): string {
   switch (type) {
     case 'BUDGET_ALERT':
     case 'BUDGET_WARNING':
-      return '/budgets'
+      return '/budgets-categories'
     case 'GROUP_EXPENSE_ADDED':
     case 'GROUP_EXPENSE_SETTLED':
     case 'GROUP_PAYMENT_RECEIVED':

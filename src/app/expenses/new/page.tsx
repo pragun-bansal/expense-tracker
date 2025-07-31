@@ -62,6 +62,12 @@ export default function NewExpense() {
       if (response.ok) {
         const data = await response.json()
         setCategories(data)
+        
+        // Set "Others" category as default
+        const othersCategory = data.find((cat: any) => cat.name.toLowerCase() === 'others')
+        if (othersCategory && !formData.categoryId) {
+          setFormData(prev => ({ ...prev, categoryId: othersCategory.id }))
+        }
       }
     } catch (error) {
       console.error('Error fetching categories:', error)

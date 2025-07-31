@@ -104,7 +104,7 @@ export default function BudgetsAndCategories() {
               id: budget.id,
               amount: budget.amount,
               period: budget.period,
-              currentSpent: budget.currentSpending || 0
+              currentSpent: budget.currentSpending || budget.spent || 0
             } : undefined
           }
         })
