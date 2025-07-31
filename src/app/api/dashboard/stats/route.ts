@@ -3,8 +3,6 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
-// Enable revalidation every 5 minutes for dashboard stats
-export const revalidate = 300
 
 export async function GET(request: NextRequest) {
   try {
@@ -106,9 +104,10 @@ export async function GET(request: NextRequest) {
       recentIncome: [] // Add if needed
     })
 
-    // Add caching headers
-    response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=600, stale-while-revalidate=300')
-    response.headers.set('CDN-Cache-Control', 'public, max-age=600')
+    // No caching - always return fresh data
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+    response.headers.set('Pragma', 'no-cache')
+    response.headers.set('Expires', '0')
     
     return response
   } catch (error) {

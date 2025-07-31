@@ -52,31 +52,21 @@ const nextConfig: NextConfig = {
           },
         ],
       },
-      // Cache API responses with shorter duration
+      // No caching for API responses - always fresh data
       {
-        source: '/api/analytics(.*)',
+        source: '/api/(.*)',
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=300, s-maxage=600, stale-while-revalidate=300',
+            value: 'no-store, no-cache, must-revalidate, max-age=0',
           },
-        ],
-      },
-      {
-        source: '/api/dashboard/stats(.*)',
-        headers: [
           {
-            key: 'Cache-Control',
-            value: 'public, max-age=300, s-maxage=600, stale-while-revalidate=300',
+            key: 'Pragma',
+            value: 'no-cache',
           },
-        ],
-      },
-      {
-        source: '/api/categories(.*)',
-        headers: [
           {
-            key: 'Cache-Control',
-            value: 'public, max-age=600, s-maxage=1200, stale-while-revalidate=600',
+            key: 'Expires',
+            value: '0',
           },
         ],
       },
