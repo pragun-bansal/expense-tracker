@@ -25,6 +25,14 @@ export function useModal() {
     loading: boolean
   }) | null>(null)
 
+  // Provide stable default values for alertModal to prevent null reference errors
+  const safeAlertModal = alertModal || {
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'info' as const
+  }
+
   const showAlert = useCallback((options: AlertOptions) => {
     setAlertModal({
       ...options,
@@ -55,7 +63,7 @@ export function useModal() {
   }, [])
 
   return {
-    alertModal,
+    alertModal: safeAlertModal,
     confirmModal,
     showAlert,
     showConfirm,

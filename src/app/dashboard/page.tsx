@@ -510,11 +510,11 @@ export default function Dashboard() {
       )}
 
       <AlertModal
-        isOpen={alertModal?.isOpen || false}
+        isOpen={alertModal.isOpen}
         onClose={closeAlert}
-        title={alertModal?.title || ''}
-        message={alertModal?.message || ''}
-        type={alertModal?.type || 'info'}
+        title={alertModal.title}
+        message={alertModal.message}
+        type={alertModal.type}
       />
     </div>
   )

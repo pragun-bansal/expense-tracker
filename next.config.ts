@@ -9,9 +9,8 @@ const nextConfig: NextConfig = {
     // Disable TypeScript type checking during builds for deployment
     ignoreBuildErrors: true,
   },
-  // Performance optimizations
+  // Performance optimizations (removed optimizeCss due to critters module dependency)
   experimental: {
-    optimizeCss: true,
     optimizeServerReact: true,
   },
   // Add caching headers for static assets
