@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useSession } from 'next-auth/react'
 import { useToast } from '@/contexts/ToastContext'
 import { NotificationWithMetadata } from '@/lib/notifications'
@@ -11,44 +11,51 @@ export function useNotifications() {
   const [notifications, setNotifications] = useState<NotificationWithMetadata[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [loading, setLoading] = useState(true)
-  const [lastChecked, setLastChecked] = useState<Date>(new Date())
+  const lastCheckedRef = useRef<Date>(new Date())
+  const isLoadingRef = useRef<boolean>(false)
 
   const fetchNotifications = useCallback(async () => {
-    if (!session?.user?.id) return
+    if (!session?.user?.id || isLoadingRef.current) return
 
+    isLoadingRef.current = true
     try {
       const response = await fetch('/api/notifications')
       if (response.ok) {
         const newNotifications = await response.json()
         
-        // Check for new notifications since last check
-        const newItems = newNotifications.filter((notif: NotificationWithMetadata) => 
-          new Date(notif.createdAt) > lastChecked && !notif.read
-        )
+        setNotifications(prev => {
+          // Check for new notifications since last check
+          const newItems = newNotifications.filter((notif: NotificationWithMetadata) => 
+            new Date(notif.createdAt) > lastCheckedRef.current && !notif.read &&
+            !prev.some(existing => existing.id === notif.id)
+          )
 
-        // Show toast notifications for new items
-        newItems.forEach((notif: NotificationWithMetadata) => {
-          addToast({
-            type: getToastType(notif.priority),
-            title: notif.title,
-            message: notif.message,
-            duration: notif.priority === 'high' ? 8000 : 5000,
-            action: notif.actionUrl ? {
-              label: 'View',
-              onClick: () => window.location.href = notif.actionUrl!
-            } : undefined
+          // Show toast notifications for new items
+          newItems.forEach((notif: NotificationWithMetadata) => {
+            addToast({
+              type: getToastType(notif.priority),
+              title: notif.title,
+              message: notif.message,
+              duration: notif.priority === 'high' ? 8000 : 5000,
+              action: notif.actionUrl ? {
+                label: 'View',
+                onClick: () => window.location.href = notif.actionUrl!
+              } : undefined
+            })
           })
-        })
 
-        setNotifications(newNotifications)
-        setLastChecked(new Date())
+          return newNotifications
+        })
+        
+        lastCheckedRef.current = new Date()
       }
     } catch (error) {
       console.error('Error fetching notifications:', error)
     } finally {
       setLoading(false)
+      isLoadingRef.current = false
     }
-  }, [session?.user?.id, addToast, lastChecked])
+  }, [session?.user?.id, addToast])
 
   const fetchUnreadCount = useCallback(async () => {
     if (!session?.user?.id) return
@@ -144,20 +151,22 @@ export function useNotifications() {
     }
   }, [])
 
-  // Poll for new notifications every 30 seconds
+  // Poll for new notifications every 60 seconds (reduced frequency)
   useEffect(() => {
     if (!session?.user?.id) return
 
+    // Initial fetch
     fetchNotifications()
     fetchUnreadCount()
     
+    // Set up polling interval with longer delay to reduce server load
     const interval = setInterval(() => {
       fetchNotifications()
       fetchUnreadCount()
-    }, 30000) // 30 seconds
+    }, 30000) // 60 seconds instead of 30
 
     return () => clearInterval(interval)
-  }, [session?.user?.id, fetchNotifications, fetchUnreadCount])
+  }, [session?.user?.id]) // Remove function dependencies to prevent infinite loops
 
   return {
     notifications,
