@@ -1,6 +1,6 @@
-const CACHE_NAME = 'fina-v2';
-const STATIC_CACHE = 'fina-static-v2';
-const DYNAMIC_CACHE = 'fina-dynamic-v2';
+const CACHE_NAME = 'fina-v3';
+const STATIC_CACHE = 'fina-static-v3';
+const DYNAMIC_CACHE = 'fina-dynamic-v3';
 
 // Static assets to cache
 const STATIC_ASSETS = [
@@ -26,7 +26,7 @@ const API_ROUTES = [
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
-  console.log('Service Worker: Installing...');
+  console.log('Service Worker: Installing v3...');
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then((cache) => {
@@ -35,6 +35,7 @@ self.addEventListener('install', (event) => {
       })
       .then(() => {
         console.log('Service Worker: Static assets cached');
+        // Force immediate activation of new service worker
         return self.skipWaiting();
       })
       .catch((error) => {
@@ -45,7 +46,7 @@ self.addEventListener('install', (event) => {
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-  console.log('Service Worker: Activating...');
+  console.log('Service Worker: Activating v3...');
   event.waitUntil(
     caches.keys()
       .then((cacheNames) => {
@@ -59,8 +60,21 @@ self.addEventListener('activate', (event) => {
         );
       })
       .then(() => {
-        console.log('Service Worker: Activated');
+        console.log('Service Worker: Activated v3, taking control of all clients');
+        // Immediately take control of all clients (pages)
         return self.clients.claim();
+      })
+      .then(() => {
+        // Notify all clients about the update
+        return self.clients.matchAll();
+      })
+      .then((clients) => {
+        clients.forEach((client) => {
+          client.postMessage({
+            type: 'SW_UPDATED',
+            message: 'Service Worker updated to v3. Please refresh for the latest features.'
+          });
+        });
       })
   );
 });

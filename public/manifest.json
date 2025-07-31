@@ -2,6 +2,7 @@
   "name": "Fina - Personal Finance Manager",
   "short_name": "Fina",
   "description": "A comprehensive personal finance management application for tracking expenses, income, budgets, and group expenses.",
+  "version": "1.1.0",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1a1625",
