@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
-import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
+import ServiceWorkerCleanup from "@/components/ServiceWorkerCleanup";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,20 +17,6 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Fina",
   description: "Smart personal finance management and group expense splitting",
-  manifest: "/manifest.json",
-  themeColor: "#8b5cf6",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "Fina",
-  },
-  formatDetection: {
-    telephone: false,
-  },
-  icons: {
-    icon: "/icons/icon-192x192.png",
-    apple: "/icons/icon-192x192.png",
-  },
   viewport: {
     width: "device-width",
     initialScale: 1,
@@ -50,7 +36,7 @@ export default function RootLayout({
       >
 
         <Providers>
-          <ServiceWorkerRegistration />
+          <ServiceWorkerCleanup />
           {children}
         </Providers>
       </body>

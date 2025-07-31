@@ -4,7 +4,6 @@ import { useSession } from 'next-auth/react'
 import { usePathname } from 'next/navigation'
 import Sidebar from './Sidebar'
 import {ThemeToggle} from "@/components/ThemeToggle2";
-import ServiceWorkerUpdater from './ServiceWorkerUpdater'
 
 const publicRoutes = ['/auth/signin', '/auth/signup', '/']
 
@@ -35,7 +34,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-page">
-      <ServiceWorkerUpdater />
       <Sidebar />
       <div className="lg:pl-64">
           {/*<ThemeToggle />*/}

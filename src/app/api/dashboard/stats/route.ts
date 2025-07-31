@@ -109,7 +109,6 @@ export async function GET(request: NextRequest) {
     // Add caching headers
     response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=600, stale-while-revalidate=300')
     response.headers.set('CDN-Cache-Control', 'public, max-age=600')
-    console.log(response)
     
     return response
   } catch (error) {
