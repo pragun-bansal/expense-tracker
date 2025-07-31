@@ -7,9 +7,38 @@ import { Filter, Search, ArrowUpCircle, ArrowDownCircle, Calendar, Download, Edi
 import { CurrencyLoader } from '@/components/CurrencyLoader'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useModal } from '@/hooks/useModal'
-import { useProgressiveLoading, useIntersectionObserver } from '@/hooks/useProgressiveLoading'
-import { TransactionListSkeleton } from '@/components/SkeletonLoaders'
-import { AutoVirtualList } from '@/components/VirtualScrollList'
+// Fallback implementations for progressive loading
+const useProgressiveLoading = (data: any[], options?: any) => ({
+  visibleData: data, // Show all data instead of progressive loading
+  isLoadingMore: false,
+  hasMore: false,
+  loadMore: () => {}
+})
+
+const useIntersectionObserver = () => () => {}
+
+// Simple fallback skeleton
+const TransactionListSkeleton = () => (
+  <div className="animate-pulse space-y-4">
+    {Array.from({ length: 8 }).map((_, i) => (
+      <div key={i} className="bg-card rounded-lg border p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+            <div>
+              <div className="h-4 bg-gray-200 rounded w-32 mb-2"></div>
+              <div className="h-3 bg-gray-200 rounded w-24"></div>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="h-4 bg-gray-200 rounded w-20 mb-2"></div>
+            <div className="h-3 bg-gray-200 rounded w-16"></div>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+)
 
 // Lazy load modal components
 const AlertModal = lazy(() => import('@/components/AlertModal'))
@@ -44,7 +73,7 @@ interface Transaction {
   groupType?: 'LENDER' | 'BORROWER' | 'SETTLEMENT_RECEIVED' | 'SETTLEMENT_PAID'
 }
 
-export default function Transactions() {
+function TransactionsContent() {
   const { data: session } = useSession()
   const { formatAmount } = useCurrency()
   const { alertModal, confirmModal, showAlert, showConfirm, closeAlert, closeConfirm } = useModal()
@@ -228,12 +257,12 @@ export default function Transactions() {
     delay: 50
   })
 
-  // Intersection observer for auto-loading
+  // Safe intersection observer for auto-loading
   const loadMoreRef = useIntersectionObserver(() => {
     if (hasMore && !isLoadingMore) {
       loadMore()
     }
-  })
+  }) || (() => {}) // Fallback to prevent crashes
   
 
   const exportTransactions = () => {
@@ -1175,5 +1204,58 @@ function EditTransactionForm({
         </button>
       </div>
     </form>
+  )
+}
+
+// Error boundary wrapper component
+class TransactionsErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error?: Error }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props)
+    this.state = { hasError: false }
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error }
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('Transactions page error:', error, errorInfo)
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="p-6 text-center">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+            <h2 className="text-lg font-semibold text-red-800 mb-2">
+              Something went wrong with the transactions page
+            </h2>
+            <p className="text-red-600 mb-4">
+              Please refresh the page or contact support if the problem persists.
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+            >
+              Refresh Page
+            </button>
+          </div>
+        </div>
+      )
+    }
+
+    return this.props.children
+  }
+}
+
+// Main export with error boundary
+export default function Transactions() {
+  return (
+    <TransactionsErrorBoundary>
+      <TransactionsContent />
+    </TransactionsErrorBoundary>
   )
 }
