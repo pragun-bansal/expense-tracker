@@ -3,6 +3,9 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
+// Categories rarely change, cache for 10 minutes
+export const revalidate = 600
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -21,7 +24,13 @@ export async function GET(request: NextRequest) {
       orderBy: { name: 'asc' }
     })
 
-    return NextResponse.json(categories)
+    const response = NextResponse.json(categories)
+    
+    // Add caching headers - categories change infrequently
+    response.headers.set('Cache-Control', 'public, max-age=600, s-maxage=1200, stale-while-revalidate=600')
+    response.headers.set('CDN-Cache-Control', 'public, max-age=1200')
+    
+    return response
   } catch (error) {
     console.error('Error fetching categories:', error)
     return NextResponse.json(

@@ -1,6 +1,6 @@
-const CACHE_NAME = 'fina-v1';
-const STATIC_CACHE = 'fina-static-v1';
-const DYNAMIC_CACHE = 'fina-dynamic-v1';
+const CACHE_NAME = 'fina-v2';
+const STATIC_CACHE = 'fina-static-v2';
+const DYNAMIC_CACHE = 'fina-dynamic-v2';
 
 // Static assets to cache
 const STATIC_ASSETS = [
@@ -72,6 +72,25 @@ self.addEventListener('fetch', (event) => {
 
   // Handle navigation requests
   if (request.mode === 'navigate') {
+    // Don't cache analytics page for fresh content
+    if (url.pathname === '/analytics') {
+      event.respondWith(
+        fetch(request)
+          .catch(() => {
+            // If offline, serve from cache or fallback
+            return caches.match(request)
+              .then((cachedResponse) => {
+                if (cachedResponse) {
+                  return cachedResponse;
+                }
+                // Fallback to dashboard for navigation requests
+                return caches.match('/dashboard');
+              });
+          })
+      );
+      return;
+    }
+
     event.respondWith(
       fetch(request)
         .then((response) => {
@@ -100,10 +119,38 @@ self.addEventListener('fetch', (event) => {
 
   // Handle API requests
   if (url.pathname.startsWith('/api/')) {
+    // Don't cache analytics API for fresh data
+    if (url.pathname.includes('/api/analytics')) {
+      event.respondWith(
+        fetch(request)
+          .catch(() => {
+            // If offline, serve from cache only
+            return caches.match(request)
+              .then((cachedResponse) => {
+                if (cachedResponse) {
+                  return cachedResponse;
+                }
+                return new Response(
+                  JSON.stringify({ 
+                    error: 'Offline', 
+                    message: 'You are currently offline. Analytics data may not be up to date.' 
+                  }),
+                  {
+                    status: 503,
+                    statusText: 'Service Unavailable',
+                    headers: { 'Content-Type': 'application/json' }
+                  }
+                );
+              });
+          })
+      );
+      return;
+    }
+
     event.respondWith(
       fetch(request)
         .then((response) => {
-          // Only cache successful GET requests
+          // Only cache successful GET requests for non-analytics APIs
           if (request.method === 'GET' && response.status === 200) {
             const responseClone = response.clone();
             caches.open(DYNAMIC_CACHE)

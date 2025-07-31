@@ -3,6 +3,9 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
+// Enable revalidation every 5 minutes for dashboard stats
+export const revalidate = 300
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -17,8 +20,17 @@ export async function GET(request: NextRequest) {
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
     const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0)
 
-    // Fetch stats
-    const [totalExpenses, monthlyExpenses, totalAccounts, activeGroups] = await Promise.all([
+    // Fetch stats with optimized queries
+    const [
+      totalExpenses, 
+      monthlyExpenses, 
+      totalIncome,
+      monthlyIncome,
+      totalAccounts, 
+      activeGroups,
+      transactionCount,
+      recentExpenses
+    ] = await Promise.all([
       prisma.expense.aggregate({
         where: { userId },
         _sum: { amount: true }
@@ -33,20 +45,68 @@ export async function GET(request: NextRequest) {
         },
         _sum: { amount: true }
       }),
+      prisma.income.aggregate({
+        where: { userId },
+        _sum: { amount: true }
+      }),
+      prisma.income.aggregate({
+        where: {
+          userId,
+          date: {
+            gte: monthStart,
+            lte: monthEnd
+          }
+        },
+        _sum: { amount: true }
+      }),
       prisma.userAccount.count({
         where: { userId }
       }),
       prisma.groupMember.count({
         where: { userId }
+      }),
+      prisma.expense.count({
+        where: { userId }
+      }) + await prisma.income.count({
+        where: { userId }
+      }),
+      prisma.expense.findMany({
+        where: { userId },
+        include: { category: true },
+        orderBy: { date: 'desc' },
+        take: 5
       })
     ])
 
-    return NextResponse.json({
+    const netWorth = await prisma.userAccount.aggregate({
+      where: { userId },
+      _sum: { balance: true }
+    })
+
+    const response = NextResponse.json({
       totalExpenses: totalExpenses._sum.amount || 0,
       monthlyExpenses: monthlyExpenses._sum.amount || 0,
+      totalIncome: totalIncome._sum.amount || 0,
+      monthlyIncome: monthlyIncome._sum.amount || 0,
+      netWorth: netWorth._sum.balance || 0,
       totalAccounts,
-      activeGroups
+      activeGroups,
+      transactionCount,
+      recentExpenses: recentExpenses.map(expense => ({
+        id: expense.id,
+        description: expense.description || 'Expense',
+        amount: expense.amount,
+        date: expense.date.toISOString(),
+        category: { name: expense.category.name }
+      })),
+      recentIncome: [] // Add if needed
     })
+
+    // Add caching headers
+    response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=600, stale-while-revalidate=300')
+    response.headers.set('CDN-Cache-Control', 'public, max-age=600')
+    
+    return response
   } catch (error) {
     console.error('Error fetching dashboard stats:', error)
     return NextResponse.json(

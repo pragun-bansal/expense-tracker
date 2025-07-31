@@ -5,6 +5,9 @@ import { prisma } from '@/lib/prisma'
 import { ensureSpecialAccountsExist } from '@/lib/specialAccounts'
 import { migrateOldOthersAccounts } from '@/lib/migrateAccounts'
 
+// Accounts change moderately, cache for 5 minutes
+export const revalidate = 300
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -26,7 +29,13 @@ export async function GET(request: NextRequest) {
       ]
     })
 
-    return NextResponse.json(accounts)
+    const response = NextResponse.json(accounts)
+    
+    // Add caching headers - accounts change moderately
+    response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=600, stale-while-revalidate=300')
+    response.headers.set('CDN-Cache-Control', 'public, max-age=600')
+    
+    return response
   } catch (error) {
     console.error('Error fetching accounts:', error)
     return NextResponse.json(

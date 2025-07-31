@@ -291,11 +291,11 @@ export default function Notifications() {
       {/* Alert Modal */}
       {alertModal && (
         <AlertModal
-          isOpen={alertModal.isOpen}
+          isOpen={alertModal?.isOpen || false}
           onClose={closeAlert}
-          title={alertModal.title}
-          message={alertModal.message}
-          type={alertModal.type}
+          title={alertModal?.title || ''}
+          message={alertModal?.message || ''}
+          type={alertModal?.type || 'info'}
           confirmText={alertModal.confirmText}
         />
       )}

@@ -3,6 +3,9 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
+// Reports are heavy queries, cache for 5 minutes
+export const revalidate = 300
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)

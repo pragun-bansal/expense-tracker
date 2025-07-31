@@ -4,6 +4,9 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { createGroupMemberNotification } from '@/lib/notifications'
 
+// Groups change moderately, cache for 3 minutes
+export const revalidate = 180
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)

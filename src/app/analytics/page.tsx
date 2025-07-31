@@ -117,10 +117,18 @@ export default function Analytics() {
   const fetchAnalytics = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/analytics?period=${period}`)
+      
+      const response = await fetch(`/api/analytics?period=${period}`, {
+        headers: {
+          'Cache-Control': 'public, max-age=300'
+        }
+      })
+      
       if (response.ok) {
         const analyticsData = await response.json()
         setData(analyticsData)
+      } else {
+        console.error('Analytics API error:', response.status)
       }
     } catch (error) {
       console.error('Error fetching analytics:', error)
