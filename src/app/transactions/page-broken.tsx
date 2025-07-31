@@ -1,0 +1,1261 @@
+'use client'
+
+import { useState, useEffect, lazy, Suspense } from 'react'
+import { useSession } from 'next-auth/react'
+import Link from 'next/link'
+import { Filter, Search, ArrowUpCircle, ArrowDownCircle, Calendar, Download, Edit, Users, PlusCircle, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
+import { CurrencyLoader } from '@/components/CurrencyLoader'
+import { useCurrency } from '@/hooks/useCurrency'
+import { useModal } from '@/hooks/useModal'
+// Fallback implementations for progressive loading
+const useProgressiveLoading = (data: any[], options?: any) => ({
+  visibleData: data, // Show all data instead of progressive loading
+  isLoadingMore: false,
+  hasMore: false,
+  loadMore: () => {}
+})
+
+const useIntersectionObserver = () => () => {}
+
+// Simple fallback skeleton
+const TransactionListSkeleton = () => (
+  <div className="animate-pulse space-y-4">
+    {Array.from({ length: 8 }).map((_, i) => (
+      <div key={i} className="bg-card rounded-lg border p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+            <div>
+              <div className="h-4 bg-gray-200 rounded w-32 mb-2"></div>
+              <div className="h-3 bg-gray-200 rounded w-24"></div>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="h-4 bg-gray-200 rounded w-20 mb-2"></div>
+            <div className="h-3 bg-gray-200 rounded w-16"></div>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+)
+
+// Lazy load modal components
+const AlertModal = lazy(() => import('@/components/AlertModal'))
+const ConfirmModal = lazy(() => import('@/components/ConfirmModal'))
+
+interface Transaction {
+  id: string
+  type: 'income' | 'expense' | 'lending' | 'borrowing'
+  amount: number
+  description: string
+  date: string
+  category: {
+    id: string
+    name: string
+    color?: string
+  }
+  account: {
+    id: string
+    name: string
+    type: string
+  }
+  source?: string
+  receiptUrl?: string
+  isRecurring?: boolean
+  groupExpense?: {
+    id: string
+    group: {
+      id: string
+      name: string
+    }
+  }
+  groupType?: 'LENDER' | 'BORROWER' | 'SETTLEMENT_RECEIVED' | 'SETTLEMENT_PAID'
+}
+
+function TransactionsContent() {
+  const { data: session } = useSession()
+  const { formatAmount } = useCurrency()
+  const { alertModal, confirmModal, showAlert, showConfirm, closeAlert, closeConfirm } = useModal()
+  const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filterType, setFilterType] = useState('')
+  const [filterCategory, setFilterCategory] = useState('')
+  const [filterAccount, setFilterAccount] = useState('')
+  const [dateRange, setDateRange] = useState({
+    startDate: '',
+    endDate: ''
+  })
+  const [showMobileFilters, setShowMobileFilters] = useState(false)
+  const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set())
+  const [categories, setCategories] = useState([])
+  const [accounts, setAccounts] = useState([])
+  const [sortBy, setSortBy] = useState('date')
+  const [sortOrder, setSortOrder] = useState('desc')
+  
+  // Edit functionality state
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
+  
+  // Add progressive loading for better performance
+  const [showEditModal, setShowEditModal] = useState(false)
+
+  useEffect(() => {
+    if (session) {
+      fetchTransactions()
+      fetchCategories()
+      fetchAccounts()
+    }
+  }, [session])
+
+  const toggleCardExpansion = (transactionKey: string) => {
+    const newExpanded = new Set(expandedCards)
+    if (newExpanded.has(transactionKey)) {
+      newExpanded.delete(transactionKey)
+    } else {
+      newExpanded.add(transactionKey)
+    }
+    setExpandedCards(newExpanded)
+  }
+
+  const fetchTransactions = async () => {
+    try {
+      setLoading(true)
+      
+      // Fetch all transaction types
+      const [expenseResponse, incomeResponse, lendingResponse, borrowingResponse] = await Promise.all([
+        fetch('/api/expenses'),
+        fetch('/api/income'),
+        fetch('/api/lending'),
+        fetch('/api/borrowing')
+      ])
+      
+      // Check for API errors
+      if (!expenseResponse.ok) console.error('Expenses API error:', expenseResponse.status)
+      if (!incomeResponse.ok) console.error('Income API error:', incomeResponse.status)
+      if (!lendingResponse.ok) console.error('Lending API error:', lendingResponse.status)
+      if (!borrowingResponse.ok) console.error('Borrowing API error:', borrowingResponse.status)
+      
+      const [expenseData, incomeData, lendingData, borrowingData] = await Promise.all([
+        expenseResponse.json(),
+        incomeResponse.json(),
+        lendingResponse.json(),
+        borrowingResponse.json()
+      ])
+      
+      
+      // Combine and format transactions
+      const expenseTransactions = expenseData.expenses?.map((expense: any) => ({
+        ...expense,
+        type: 'expense' as const
+      })) || []
+      
+      const incomeTransactions = incomeData.incomes?.map((income: any) => ({
+        ...income,
+        type: 'income' as const
+      })) || []
+      
+      const lendingTransactions = lendingData.lendings?.map((lending: any) => ({
+        ...lending,
+        type: 'lending' as const
+      })) || []
+      
+      const borrowingTransactions = borrowingData.borrowings?.map((borrowing: any) => ({
+        ...borrowing,
+        type: 'borrowing' as const
+      })) || []
+      
+      const allTransactions = [...expenseTransactions, ...incomeTransactions, ...lendingTransactions, ...borrowingTransactions]
+      
+      // Sort transactions
+      allTransactions.sort((a, b) => {
+        const dateA = new Date(a.date)
+        const dateB = new Date(b.date)
+        return sortOrder === 'desc' ? dateB.getTime() - dateA.getTime() : dateA.getTime() - dateB.getTime()
+      })
+      
+      setTransactions(allTransactions)
+    } catch (error) {
+      console.error('Error fetching transactions:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchCategories = async () => {
+    try {
+      const [expenseResponse, incomeResponse] = await Promise.all([
+        fetch('/api/categories?type=EXPENSE'),
+        fetch('/api/categories?type=INCOME')
+      ])
+      
+      const [expenseData, incomeData] = await Promise.all([
+        expenseResponse.json(),
+        incomeResponse.json()
+      ])
+      
+      setCategories([...expenseData, ...incomeData])
+    } catch (error) {
+      console.error('Error fetching categories:', error)
+    }
+  }
+
+  const fetchAccounts = async () => {
+    try {
+      const response = await fetch('/api/accounts')
+      if (response.ok) {
+        const data = await response.json()
+        setAccounts(data)
+      }
+    } catch (error) {
+      console.error('Error fetching accounts:', error)
+    }
+  }
+
+  const filteredTransactions = transactions.filter(transaction => {
+    const matchesSearch = transaction.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         transaction.category?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (transaction.source && transaction.source.toLowerCase().includes(searchTerm.toLowerCase()))
+    
+    const matchesType = !filterType || transaction.type === filterType
+    const matchesCategory = !filterCategory || transaction.category?.id === filterCategory
+    const matchesAccount = !filterAccount || transaction.account?.id === filterAccount
+    
+    const matchesDateRange = (!dateRange.startDate || new Date(transaction.date) >= new Date(dateRange.startDate)) &&
+                            (!dateRange.endDate || new Date(transaction.date) <= new Date(dateRange.endDate))
+    
+    return matchesSearch && matchesType && matchesCategory && matchesAccount && matchesDateRange
+  })
+
+  const totalIncome = filteredTransactions
+    .filter(t => t.type === 'income')
+    .reduce((sum, t) => sum + t.amount, 0)
+  
+  const totalExpenses = filteredTransactions
+    .filter(t => t.type === 'expense')
+    .reduce((sum, t) => sum + t.amount, 0)
+  
+  const totalLending = filteredTransactions
+    .filter(t => t.type === 'lending')
+    .reduce((sum, t) => sum + t.amount, 0)
+  
+  const totalBorrowing = filteredTransactions
+    .filter(t => t.type === 'borrowing')
+    .reduce((sum, t) => sum + t.amount, 0)
+  
+  const totalLendingBorrowing = totalLending - totalBorrowing
+
+  // Progressive loading for better performance with large transaction lists
+  const {
+    visibleData: visibleTransactions,
+    isLoadingMore,
+    hasMore,
+    loadMore
+  } = useProgressiveLoading(filteredTransactions, {
+    initialBatchSize: 20,
+    batchSize: 10,
+    delay: 50
+  })
+
+  // Safe intersection observer for auto-loading
+  const loadMoreRef = useIntersectionObserver(() => {
+    if (hasMore && !isLoadingMore) {
+      loadMore()
+    }
+  }) || (() => {}) // Fallback to prevent crashes
+  
+
+  const exportTransactions = () => {
+    const csvContent = [
+      ['Date', 'Type', 'Description', 'Category', 'Account', 'Amount', 'Source/Receipt'],
+      ...filteredTransactions.map(t => [
+        new Date(t.date).toLocaleDateString(),
+        t.type,
+        t.description,
+        t.category.name,
+        t.account.name,
+        formatAmount(t.amount),
+        t.source || t.receiptUrl || ''
+      ])
+    ].map(row => row.join(',')).join('\n')
+
+    const blob = new Blob([csvContent], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `transactions-${new Date().toISOString().split('T')[0]}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const handleSaveTransaction = async (updatedTransaction: any) => {
+    try {
+      const endpoint = updatedTransaction.type === 'income' ? '/api/income' : 
+                      updatedTransaction.type === 'expense' ? '/api/expenses' :
+                      updatedTransaction.type === 'lending' ? '/api/lending' : '/api/borrowing'
+      const response = await fetch(endpoint, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedTransaction)
+      })
+
+      if (response.ok) {
+        setShowEditModal(false)
+        setEditingTransaction(null)
+        fetchTransactions() // Refresh the transactions list
+      } else {
+        const error = await response.json()
+        showAlert({
+          title: 'Update Failed',
+          message: error.error || 'Failed to update transaction',
+          type: 'error'
+        })
+      }
+    } catch (error) {
+      console.error('Error updating transaction:', error)
+      showAlert({
+        title: 'Update Failed',
+        message: 'Failed to update transaction',
+        type: 'error'
+      })
+    } finally {
+      setUpdateLoading(false)
+    }
+  }
+
+  const handleDeleteTransaction = async (transaction: Transaction) => {
+    // Prevent deletion of group-related transactions
+    if (transaction.groupExpense || transaction.groupType) {
+      showAlert({
+        title: 'Cannot Delete',
+        message: 'Group transactions cannot be deleted individually. Please delete them from the group expense page.',
+        type: 'warning'
+      })
+      return
+    }
+
+    const confirmed = await showConfirm({
+      title: 'Delete Transaction',
+      message: `Are you sure you want to delete this ${transaction.type}?`,
+      type: 'danger'
+    })
+    if (!confirmed) {
+      closeConfirm()
+      return
+    }
+
+    try {
+      const endpoint = transaction.type === 'income' ? `/api/income?id=${transaction.id}` : 
+                      transaction.type === 'expense' ? `/api/expenses?id=${transaction.id}` :
+                      transaction.type === 'lending' ? `/api/lending?id=${transaction.id}` : `/api/borrowing?id=${transaction.id}`
+      
+      const response = await fetch(endpoint, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        closeConfirm()
+        fetchTransactions() // Refresh the transactions list
+      } else {
+        const error = await response.json()
+        closeConfirm()
+        showAlert({
+          title: 'Delete Failed',
+          message: error.error || 'Failed to delete transaction',
+          type: 'error'
+        })
+      }
+    } catch (error) {
+      console.error('Error deleting transaction:', error)
+      closeConfirm()
+      showAlert({
+        title: 'Delete Failed',
+        message: 'Failed to delete transaction',
+        type: 'error'
+      })
+    } finally {
+      setDeleteLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="p-4 sm:p-6">
+        <div className="mb-8">
+          <div className="h-8 bg-gray-200 rounded w-48 mb-2 animate-pulse"></div>
+          <div className="h-4 bg-gray-200 rounded w-64 animate-pulse"></div>
+        </div>
+        <TransactionListSkeleton />
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      {/* Header */}
+      <div className="sm:flex sm:items-center sm:justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-heading">Transaction History</h1>
+          <p className="mt-2 text-sm text-body">
+            All your income and expenses in one place
+          </p>
+        </div>
+        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none flex gap-2">
+          <Link
+            href="/income/new"
+            className="inline-flex items-center justify-center rounded-md border border-transparent bg-button-success px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-button-success shadow-sm bg-button-success:hover focus:outline-none focus:ring-2 ring-focus focus:ring-offset-2 sm:w-auto"
+          >
+            <PlusCircle className="h-4 w-4 mr-2" />
+            Add Income
+          </Link>
+          <Link
+            href="/expenses/new"
+            className="inline-flex items-center justify-center rounded-md border border-transparent bg-button-primary px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-button-primary shadow-sm bg-button-primary:hover focus:outline-none ring-focus focus:ring-2 focus:ring-offset-2 sm:w-auto"
+          >
+            <PlusCircle className="h-4 w-4 mr-2" />
+            Add Expense
+          </Link>
+          <button
+            onClick={exportTransactions}
+            className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:w-auto"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Export CSV
+          </button>
+        </div>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+        <div className="bg-card p-4 sm:p-6 rounded-lg shadow-card">
+          <div className="flex items-center">
+            <ArrowUpCircle className="h-6 w-6 sm:h-8 sm:w-8 text-status-success flex-shrink-0" />
+            <div className="ml-3 sm:ml-4 min-w-0">
+              <p className="text-xs sm:text-sm font-medium text-body truncate">Total Income</p>
+              <p className="text-lg sm:text-2xl font-semibold text-status-success">
+                {formatAmount(totalIncome)}
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-card p-4 sm:p-6 rounded-lg shadow-card">
+          <div className="flex items-center">
+            <ArrowDownCircle className="h-6 w-6 sm:h-8 sm:w-8 text-status-error flex-shrink-0" />
+            <div className="ml-3 sm:ml-4 min-w-0">
+              <p className="text-xs sm:text-sm font-medium text-body truncate">Total Expenses</p>
+              <p className="text-lg sm:text-2xl font-semibold text-status-error">
+                {formatAmount(totalExpenses)}
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-card p-4 sm:p-6 rounded-lg shadow-card">
+          <div className="flex items-center">
+            <Users className={`h-6 w-6 sm:h-8 sm:w-8 flex-shrink-0 ${totalLendingBorrowing >= 0 ? 'text-status-success' : 'text-status-error'}`} />
+            <div className="ml-3 sm:ml-4 min-w-0">
+              <p className="text-xs sm:text-sm font-medium text-body truncate">Total Lending/Borrowing</p>
+              <p className={`text-lg sm:text-2xl font-semibold ${totalLendingBorrowing >= 0 ? 'text-status-success' : 'text-status-error'}`}>
+                {totalLendingBorrowing >= 0 ? '' : '-'}{formatAmount(Math.abs(totalLendingBorrowing))}
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-card p-4 sm:p-6 rounded-lg shadow-card">
+          <div className="flex items-center">
+            <Calendar className="h-6 w-6 sm:h-8 sm:w-8 text-heading flex-shrink-0" />
+            <div className="ml-3 sm:ml-4 min-w-0">
+              <p className="text-xs sm:text-sm font-medium text-body truncate">Net Amount</p>
+              <p className={`text-lg sm:text-2xl font-semibold ${totalIncome + totalLending - totalExpenses - totalBorrowing >= 0 ? 'text-status-success' : 'text-status-error'}`}>
+                {formatAmount(totalIncome + totalLending - totalExpenses - totalBorrowing)}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="bg-card shadow-card rounded-lg mb-8">
+        <div className="px-4 py-5 sm:p-6">
+          {/* Mobile Search and Filter Toggle */}
+          <div className="sm:hidden mb-4">
+            <div className="flex gap-3">
+              {/* Search Bar */}
+              <div className="flex-1">
+                <label htmlFor="mobile-search" className="block text-sm font-medium text-input-label mb-1">
+                  Search
+                </label>
+                <div className="relative rounded-lg shadow-sm">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Search className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    id="mobile-search"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="block w-full pl-12 pr-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input placeholder-gray-400 transition-all duration-200"
+                    placeholder="Search transactions..."
+                  />
+                </div>
+              </div>
+              
+              {/* Filter Toggle Button */}
+              <div>
+                <label className="block text-sm font-medium text-input-label mb-1">
+                  &nbsp;
+                </label>
+                <button
+                  onClick={() => setShowMobileFilters(!showMobileFilters)}
+                  className="flex items-center justify-center px-4 py-3 bg-input border border-input rounded-lg text-input font-medium hover:bg-button-secondary-hover transition-all duration-200 min-w-[100px]"
+                >
+                  <Filter className="h-5 w-5 mr-2" />
+                  Filters
+                  {showMobileFilters ? (
+                    <ChevronUp className="h-4 w-4 ml-1" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 ml-1" />
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          {/* Filter Grid - Hidden on mobile unless toggled */}
+          <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 ${!showMobileFilters ? 'hidden sm:grid' : 'mt-4 sm:mt-0'}`}>
+            {/* Desktop Search */}
+            <div className="hidden sm:block">
+              <label htmlFor="search" className="block text-sm font-medium text-input-label">
+                Search
+              </label>
+              <div className="mt-1 relative rounded-lg shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Search className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  id="search"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="block w-full pl-12 pr-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input placeholder-gray-400 transition-all duration-200"
+                  placeholder="Search transactions..."
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="type" className="block text-sm font-medium text-input-label">
+                Type
+              </label>
+              <select
+                id="type"
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+                className="mt-1 block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200 appearance-none bg-arrow-down bg-no-repeat bg-right bg-origin-content"
+              >
+                <option value="">All Types</option>
+                <option value="income">Income</option>
+                <option value="expense">Expense</option>
+                <option value="lending">Lending</option>
+                <option value="borrowing">Borrowing</option>
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="category" className="block text-sm font-medium text-input-label">
+                Category
+              </label>
+              <select
+                id="category"
+                value={filterCategory}
+                onChange={(e) => setFilterCategory(e.target.value)}
+                className="mt-1 block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200 appearance-none bg-arrow-down bg-no-repeat bg-right bg-origin-content"
+              >
+                <option value="">All Categories</option>
+                {categories.map((category: any) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="account" className="block text-sm font-medium text-input-label">
+                Account
+              </label>
+              <select
+                id="account"
+                value={filterAccount}
+                onChange={(e) => setFilterAccount(e.target.value)}
+                className="mt-1 block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200 appearance-none bg-arrow-down bg-no-repeat bg-right bg-origin-content"
+              >
+                <option value="">All Accounts</option>
+                {accounts.map((account: any) => (
+                  <option key={account.id} value={account.id}>
+                    {account.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="startDate" className="block text-sm font-medium text-input-label">
+                Start Date
+              </label>
+              <input
+                type="date"
+                id="startDate"
+                value={dateRange.startDate}
+                onChange={(e) => setDateRange({...dateRange, startDate: e.target.value})}
+                className="mt-1 block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="endDate" className="block text-sm font-medium text-input-label">
+                End Date
+              </label>
+              <input
+                type="date"
+                id="endDate"
+                value={dateRange.endDate}
+                onChange={(e) => setDateRange({...dateRange, endDate: e.target.value})}
+                className="mt-1 block w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop Table View */}
+      <div className="hidden lg:block bg-card shadow-card overflow-hidden rounded-lg">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-table-border">
+            <thead className="bg-muted">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-input-label uppercase tracking-wider">
+                  Date
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-input-label uppercase tracking-wider">
+                  Type
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-input-label uppercase tracking-wider">
+                  Description
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-input-label uppercase tracking-wider">
+                  Category
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-input-label uppercase tracking-wider">
+                  Account
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-input-label uppercase tracking-wider">
+                  Amount
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-input-label uppercase tracking-wider">
+                  Source
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-input-label uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-card divide-y divide-table-border">
+              {visibleTransactions.map((transaction) => (
+                <tr key={`${transaction.type}-${transaction.id}`}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-heading">
+                    {new Date(transaction.date).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      {transaction.type === 'income' ? (
+                        <ArrowUpCircle className="h-4 w-4 text-status-success mr-2" />
+                      ) : transaction.type === 'expense' ? (
+                        <ArrowDownCircle className="h-4 w-4 text-status-error mr-2" />
+                      ) : transaction.type === 'lending' ? (
+                        <Users className="h-4 w-4 text-green-600 mr-2" />
+                      ) : (
+                        <Users className="h-4 w-4 text-orange-600 mr-2" />
+                      )}
+                      <span className={`text-sm font-medium ${
+                        transaction.type === 'income' ? 'text-status-success' : 
+                        transaction.type === 'expense' ? 'text-status-error' :
+                        transaction.type === 'lending' ? 'text-green-600' : 'text-orange-600'
+                      }`}>
+                        {transaction.type === 'income' ? 'Income' : 
+                         transaction.type === 'expense' ? 'Expense' :
+                         transaction.type === 'lending' ? 'Lending' : 'Borrowing'}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-heading">{transaction.description}</div>
+                    <div className="flex items-center space-x-2 mt-1">
+                      {transaction.isRecurring && (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-status-info text-status-info">
+                          Recurring
+                        </span>
+                      )}
+                      {transaction.groupExpense && (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-status-info text-status-info">
+                          <Users className="h-3 w-3 mr-1" />
+                          Group
+                        </span>
+                      )}
+                      {transaction.groupType && (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-muted text-body">
+                          {transaction.groupType.replace('_', ' ').toLowerCase()}
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span
+                      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                      style={{
+                        backgroundColor: transaction.category.color + '20',
+                        color: transaction.category.color || '#374151'
+                      }}
+                    >
+                      {transaction.category.name}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-heading">
+                    {transaction.account.name}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <span className={
+                      transaction.type === 'income' ? 'text-status-success' : 
+                      transaction.type === 'expense' ? 'text-status-error' :
+                      transaction.type === 'lending' ? 'text-green-600' : 'text-orange-600'
+                    }>
+                      {transaction.type === 'income' || transaction.type === 'lending' ? '+' : '-'}{formatAmount(transaction.amount)}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-heading">
+                    {transaction.groupExpense ? (
+                      <div>
+                        <div className="font-medium text-status-info">
+                          {transaction.groupExpense.group.name}
+                        </div>
+                        <div className="text-xs text-muted">
+                          Group Transaction
+                        </div>
+                      </div>
+                    ) : transaction.source ? (
+                      transaction.source
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    {!transaction.groupExpense && !transaction.groupType ? (
+                      <div className="flex items-center space-x-2">
+                        {(transaction.type === 'income' || transaction.type === 'expense') && (
+                          <button
+                            onClick={() => {
+                              setEditingTransaction(transaction)
+                              setShowEditModal(true)
+                            }}
+                            className="text-link hover:text-link-hover"
+                            title="Edit transaction"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleDeleteTransaction(transaction)}
+                          className="text-red-600 hover:text-red-800"
+                          title="Delete transaction"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-gray-400 text-xs">
+                        {transaction.groupExpense ? 'Group transaction' : 'Group lending/borrowing'}
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          
+          {/* Progressive loading indicators for desktop */}
+          {hasMore && (
+            <div className="p-4 text-center border-t">
+              <div ref={loadMoreRef}>
+                {isLoadingMore ? (
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                    <span className="text-sm text-muted">Loading more transactions...</span>
+                  </div>
+                ) : (
+                  <button
+                    onClick={loadMore}
+                    className="text-primary hover:text-primary-dark text-sm font-medium"
+                  >
+                    Load More ({filteredTransactions.length - visibleTransactions.length} remaining)
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="lg:hidden space-y-4">
+        {visibleTransactions.map((transaction) => {
+          const transactionKey = `${transaction.type}-${transaction.id}`
+          const isExpanded = expandedCards.has(transactionKey)
+          
+          return (
+            <div key={transactionKey} className="bg-card shadow-card rounded-lg overflow-hidden">
+              {/* Card Header - Always Visible */}
+              <div 
+                className="p-4 cursor-pointer"
+                onClick={() => toggleCardExpansion(transactionKey)}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    {transaction.type === 'income' ? (
+                      <ArrowUpCircle className="h-5 w-5 text-status-success" />
+                    ) : transaction.type === 'expense' ? (
+                      <ArrowDownCircle className="h-5 w-5 text-status-error" />
+                    ) : transaction.type === 'lending' ? (
+                      <Users className="h-5 w-5 text-green-600" />
+                    ) : (
+                      <Users className="h-5 w-5 text-orange-600" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center space-x-2">
+                        <p className="text-sm font-medium text-heading truncate">
+                          {transaction.description}
+                        </p>
+                        {transaction.isRecurring && (
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-status-info text-status-info">
+                            R
+                          </span>
+                        )}
+                        {transaction.groupExpense && (
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-status-info text-status-info">
+                            <Users className="h-2.5 w-2.5" />
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted">
+                        {new Date(transaction.date).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className={`text-sm font-semibold ${
+                      transaction.type === 'income' ? 'text-status-success' : 
+                      transaction.type === 'expense' ? 'text-status-error' :
+                      transaction.type === 'lending' ? 'text-green-600' : 'text-orange-600'
+                    }`}>
+                      {transaction.type === 'income' || transaction.type === 'lending' ? '+' : '-'}{formatAmount(transaction.amount)}
+                    </span>
+                    {isExpanded ? (
+                      <ChevronUp className="h-4 w-4 text-muted" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4 text-muted" />
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Expanded Details */}
+              {isExpanded && (
+                <div className="px-4 pb-4 border-t border-table-border">
+                  <div className="grid grid-cols-2 gap-4 mt-4">
+                    <div>
+                      <p className="text-xs font-medium text-input-label uppercase tracking-wider mb-1">
+                        Type
+                      </p>
+                      <span className={`text-sm font-medium ${
+                        transaction.type === 'income' ? 'text-status-success' : 
+                        transaction.type === 'expense' ? 'text-status-error' :
+                        transaction.type === 'lending' ? 'text-green-600' : 'text-orange-600'
+                      }`}>
+                        {transaction.type === 'income' ? 'Income' : 
+                         transaction.type === 'expense' ? 'Expense' :
+                         transaction.type === 'lending' ? 'Lending' : 'Borrowing'}
+                      </span>
+                    </div>
+                    
+                    <div>
+                      <p className="text-xs font-medium text-input-label uppercase tracking-wider mb-1">
+                        Category
+                      </p>
+                      <span
+                        className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                        style={{
+                          backgroundColor: transaction.category.color + '20',
+                          color: transaction.category.color || '#374151'
+                        }}
+                      >
+                        {transaction.category.name}
+                      </span>
+                    </div>
+                    
+                    <div>
+                      <p className="text-xs font-medium text-input-label uppercase tracking-wider mb-1">
+                        Account
+                      </p>
+                      <p className="text-sm text-heading">
+                        {transaction.account.name}
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <p className="text-xs font-medium text-input-label uppercase tracking-wider mb-1">
+                        Source
+                      </p>
+                      <p className="text-sm text-heading">
+                        {transaction.groupExpense ? (
+                          <span className="text-status-info font-medium">
+                            {transaction.groupExpense.group.name}
+                          </span>
+                        ) : transaction.source ? (
+                          transaction.source
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Group Type Badge */}
+                  {transaction.groupType && (
+                    <div className="mt-3">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-muted text-body">
+                        {transaction.groupType.replace('_', ' ').toLowerCase()}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  {!transaction.groupExpense && !transaction.groupType && (
+                    <div className="flex justify-end space-x-3 mt-4 pt-3 border-t border-table-border">
+                      {(transaction.type === 'income' || transaction.type === 'expense') && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setEditingTransaction(transaction)
+                            setShowEditModal(true)
+                          }}
+                          className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-link hover:text-link-hover rounded-md hover:bg-button-secondary-hover transition-colors duration-200"
+                        >
+                          <Edit className="h-4 w-4 mr-1" />
+                          Edit
+                        </button>
+                      )}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDeleteTransaction(transaction)
+                        }}
+                        className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-600 hover:text-red-800 rounded-md hover:bg-red-50 transition-colors duration-200"
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                  
+                  {(transaction.groupExpense || transaction.groupType) && (
+                    <div className="mt-4 pt-3 border-t border-table-border">
+                      <p className="text-xs text-gray-400 text-center">
+                        {transaction.groupExpense ? 'Group transactions cannot be edited individually' : 'Group lending/borrowing transaction'}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )
+        })}
+        
+        {/* Progressive loading indicators for mobile */}
+        {hasMore && (
+          <div className="lg:hidden p-4 text-center">
+            <div ref={loadMoreRef}>
+              {isLoadingMore ? (
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                  <span className="text-sm text-muted">Loading more...</span>
+                </div>
+              ) : (
+                <button
+                  onClick={loadMore}
+                  className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Load More ({filteredTransactions.length - visibleTransactions.length} remaining)
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {filteredTransactions.length === 0 && !loading && (
+        <div className="text-center py-12">
+          <p className="text-muted">No transactions found. Try adjusting your filters.</p>
+        </div>
+      )}
+
+      {/* Edit Transaction Modal */}
+      {showEditModal && editingTransaction && (
+        <div className="fixed inset-0 bg-modal-overlay overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-card">
+            <div className="mt-3">
+              <h3 className="text-lg font-medium text-heading mb-4">
+                Edit {editingTransaction.type === 'income' ? 'Income' : 
+                      editingTransaction.type === 'expense' ? 'Expense' :
+                      editingTransaction.type === 'lending' ? 'Lending' : 'Borrowing'}
+              </h3>
+              <EditTransactionForm 
+                transaction={editingTransaction}
+                categories={categories}
+                accounts={accounts}
+                onSave={handleSaveTransaction}
+                onCancel={() => setShowEditModal(false)}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Alert Modal */}
+      {alertModal && (
+        <Suspense fallback={<div />}>
+          <AlertModal
+            isOpen={alertModal?.isOpen || false}
+            onClose={closeAlert}
+            title={alertModal?.title || ''}
+            message={alertModal?.message || ''}
+            type={alertModal?.type || 'info'}
+            confirmText={alertModal.confirmText}
+          />
+        </Suspense>
+      )}
+
+      {/* Confirm Modal */}
+      {confirmModal && (
+        <Suspense fallback={<div />}>
+          <ConfirmModal
+            isOpen={confirmModal.isOpen}
+            onClose={closeConfirm}
+            onConfirm={confirmModal.onConfirm}
+            title={confirmModal.title}
+            message={confirmModal.message}
+            confirmText={confirmModal.confirmText}
+            cancelText={confirmModal.cancelText}
+            type={confirmModal.type}
+            loading={confirmModal.loading}
+          />
+        </Suspense>
+      )}
+    </div>
+  )
+}
+
+// Edit Transaction Form Component
+function EditTransactionForm({ 
+  transaction, 
+  categories, 
+  accounts, 
+  onSave, 
+  onCancel 
+}: {
+  transaction: Transaction
+  categories: any[]
+  accounts: any[]
+  onSave: (updatedTransaction: any) => void
+  onCancel: () => void
+}) {
+  const [formData, setFormData] = useState({
+    amount: transaction.amount,
+    description: transaction.description || '',
+    categoryId: transaction.category.id,
+    accountId: transaction.account.id,
+    date: transaction.date.split('T')[0], // Convert to YYYY-MM-DD format
+    source: transaction.source || ''
+  })
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    onSave({
+      ...formData,
+      id: transaction.id,
+      type: transaction.type
+    })
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className="block text-sm font-medium text-input-label mb-1">
+          Amount *
+        </label>
+        <input
+          type="number"
+          step="0.01"
+          required
+          value={formData.amount}
+          onChange={(e) => setFormData({...formData, amount: parseFloat(e.target.value) || 0})}
+          className="w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input placeholder-gray-400 transition-all duration-200"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-input-label mb-1">
+          Description
+        </label>
+        <input
+          type="text"
+          value={formData.description}
+          onChange={(e) => setFormData({...formData, description: e.target.value})}
+          className="w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input placeholder-gray-400 transition-all duration-200"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-input-label mb-1">
+          Category *
+        </label>
+        <select
+          required
+          value={formData.categoryId}
+          onChange={(e) => setFormData({...formData, categoryId: e.target.value})}
+          className="w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200 appearance-none bg-arrow-down bg-no-repeat bg-right bg-origin-content"
+        >
+          {categories.filter(cat => cat.type === transaction.type.toUpperCase()).map(category => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-input-label mb-1">
+          Account *
+        </label>
+        <select
+          required
+          value={formData.accountId}
+          onChange={(e) => setFormData({...formData, accountId: e.target.value})}
+          className="w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200 appearance-none bg-arrow-down bg-no-repeat bg-right bg-origin-content"
+        >
+          {accounts.map(account => (
+            <option key={account.id} value={account.id}>
+              {account.name} ({account.type})
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-input-label mb-1">
+          Date *
+        </label>
+        <input
+          type="date"
+          required
+          value={formData.date}
+          onChange={(e) => setFormData({...formData, date: e.target.value})}
+          className="w-full px-4 py-3 border-input rounded-lg shadow-sm ring-focus border-input-focus:focus text-base bg-input text-input transition-all duration-200"
+        />
+      </div>
+
+      {transaction.type === 'income' && (
+        <div>
+          <label className="block text-sm font-medium text-input-label mb-1">
+            Source
+          </label>
+          <input
+            type="text"
+            value={formData.source}
+            onChange={(e) => setFormData({...formData, source: e.target.value})}
+            className="w-full border border-input rounded-md px-3 py-2 bg-input text-heading"
+          />
+        </div>
+      )}
+
+      <div className="flex justify-end space-x-3 pt-4">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="px-4 py-2 text-input-label border border-input rounded-md hover:bg-button-secondary-hover"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+        >
+          Save Changes
+        </button>
+      </div>
+    </form>
+  )
+}
+
+// Error boundary wrapper component
+class TransactionsErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error?: Error }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props)
+    this.state = { hasError: false }
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error }
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('Transactions page error:', error, errorInfo)
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="p-6 text-center">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+            <h2 className="text-lg font-semibold text-red-800 mb-2">
+              Something went wrong with the transactions page
+            </h2>
+            <p className="text-red-600 mb-4">
+              Please refresh the page or contact support if the problem persists.
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+            >
+              Refresh Page
+            </button>
+          </div>
+        </div>
+      )
+    }
+
+    return this.props.children
+  }
+}
+
+// Main export with error boundary
+export default function Transactions() {
+  return (
+    <TransactionsErrorBoundary>
+      <TransactionsContent />
+    </TransactionsErrorBoundary>
+  )
+}
