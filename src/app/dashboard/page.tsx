@@ -1,7 +1,7 @@
 'use client'
 
 import { useSession } from 'next-auth/react'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, lazy, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { 
@@ -20,9 +20,11 @@ import {
 } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
 import { useCurrency } from '@/hooks/useCurrency'
-import AlertModal from '@/components/AlertModal'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import { useModal } from '@/hooks/useModal'
+
+// Lazy load modal components
+const AlertModal = lazy(() => import('@/components/AlertModal'))
 
 interface DashboardStats {
   totalExpenses: number
@@ -509,13 +511,15 @@ export default function Dashboard() {
         </div>
       )}
 
-      <AlertModal
-        isOpen={alertModal.isOpen}
-        onClose={closeAlert}
-        title={alertModal.title}
-        message={alertModal.message}
-        type={alertModal.type}
-      />
+      <Suspense fallback={<div />}>
+        <AlertModal
+          isOpen={alertModal.isOpen}
+          onClose={closeAlert}
+          title={alertModal.title}
+          message={alertModal.message}
+          type={alertModal.type}
+        />
+      </Suspense>
     </div>
   )
 }

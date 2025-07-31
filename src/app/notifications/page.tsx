@@ -1,12 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { useSession } from 'next-auth/react'
 import { Bell, Check, X, Users, Receipt, DollarSign, Trash2 } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
-import AlertModal from '@/components/AlertModal'
-import ConfirmModal from '@/components/ConfirmModal'
 import { useModal } from '@/hooks/useModal'
+
+// Lazy load modal components
+const AlertModal = lazy(() => import('@/components/AlertModal'))
+const ConfirmModal = lazy(() => import('@/components/ConfirmModal'))
 
 interface Notification {
   id: string
@@ -295,31 +297,34 @@ export default function Notifications() {
       </div>
 
       {/* Alert Modal */}
-      {/* Alert Modal */}
       {alertModal && (
-        <AlertModal
-          isOpen={alertModal?.isOpen || false}
-          onClose={closeAlert}
-          title={alertModal?.title || ''}
-          message={alertModal?.message || ''}
-          type={alertModal?.type || 'info'}
-          confirmText={alertModal.confirmText}
-        />
+        <Suspense fallback={<div />}>
+          <AlertModal
+            isOpen={alertModal?.isOpen || false}
+            onClose={closeAlert}
+            title={alertModal?.title || ''}
+            message={alertModal?.message || ''}
+            type={alertModal?.type || 'info'}
+            confirmText={alertModal.confirmText}
+          />
+        </Suspense>
       )}
 
       {/* Confirm Modal */}
       {confirmModal && (
-        <ConfirmModal
-          isOpen={confirmModal.isOpen}
-          onClose={closeConfirm}
-          onConfirm={confirmModal.onConfirm}
-          title={confirmModal.title}
-          message={confirmModal.message}
-          confirmText={confirmModal.confirmText}
-          cancelText={confirmModal.cancelText}
-          type={confirmModal.type}
-          loading={confirmModal.loading}
-        />
+        <Suspense fallback={<div />}>
+          <ConfirmModal
+            isOpen={confirmModal.isOpen}
+            onClose={closeConfirm}
+            onConfirm={confirmModal.onConfirm}
+            title={confirmModal.title}
+            message={confirmModal.message}
+            confirmText={confirmModal.confirmText}
+            cancelText={confirmModal.cancelText}
+            type={confirmModal.type}
+            loading={confirmModal.loading}
+          />
+        </Suspense>
       )}
     </div>
   )

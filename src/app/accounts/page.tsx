@@ -1,14 +1,17 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { useSession } from 'next-auth/react'
 import { PlusCircle, CreditCard, Trash2 } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
 import { useCurrency } from '@/hooks/useCurrency'
-import AlertModal from '@/components/AlertModal'
-import ConfirmModal from '@/components/ConfirmModal'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import { useModal } from '@/hooks/useModal'
+import { AccountListSkeleton } from '@/components/SkeletonLoaders'
+
+// Lazy load modal components
+const AlertModal = lazy(() => import('@/components/AlertModal'))
+const ConfirmModal = lazy(() => import('@/components/ConfirmModal'))
 
 interface Account {
   id: string
@@ -145,7 +148,18 @@ export default function Accounts() {
   const totalBalance = accounts.reduce((sum, account) => sum + account.balance, 0)
 
   if (loading) {
-    return <CurrencyLoader />
+    return (
+      <div className="px-3 sm:px-4 lg:px-6 py-4 sm:py-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <div className="h-6 bg-gray-200 rounded w-32 mb-2 animate-pulse"></div>
+            <div className="h-4 bg-gray-200 rounded w-24 animate-pulse"></div>
+          </div>
+          <div className="h-10 bg-gray-200 rounded w-32 animate-pulse"></div>
+        </div>
+        <AccountListSkeleton />
+      </div>
+    )
   }
 
   return (
@@ -355,29 +369,33 @@ export default function Accounts() {
 
       {/* Alert Modal */}
       {alertModal && (
-        <AlertModal
-          isOpen={alertModal?.isOpen || false}
-          onClose={closeAlert}
-          title={alertModal?.title || ''}
-          message={alertModal?.message || ''}
-          type={alertModal?.type || 'info'}
-          confirmText={alertModal.confirmText}
-        />
+        <Suspense fallback={<div />}>
+          <AlertModal
+            isOpen={alertModal?.isOpen || false}
+            onClose={closeAlert}
+            title={alertModal?.title || ''}
+            message={alertModal?.message || ''}
+            type={alertModal?.type || 'info'}
+            confirmText={alertModal.confirmText}
+          />
+        </Suspense>
       )}
 
       {/* Confirm Modal */}
       {confirmModal && (
-        <ConfirmModal
-          isOpen={confirmModal.isOpen}
-          onClose={closeConfirm}
-          onConfirm={confirmModal.onConfirm}
-          title={confirmModal.title}
-          message={confirmModal.message}
-          confirmText={confirmModal.confirmText}
-          cancelText={confirmModal.cancelText}
-          type={confirmModal.type}
-          loading={confirmModal.loading}
-        />
+        <Suspense fallback={<div />}>
+          <ConfirmModal
+            isOpen={confirmModal.isOpen}
+            onClose={closeConfirm}
+            onConfirm={confirmModal.onConfirm}
+            title={confirmModal.title}
+            message={confirmModal.message}
+            confirmText={confirmModal.confirmText}
+            cancelText={confirmModal.cancelText}
+            type={confirmModal.type}
+            loading={confirmModal.loading}
+          />
+        </Suspense>
       )}
     </div>
   )

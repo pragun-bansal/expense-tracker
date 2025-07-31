@@ -1,15 +1,17 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { useSession } from 'next-auth/react'
 import { Bell, Mail, Shield, User, Save, RefreshCw, DollarSign } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
 import { currencies } from '@/lib/currency'
 import { useCurrency } from '@/hooks/useCurrency'
-import AlertModal from '@/components/AlertModal'
-import ConfirmModal from '@/components/ConfirmModal'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import { useModal } from '@/hooks/useModal'
+
+// Lazy load modal components
+const AlertModal = lazy(() => import('@/components/AlertModal'))
+const ConfirmModal = lazy(() => import('@/components/ConfirmModal'))
 
 interface BudgetAlert {
   budgetId: string

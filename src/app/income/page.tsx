@@ -1,14 +1,16 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { PlusCircle, Filter, Search, Edit, Trash2 } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
 import { useCurrency } from '@/hooks/useCurrency'
-import ConfirmModal from '@/components/ConfirmModal'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import { useModal } from '@/hooks/useModal'
+
+// Lazy load modal components
+const ConfirmModal = lazy(() => import('@/components/ConfirmModal'))
 
 interface Income {
   id: string
@@ -319,7 +321,9 @@ export default function Income() {
         </div>
       )}
 
-      <ConfirmModal {...confirmModal} />
+      <Suspense fallback={<div />}>
+        <ConfirmModal {...confirmModal} />
+      </Suspense>
     </div>
   )
 }

@@ -1,28 +1,12 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Suspense } from 'react'
+import dynamic from 'next/dynamic'
 import { useSession } from 'next-auth/react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
 import { useCurrency } from '@/hooks/useCurrency'
-import { 
-  PieChart, 
-  Pie, 
-  Cell, 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  Area,
-  AreaChart,
-  RadialBarChart,
-  RadialBar
-} from 'recharts'
+import { useLazyLoad } from '@/hooks/useProgressiveLoading'
+import { ChartSkeleton, DashboardStatsSkeleton } from '@/components/SkeletonLoaders'
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -39,6 +23,32 @@ import {
   Repeat,
   AlertTriangle
 } from 'lucide-react'
+
+// Lazy load heavy chart components
+const PieChart = dynamic(() => import('recharts').then(mod => ({ default: mod.PieChart })), { ssr: false })
+const Pie = dynamic(() => import('recharts').then(mod => ({ default: mod.Pie })), { ssr: false })
+const Cell = dynamic(() => import('recharts').then(mod => ({ default: mod.Cell })), { ssr: false })
+const BarChart = dynamic(() => import('recharts').then(mod => ({ default: mod.BarChart })), { ssr: false })
+const Bar = dynamic(() => import('recharts').then(mod => ({ default: mod.Bar })), { ssr: false })
+const XAxis = dynamic(() => import('recharts').then(mod => ({ default: mod.XAxis })), { ssr: false })
+const YAxis = dynamic(() => import('recharts').then(mod => ({ default: mod.YAxis })), { ssr: false })
+const CartesianGrid = dynamic(() => import('recharts').then(mod => ({ default: mod.CartesianGrid })), { ssr: false })
+const Tooltip = dynamic(() => import('recharts').then(mod => ({ default: mod.Tooltip })), { ssr: false })
+const Legend = dynamic(() => import('recharts').then(mod => ({ default: mod.Legend })), { ssr: false })
+const ResponsiveContainer = dynamic(() => import('recharts').then(mod => ({ default: mod.ResponsiveContainer })), { ssr: false })
+const LineChart = dynamic(() => import('recharts').then(mod => ({ default: mod.LineChart })), { ssr: false })
+const Line = dynamic(() => import('recharts').then(mod => ({ default: mod.Line })), { ssr: false })
+const Area = dynamic(() => import('recharts').then(mod => ({ default: mod.Area })), { ssr: false })
+const AreaChart = dynamic(() => import('recharts').then(mod => ({ default: mod.AreaChart })), { ssr: false })
+const RadialBarChart = dynamic(() => import('recharts').then(mod => ({ default: mod.RadialBarChart })), { ssr: false })
+const RadialBar = dynamic(() => import('recharts').then(mod => ({ default: mod.RadialBar })), { ssr: false })
+
+// Loading component for charts
+const ChartLoader = () => (
+  <div className="flex items-center justify-center h-[300px]">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+  </div>
+)
 
 interface AnalyticsData {
   period: string
@@ -219,7 +229,38 @@ export default function Analytics() {
   )
 
   if (loading) {
-    return <CurrencyLoader />
+    return (
+      <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-6 sm:space-y-8">
+        {/* Header Skeleton */}
+        <div className="mb-6 sm:mb-8 animate-fade-in">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+            <div>
+              <div className="h-8 bg-gray-200 rounded w-64 mb-2 animate-pulse"></div>
+              <div className="h-4 bg-gray-200 rounded w-48 animate-pulse"></div>
+            </div>
+            <div className="h-10 bg-gray-200 rounded w-32 animate-pulse"></div>
+          </div>
+        </div>
+
+        {/* Tab Navigation Skeleton */}
+        <div className="border-b border-card-border mb-6 sm:mb-8">
+          <nav className="flex space-x-4 sm:space-x-8">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-10 bg-gray-200 rounded w-20 animate-pulse"></div>
+            ))}
+          </nav>
+        </div>
+
+        {/* Stats Cards Skeleton */}
+        <DashboardStatsSkeleton />
+
+        {/* Charts Skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          <ChartSkeleton />
+          <ChartSkeleton />
+        </div>
+      </div>
+    )
   }
 
   if (!data) {
@@ -430,28 +471,30 @@ export default function Analytics() {
               <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               Income vs Expenses Trend
             </h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={data.monthlyTrends}>
-                <defs>
-                  <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
-                  </linearGradient>
-                  <linearGradient id="expenseGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#EF4444" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#EF4444" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                <XAxis dataKey="month" stroke="#6B7280" fontSize={12} />
-                <YAxis stroke="#6B7280" fontSize={12} />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend />
-                <Area type="monotone" dataKey="income" stroke="#10B981" fillOpacity={1} fill="url(#incomeGradient)" strokeWidth={2} name="Income" />
-                <Area type="monotone" dataKey="expenses" stroke="#EF4444" fillOpacity={1} fill="url(#expenseGradient)" strokeWidth={2} name="Expenses" />
-                <Line type="monotone" dataKey="net" stroke="#3B82F6" strokeWidth={3} name="Net" strokeDasharray="5 5" />
-              </AreaChart>
-            </ResponsiveContainer>
+            <Suspense fallback={<ChartLoader />}>
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart data={data.monthlyTrends}>
+                  <defs>
+                    <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                    </linearGradient>
+                    <linearGradient id="expenseGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#EF4444" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#EF4444" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                  <XAxis dataKey="month" stroke="#6B7280" fontSize={12} />
+                  <YAxis stroke="#6B7280" fontSize={12} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend />
+                  <Area type="monotone" dataKey="income" stroke="#10B981" fillOpacity={1} fill="url(#incomeGradient)" strokeWidth={2} name="Income" />
+                  <Area type="monotone" dataKey="expenses" stroke="#EF4444" fillOpacity={1} fill="url(#expenseGradient)" strokeWidth={2} name="Expenses" />
+                  <Line type="monotone" dataKey="net" stroke="#3B82F6" strokeWidth={3} name="Net" strokeDasharray="5 5" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </Suspense>
           </div>
 
           {/* Weekly Activity */}
@@ -460,19 +503,21 @@ export default function Analytics() {
               <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               Weekly Activity
             </h3>
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={data.weeklyTrends}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                <XAxis dataKey="week" stroke="#6B7280" fontSize={12} />
-                <YAxis yAxisId="amount" orientation="left" stroke="#6B7280" fontSize={12} />
-                <YAxis yAxisId="count" orientation="right" stroke="#8B5CF6" fontSize={12} />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend />
-                <Bar yAxisId="amount" dataKey="expenses" fill="#EF4444" name="Expenses" radius={[4, 4, 0, 0]} />
-                <Bar yAxisId="amount" dataKey="income" fill="#10B981" name="Income" radius={[4, 4, 0, 0]} />
-                <Line yAxisId="count" type="monotone" dataKey="transactions" stroke="#8B5CF6" strokeWidth={2} name="Transaction Count" />
-              </BarChart>
-            </ResponsiveContainer>
+            <Suspense fallback={<ChartLoader />}>
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={data.weeklyTrends}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                  <XAxis dataKey="week" stroke="#6B7280" fontSize={12} />
+                  <YAxis yAxisId="amount" orientation="left" stroke="#6B7280" fontSize={12} />
+                  <YAxis yAxisId="count" orientation="right" stroke="#8B5CF6" fontSize={12} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend />
+                  <Bar yAxisId="amount" dataKey="expenses" fill="#EF4444" name="Expenses" radius={[4, 4, 0, 0]} />
+                  <Bar yAxisId="amount" dataKey="income" fill="#10B981" name="Income" radius={[4, 4, 0, 0]} />
+                  <Line yAxisId="count" type="monotone" dataKey="transactions" stroke="#8B5CF6" strokeWidth={2} name="Transaction Count" />
+                </BarChart>
+              </ResponsiveContainer>
+            </Suspense>
           </div>
         </div>
       )}
@@ -488,25 +533,27 @@ export default function Analytics() {
                 Expenses by Category
               </h3>
               {data.expensesByCategory.length > 0 ? (
-                <ResponsiveContainer width="100%" height={350}>
-                  <PieChart>
-                    <Pie
-                      data={data.expensesByCategory}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={120}
-                      paddingAngle={2}
-                      dataKey="value"
-                    >
-                      {data.expensesByCategory.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip content={<CustomTooltip />} />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
+                <Suspense fallback={<ChartLoader />}>
+                  <ResponsiveContainer width="100%" height={350}>
+                    <PieChart>
+                      <Pie
+                        data={data.expensesByCategory}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={120}
+                        paddingAngle={2}
+                        dataKey="value"
+                      >
+                        {data.expensesByCategory.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip content={<CustomTooltip />} />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </Suspense>
               ) : (
                 <div className="flex items-center justify-center h-[350px] text-muted">
                   <div className="text-center">
@@ -524,25 +571,27 @@ export default function Analytics() {
                 Income by Category
               </h3>
               {data.incomesByCategory.length > 0 ? (
-                <ResponsiveContainer width="100%" height={350}>
-                  <PieChart>
-                    <Pie
-                      data={data.incomesByCategory}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={120}
-                      paddingAngle={2}
-                      dataKey="value"
-                    >
-                      {data.incomesByCategory.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip content={<CustomTooltip />} />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
+                <Suspense fallback={<ChartLoader />}>
+                  <ResponsiveContainer width="100%" height={350}>
+                    <PieChart>
+                      <Pie
+                        data={data.incomesByCategory}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={120}
+                        paddingAngle={2}
+                        dataKey="value"
+                      >
+                        {data.incomesByCategory.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip content={<CustomTooltip />} />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </Suspense>
               ) : (
                 <div className="flex items-center justify-center h-[350px] text-muted">
                   <div className="text-center">

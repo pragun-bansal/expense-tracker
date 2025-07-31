@@ -1,14 +1,19 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { Filter, Search, ArrowUpCircle, ArrowDownCircle, Calendar, Download, Edit, Users, PlusCircle, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
 import { CurrencyLoader } from '@/components/CurrencyLoader'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useModal } from '@/hooks/useModal'
-import AlertModal from '@/components/AlertModal'
-import ConfirmModal from '@/components/ConfirmModal'
+import { useProgressiveLoading, useIntersectionObserver } from '@/hooks/useProgressiveLoading'
+import { TransactionListSkeleton } from '@/components/SkeletonLoaders'
+import { AutoVirtualList } from '@/components/VirtualScrollList'
+
+// Lazy load modal components
+const AlertModal = lazy(() => import('@/components/AlertModal'))
+const ConfirmModal = lazy(() => import('@/components/ConfirmModal'))
 
 interface Transaction {
   id: string
@@ -62,6 +67,8 @@ export default function Transactions() {
   
   // Edit functionality state
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
+  
+  // Add progressive loading for better performance
   const [showEditModal, setShowEditModal] = useState(false)
 
   useEffect(() => {
@@ -208,6 +215,25 @@ export default function Transactions() {
     .reduce((sum, t) => sum + t.amount, 0)
   
   const totalLendingBorrowing = totalLending - totalBorrowing
+
+  // Progressive loading for better performance with large transaction lists
+  const {
+    visibleData: visibleTransactions,
+    isLoadingMore,
+    hasMore,
+    loadMore
+  } = useProgressiveLoading(filteredTransactions, {
+    initialBatchSize: 20,
+    batchSize: 10,
+    delay: 50
+  })
+
+  // Intersection observer for auto-loading
+  const loadMoreRef = useIntersectionObserver(() => {
+    if (hasMore && !isLoadingMore) {
+      loadMore()
+    }
+  })
   
 
   const exportTransactions = () => {
@@ -324,7 +350,15 @@ export default function Transactions() {
   }
 
   if (loading) {
-    return <CurrencyLoader />
+    return (
+      <div className="p-4 sm:p-6">
+        <div className="mb-8">
+          <div className="h-8 bg-gray-200 rounded w-48 mb-2 animate-pulse"></div>
+          <div className="h-4 bg-gray-200 rounded w-64 animate-pulse"></div>
+        </div>
+        <TransactionListSkeleton />
+      </div>
+    )
   }
 
   return (
@@ -600,7 +634,7 @@ export default function Transactions() {
               </tr>
             </thead>
             <tbody className="bg-card divide-y divide-table-border">
-              {filteredTransactions.map((transaction) => (
+              {visibleTransactions.map((transaction) => (
                 <tr key={`${transaction.type}-${transaction.id}`}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-heading">
                     {new Date(transaction.date).toLocaleDateString()}
@@ -720,12 +754,33 @@ export default function Transactions() {
               ))}
             </tbody>
           </table>
+          
+          {/* Progressive loading indicators for desktop */}
+          {hasMore && (
+            <div className="p-4 text-center border-t">
+              <div ref={loadMoreRef}>
+                {isLoadingMore ? (
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                    <span className="text-sm text-muted">Loading more transactions...</span>
+                  </div>
+                ) : (
+                  <button
+                    onClick={loadMore}
+                    className="text-primary hover:text-primary-dark text-sm font-medium"
+                  >
+                    Load More ({filteredTransactions.length - visibleTransactions.length} remaining)
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Mobile Card View */}
       <div className="lg:hidden space-y-4">
-        {filteredTransactions.map((transaction) => {
+        {visibleTransactions.map((transaction) => {
           const transactionKey = `${transaction.type}-${transaction.id}`
           const isExpanded = expandedCards.has(transactionKey)
           
@@ -896,9 +951,30 @@ export default function Transactions() {
             </div>
           )
         })}
+        
+        {/* Progressive loading indicators for mobile */}
+        {hasMore && (
+          <div className="lg:hidden p-4 text-center">
+            <div ref={loadMoreRef}>
+              {isLoadingMore ? (
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                  <span className="text-sm text-muted">Loading more...</span>
+                </div>
+              ) : (
+                <button
+                  onClick={loadMore}
+                  className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Load More ({filteredTransactions.length - visibleTransactions.length} remaining)
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
-      {filteredTransactions.length === 0 && (
+      {filteredTransactions.length === 0 && !loading && (
         <div className="text-center py-12">
           <p className="text-muted">No transactions found. Try adjusting your filters.</p>
         </div>
@@ -928,29 +1004,33 @@ export default function Transactions() {
 
       {/* Alert Modal */}
       {alertModal && (
-        <AlertModal
-          isOpen={alertModal?.isOpen || false}
-          onClose={closeAlert}
-          title={alertModal?.title || ''}
-          message={alertModal?.message || ''}
-          type={alertModal?.type || 'info'}
-          confirmText={alertModal.confirmText}
-        />
+        <Suspense fallback={<div />}>
+          <AlertModal
+            isOpen={alertModal?.isOpen || false}
+            onClose={closeAlert}
+            title={alertModal?.title || ''}
+            message={alertModal?.message || ''}
+            type={alertModal?.type || 'info'}
+            confirmText={alertModal.confirmText}
+          />
+        </Suspense>
       )}
 
       {/* Confirm Modal */}
       {confirmModal && (
-        <ConfirmModal
-          isOpen={confirmModal.isOpen}
-          onClose={closeConfirm}
-          onConfirm={confirmModal.onConfirm}
-          title={confirmModal.title}
-          message={confirmModal.message}
-          confirmText={confirmModal.confirmText}
-          cancelText={confirmModal.cancelText}
-          type={confirmModal.type}
-          loading={confirmModal.loading}
-        />
+        <Suspense fallback={<div />}>
+          <ConfirmModal
+            isOpen={confirmModal.isOpen}
+            onClose={closeConfirm}
+            onConfirm={confirmModal.onConfirm}
+            title={confirmModal.title}
+            message={confirmModal.message}
+            confirmText={confirmModal.confirmText}
+            cancelText={confirmModal.cancelText}
+            type={confirmModal.type}
+            loading={confirmModal.loading}
+          />
+        </Suspense>
       )}
     </div>
   )
